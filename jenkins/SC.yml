@@ -1,0 +1,87 @@
+#
+# Copyright (C) 2018 Red Hat, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+- job:
+    name: 'SourceClear-Validation'
+    project-type: freestyle
+    defaults: global
+    description: 'Job that runs the Vulnerability Scanner'
+    disabled: false
+    concurrent: false
+    quiet-period: 0
+    block-downstream: false
+    block-upstream: false
+    retry-count: 3
+    node: sourceclear
+    builders:
+    - maven-target:
+        pom: pom.xml
+        goals: '-Pjenkins clean test -DargLine=''-Dsourceclear="${SCAN_TYPE} --url=${URL}
+          --ref=${SCM_REF} --threshold=${THRESHOLD} -d"'' '
+        maven-version: maven-3-5-0
+        private-repository: false
+
+    parameters:
+    - choice:
+        choices:
+        - scm
+        - binary
+        description: 'Choose whether to scan a remote SCM GIT repository or a remote
+          binary deliverable. '
+        name: SCAN_TYPE
+    - string:
+        default: ''
+        description: URL of SCM repository OR remote binary target to validate.
+        name: URL
+    - string:
+        default: master
+        description: SCM reference (e.g. branch/tag/commit). Only used if scanning
+          a SCM repository.
+        name: SCM_REF
+    - dynamic-choice:
+        name: THRESHOLD
+        script: 'return list = [ 1,2,3,4,5,6,7,8,9,10 ]'
+        description: |-
+          Threshold for Vulnerability Scoring from 1-10. based on CVSS ( https://www.first.org/cvss/v2/guide ).
+          Default is 1 which means fail on all found vulnerabilities.
+    properties:
+    - inject:
+        properties-content: |
+           GIT_SSL_NO_VERIFY=true
+        load-from-master: false
+        enabled: true
+        keep-system-variables: true
+        keep-build-variables: true
+        override-build-parameters: false
+    publishers:
+    - junit:
+        results: '**/target/*-reports/*.xml'
+        keep-long-stdio: false
+        health-scale-factor: 1.0
+        allow-empty-results: false
+    scm:
+    - git:
+        branches:
+        - '*/master'
+        url: https://github.com/project-ncl/sourceclear-invoker.git
+        extensions:
+          per-build-tag: false
+          wipe-workspace: true
+          clean:
+            before: false
+            after: false
+    triggers: []
+    wrappers: []
