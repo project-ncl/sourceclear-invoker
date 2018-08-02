@@ -29,8 +29,8 @@
     builders:
     - maven-target:
         pom: pom.xml
-        goals: '-Pjenkins clean test -DargLine=''-Dsourceclear="${SCAN_TYPE} --url=${URL}
-          --ref=${SCM_REF} --threshold=${THRESHOLD} -d"'' '
+        goals: '-Pjenkins clean test -DargLine=''-Dsourceclear="-d ${SCAN_TYPE} --url=${URL}
+          --ref=${SCM_REF} --threshold=${THRESHOLD} ${RECURSE} ${EXTRA}"'' '
         maven-version: maven-3-5-0
         private-repository: false
 
@@ -57,15 +57,29 @@
         description: |-
           Threshold for Vulnerability Scoring from 1-10. based on CVSS ( https://www.first.org/cvss/v2/guide ).
           Default is 1 which means fail on all found vulnerabilities.
+    - bool:
+        default: false
+        description: Enable recursive scanning of this project. This should NOT normally
+          be required unless the project is rooted within a subdirectory.
+        name: RECURSIVE
+    - string:
+        default: ''
+        description: Optional extra parameters to SourceClear.
+        name: EXTRA
     properties:
     - inject:
-        properties-content: |
-           GIT_SSL_NO_VERIFY=true
         load-from-master: false
         enabled: true
         keep-system-variables: true
         keep-build-variables: true
         override-build-parameters: false
+        properties-content: |
+           GIT_SSL_NO_VERIFY=true
+        groovy-content: |
+          if ( RECURSIVE == "true" ) {
+          def map = ["RECURSE": " --recursive " ]
+          return map
+          }
     publishers:
     - junit:
         results: '**/target/*-reports/*.xml'
