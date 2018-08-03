@@ -15,7 +15,7 @@
 #
 
 - job:
-    name: 'SourceClear-Validation'
+    name: 'SourceClear-Validation-Dev'
     project-type: freestyle
     defaults: global
     description: 'Job that runs the Vulnerability Scanner'
@@ -89,7 +89,7 @@
     scm:
     - git:
         branches:
-        - 'refs/tags/0.1'
+        - '*/master'
         url: https://github.com/project-ncl/sourceclear-invoker.git
         extensions:
           per-build-tag: false
