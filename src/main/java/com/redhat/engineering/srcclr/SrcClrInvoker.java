@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.engineering.srcclr.json.SourceClearJSON;
 import com.redhat.engineering.srcclr.utils.InternalException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeroturnaround.exec.InvalidExitValueException;
@@ -95,6 +96,11 @@ public class SrcClrInvoker
                             outputUTF8();
             logger.debug( "Read output {} ", output );
 
+            if ( output.contains( "Encountered errors while collecting component information" ) )
+            {
+                logger.warn( "Unknown errors encountered collecting component information." );
+                output = StringUtils.remove( output, "Encountered errors while collecting component information." );
+            }
             if ( output.contains( "SourceClear found no library dependencies." ) )
             {
                 throw new InternalException( "Error executing SourceClear - found no library dependencies");

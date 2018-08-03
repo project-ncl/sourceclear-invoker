@@ -89,7 +89,7 @@
     scm:
     - git:
         branches:
-        - 'fc53297cbf426e50bfb8d8c977d97ff133c8fcb0'
+        - '38172cd90714243774b50d206e9927134d57ff9f'
         url: https://github.com/project-ncl/sourceclear-invoker.git
         extensions:
           per-build-tag: false
