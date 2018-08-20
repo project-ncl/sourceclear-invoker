@@ -15,6 +15,7 @@
  */
 package com.redhat.engineering.srcclr;
 
+import com.redhat.engineering.srcclr.utils.PropertyHandler;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +40,11 @@ public class SourceClearTest
         System.getProperties().forEach( ( k, v ) -> {
             if ( k.toString().contains( "sourceclear" ) )
             {
-                logger.debug( "Properties {}  and {} ", k, v );
+                logger.info( "Properties {}  and {} ", k, v );
             }
         } );
 
-        // Convert the passed in arguments into something useful...
-        String[] arguments = System.getProperty( "sourceclear" ).trim().split( "\\s+|=" );
+        String[] arguments = PropertyHandler.convertProperty ( System.getProperty( "sourceclear" ).trim() );
         logger.info( "Retrieved argument {} ", Arrays.toString( arguments ) );
 
         // TODO: Configure for threshold of exception failure?
