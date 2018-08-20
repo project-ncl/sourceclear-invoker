@@ -21,9 +21,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.apache.commons.vfs2" level="WARN" />
-  <!-- Set to OFF due to <https://issues.apache.org/jira/browse/VFS-634> -->
-  <logger name="org.apache.commons.vfs2.impl" level="OFF" />
+  <logger name="org.goots.exploder" level="INFO" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

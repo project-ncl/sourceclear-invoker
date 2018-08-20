@@ -15,8 +15,8 @@
  */
 package com.redhat.engineering.srcclr.internal;
 
-import com.redhat.engineering.srcclr.utils.InternalException;
 import com.redhat.engineering.srcclr.SrcClrInvoker;
+import com.redhat.engineering.srcclr.utils.InternalException;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class InvokerTest
     @Test
     public void execSCTest() throws IOException, InternalException
     {
-        srccr.execSourceClear( SrcClrInvoker.ScanType.OTHER, Collections.singletonList( "--version" ) );
+        srccr.execSourceClear( SrcClrInvoker.ScanType.OTHER, Collections.emptyMap(), Collections.singletonList( "--version" ) );
     }
 
     @Test

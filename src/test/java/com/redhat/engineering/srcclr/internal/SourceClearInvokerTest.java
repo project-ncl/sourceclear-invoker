@@ -16,9 +16,10 @@
 package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SourceClearTest;
-import com.redhat.engineering.srcclr.utils.InternalException;
 import com.redhat.engineering.srcclr.utils.ScanException;
 import org.junit.Test;
+
+import java.io.FileNotFoundException;
 
 /**
  * Test for Jenkins interface.
@@ -29,14 +30,18 @@ public class SourceClearInvokerTest
 
     private final SourceClearTest wrapper = new SourceClearTest();
 
+    // TODO: Enable once finished.
+    // @Rule
+    // public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
     // TODO : This will need to be changed once binary is implemented.
-    @Test( expected = InternalException.class )
-    public void runBinarySC() throws Exception
+    @Test( expected = FileNotFoundException.class )
+    public void runBinarySC1() throws Exception
     {
         try
         {
             System.setProperty( SC,
-                                "binary --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
+                                "-d binary --url=file:///home/user/foobar.jar --name=H2 Database --rev=8.0.18 --no-upload" );
             wrapper.runSourceClear();
         }
         finally
@@ -44,6 +49,22 @@ public class SourceClearInvokerTest
             System.clearProperty( SC );
         }
     }
+
+    @Test(expected = ScanException.class)
+    public void runBinarySC2() throws Exception
+    {
+        try
+        {
+            System.setProperty( SC,
+                                "-d binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --name=CommonsIO --rev=2.1 --no-upload" );
+            wrapper.runSourceClear();
+        }
+        finally
+        {
+            System.clearProperty( SC );
+        }
+    }
+
 
     @Test
     public void runThresholdSC() throws Exception
@@ -74,5 +95,4 @@ public class SourceClearInvokerTest
             System.clearProperty( SC );
         }
     }
-
 }

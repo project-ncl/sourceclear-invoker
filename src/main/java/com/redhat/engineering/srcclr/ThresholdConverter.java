@@ -28,7 +28,7 @@ public class ThresholdConverter
     @Override
     public Integer convert( String value )
     {
-        Integer result = Integer.parseInt( value );
+        Integer result = Integer.parseInt( value.trim() );
 
         // CVSS Score is https://www.first.org/cvss/v2/guide
         if ( result < 0 || result > 10 )

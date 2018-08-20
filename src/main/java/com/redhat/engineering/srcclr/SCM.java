@@ -15,20 +15,19 @@
  */
 package com.redhat.engineering.srcclr;
 
-import com.redhat.engineering.srcclr.json.Library;
 import com.redhat.engineering.srcclr.json.Record;
 import com.redhat.engineering.srcclr.json.SourceClearJSON;
 import com.redhat.engineering.srcclr.json.Vulnerability;
-import com.redhat.engineering.srcclr.utils.InternalException;
+import com.redhat.engineering.srcclr.utils.JSONProcessor;
 import com.redhat.engineering.srcclr.utils.ScanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static picocli.CommandLine.Command;
@@ -40,8 +39,6 @@ import static picocli.CommandLine.Unmatched;
 public class SCM implements Callable<Void>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    private final Pattern pattern = Pattern.compile( "(/records/0/libraries/)([0-9]+)(.*)");
 
     @Option( names = { "-e", "--exception" }, description = "Throw exception on vulnerabilities found." )
     boolean exception = true;
@@ -73,8 +70,9 @@ public class SCM implements Callable<Void>
         }
 
         List<String> args = new ArrayList<>();
+        Map<String,String> env = new HashMap<>(  );
 
-        if ( url != null )
+        if ( isNotEmpty( url ) )
         {
             args.add( "--url" );
             args.add( url );
@@ -91,40 +89,17 @@ public class SCM implements Callable<Void>
             args.addAll( unmatched );
         }
 
-        SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.SCM, args );
+        SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.SCM, env, args );
 
 //        logger.info( "Found json unmatched {} ", json.getRecords().size() );
 
         Record record = json.getRecords().get( 0 );
-        List<Library> libs = record.getLibraries();
-        ArrayList<Vulnerability> matched = new ArrayList<>( );
+        ArrayList<Vulnerability> matched = JSONProcessor.process ( threshold, json );
 
-        for ( Vulnerability vuln : record.getVulnerabilities() )
-        {
-            // Every vulnerability item has a libraries with size 0 and a _links.
-            Matcher matcher = pattern.matcher( vuln.getLibraries().get( 0 ).getLinks().getRef());
-            Library library = null;
-            while ( matcher.find() )
-            {
-                library = libs.get( Integer.parseInt( matcher.group( 2 ) ) );
-            }
-            if ( library == null )
-            {
-                throw new InternalException( "Unable to locate library for vulnerability in output" + vuln );
-            }
-            if ( vuln.getCvssScore() >= threshold )
-            {
-                matched.add( vuln );
-                logger.info ( "Found vulnerability '{}' with score {} in library {}:{}:{} and report is {}",
-                              vuln.getTitle(), vuln.getCvssScore(), library.getCoordinate1(),
-                              library.getCoordinate2(), library.getVersions().get( 0 ).getVersion(),
-                              record.getMetadata().getReport()
-                );
-            }
-        }
         if ( exception && matched.size() > 0 )
         {
-            throw new ScanException( "Found " + matched.size() + " vulnerabilities : " + record.getMetadata().getReport() );
+            throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
+                             ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
         }
         return null;
     }

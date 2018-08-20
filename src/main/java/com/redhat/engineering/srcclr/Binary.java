@@ -15,14 +15,31 @@
  */
 package com.redhat.engineering.srcclr;
 
-import com.redhat.engineering.srcclr.utils.InternalException;
+import com.redhat.engineering.srcclr.json.Record;
+import com.redhat.engineering.srcclr.json.SourceClearJSON;
+import com.redhat.engineering.srcclr.json.Vulnerability;
+import com.redhat.engineering.srcclr.utils.JSONProcessor;
+import com.redhat.engineering.srcclr.utils.ScanException;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.goots.exploder.Exploder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+import static picocli.CommandLine.ParentCommand;
 import static picocli.CommandLine.Unmatched;
 
 @Command(name = "binary", description = "Scan a remote binary" )
@@ -30,8 +47,29 @@ public class Binary implements Callable<Void>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    @Option( names = { "-e", "--exception" }, description = "Throw exception on vulnerabilities found." )
+    boolean exception = true;
+
+    @Option( names = { "-t", "--threshold" }, description = "Threshold on which exception is thrown.", converter=ThresholdConverter.class)
+    int threshold = 0;
+
+    @Option( names = { "-d", "--debug" }, description = "Enable debug." )
+    boolean debug;
+
+    @Option(names = { "--url" }, required = true, paramLabel = "URL", description = "the remote file url")
+    String url;
+
+    @Option(names = { "--name" }, required = true, paramLabel = "NAME", description = "Name of binary")
+    String name;
+
+    @Option(names = { "--rev" }, required = true, paramLabel = "REV", description = "Version of the binary")
+    String rev;
+
     @Unmatched
     List<String> unmatched;
+
+    @ParentCommand
+    SrcClrWrapper parent; // picocli injects reference to parent command
 
     /**
      * Computes a result, or throws an exception if unable to do so.
@@ -42,6 +80,60 @@ public class Binary implements Callable<Void>
     @Override
     public Void call() throws Exception
     {
-        throw new InternalException( "NYI" );
+        if ( debug || parent.debug )
+        {
+            parent.setDebug();
+        }
+
+        Path temporaryLocation = Files.createTempDirectory( "sourceclear-" );
+        try
+        {
+            URL processedUrl = new URL( url );
+            File target = new File( temporaryLocation.toFile(), FilenameUtils.getName( processedUrl.getPath() ) );
+
+            logger.debug( "Created temporary as {} and downloading {} to {}", temporaryLocation, processedUrl, target );
+
+            // TODO : Implement concurrent axel/aria2c downloader
+            FileUtils.copyURLToFile( processedUrl, target );
+
+            // Unpack the target ready for a scan.
+            final Exploder exploder = new Exploder().excludeSuffix( ArchiveStreamFactory.JAR );
+            exploder.unpack( target );
+
+            Map<String,String> env = new HashMap<>(  );
+            env.put( "SRCCLR_SCM_NAME", name );
+
+            List<String> args = new ArrayList<>();
+            args.add ( "--scm-rev" );
+            args.add ( rev );
+            args.add ( "--scm-ref" );
+            args.add ( "tag" );
+            args.add ( "--scm-uri" );
+            args.add ( "data://" + name );
+            //args.add ( "--scm-ref-type" );
+            //args.add ( "tag" );
+
+            if ( unmatched != null )
+            {
+                logger.debug( "Unmatched is {} ", unmatched );
+                args.addAll( unmatched );
+            }
+            // Add target folder
+            args.add( temporaryLocation.toFile().getAbsolutePath() );
+
+            SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
+            ArrayList<Vulnerability> matched = JSONProcessor.process( threshold, json );
+            Record record = json.getRecords().get( 0 );
+            if ( exception && matched.size() > 0 )
+            {
+                throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
+                             ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
+            }
+            return null;
+        }
+        finally
+        {
+            FileUtils.deleteDirectory( temporaryLocation.toFile() );
+        }
     }
 }

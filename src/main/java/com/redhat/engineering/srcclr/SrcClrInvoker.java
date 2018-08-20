@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -67,7 +68,7 @@ public class SrcClrInvoker
         return result.get( 0 );
     }
 
-    public SourceClearJSON execSourceClear( ScanType type, List<String> args ) throws IOException, InternalException
+    public SourceClearJSON execSourceClear( ScanType type, Map<String, String> env, List<String> args ) throws IOException, InternalException
     {
         List<String> command = new ArrayList<>();
         command.add( "java" );
@@ -81,6 +82,8 @@ public class SrcClrInvoker
         }
         if ( type == ScanType.BINARY )
         {
+            command.add( "--unmatched" );
+            command.add( "--recursive" );
             command.add( "--scan-collectors");
             command.add( "jar");
         }
@@ -90,6 +93,7 @@ public class SrcClrInvoker
         try
         {
             String output = new ProcessExecutor().command( command ).
+                            environment( env ).
                             destroyOnExit().
                             exitValue( 0 ).
                             readOutput( true ).execute().
@@ -105,7 +109,7 @@ public class SrcClrInvoker
             {
                 throw new InternalException( "Error executing SourceClear - found no library dependencies");
             }
-            else if ( type == ScanType.SCM )
+            else if ( type != ScanType.OTHER )
             {
                 ObjectMapper mapper = new ObjectMapper().configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
                 json = mapper.readValue( output, SourceClearJSON.class );
