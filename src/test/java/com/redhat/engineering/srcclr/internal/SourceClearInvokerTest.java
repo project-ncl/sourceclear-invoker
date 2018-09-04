@@ -72,7 +72,7 @@ public class SourceClearInvokerTest
         try
         {
             System.setProperty( SC,
-                                "scm --url=https://github.com/srcclr/example-java-maven.git -t 8 --no-upload" );
+                                "scm --url=https://github.com/srcclr/example-java-maven.git --ref=a4c94e9 -t 8 --no-upload" );
             wrapper.runSourceClear();
         }
         finally
