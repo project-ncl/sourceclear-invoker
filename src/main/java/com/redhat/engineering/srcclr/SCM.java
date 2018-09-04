@@ -35,7 +35,7 @@ import static picocli.CommandLine.Option;
 import static picocli.CommandLine.ParentCommand;
 import static picocli.CommandLine.Unmatched;
 
-@Command(name = "scm", description = "Scan a SCM URL" )
+@Command(name = "scm", description = "Scan a SCM URL", mixinStandardHelpOptions = true )
 public class SCM implements Callable<Void>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
