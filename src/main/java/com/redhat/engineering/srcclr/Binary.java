@@ -42,7 +42,7 @@ import static picocli.CommandLine.Option;
 import static picocli.CommandLine.ParentCommand;
 import static picocli.CommandLine.Unmatched;
 
-@Command(name = "binary", description = "Scan a remote binary" )
+@Command(name = "binary", description = "Scan a remote binary", mixinStandardHelpOptions = true )
 public class Binary implements Callable<Void>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
@@ -91,6 +91,11 @@ public class Binary implements Callable<Void>
             URL processedUrl = new URL( url );
             File target = new File( temporaryLocation.toFile(), FilenameUtils.getName( processedUrl.getPath() ) );
 
+            if ( name.contains( " " ) )
+            {
+                logger.warn ("Replace whitespace with '-' in {}", name);
+                name = name.replace( ' ', '-' );
+            }
             logger.debug( "Created temporary as {} and downloading {} to {}", temporaryLocation, processedUrl, target );
 
             // TODO : Implement concurrent axel/aria2c downloader
