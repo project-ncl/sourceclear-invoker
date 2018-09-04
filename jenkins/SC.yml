@@ -30,7 +30,7 @@
     - maven-target:
         pom: pom.xml
         goals: '-Pjenkins clean test -DargLine=''-Dsourceclear="-d ${SCAN_TYPE} --url=${URL}
-          --ref=${SCM_REF} --threshold=${THRESHOLD} ${RECURSE} ${EXTRA}"'' '
+          ${VERSIONPARAM}=${VERSION} --threshold=${THRESHOLD} ${NAMEPARAM} ${RECURSE} ${EXTRA}"'' '
         maven-version: maven-3-5-0
         private-repository: false
 
@@ -47,10 +47,14 @@
         description: URL of SCM repository OR remote binary target to validate.
         name: URL
     - string:
+        default: ''
+        name: NAME
+        description: Name of the binary to scan e.g. "KeyCloak". Only used if scanning a binary.
+    - string:
         default: master
-        description: SCM reference (e.g. branch/tag/commit). Only used if scanning
-          a SCM repository.
-        name: SCM_REF
+        description: Either, for SCM scanning, a SCM reference (e.g. branch/tag/commit) or
+          for binary scanning an explicit version (e.g. 1.2.1.Final).
+        name: VERSION
     - dynamic-choice:
         name: THRESHOLD
         script: 'return list = [ 1,2,3,4,5,6,7,8,9,10 ]'
@@ -60,7 +64,7 @@
     - bool:
         default: false
         description: Enable recursive scanning of this project. This should NOT normally
-          be required unless the project is rooted within a subdirectory.
+          be required unless the project is rooted within a subdirectory. Only used if scanning a SCM repository.
         name: RECURSIVE
     - string:
         default: ''
@@ -76,10 +80,23 @@
         properties-content: |
            GIT_SSL_NO_VERIFY=true
         groovy-content: |
+          def map = [:]
+
           if ( RECURSIVE == "true" ) {
-          def map = ["RECURSE": " --recursive " ]
-          return map
+          map.put("RECURSE"," --recursive ")
+          } else {
+          map.put("RECURSE","")
           }
+
+          if ( SCAN_TYPE == "scm" ) {
+          map.put("VERSIONPARAM"," --ref")
+          map.put("NAMEPARAM", "")
+          } else {
+          map.put("VERSIONPARAM"," --rev")
+          map.put("NAMEPARAM", "--name=${NAME}")
+          }
+
+          return map
     publishers:
     - junit:
         results: '**/target/*-reports/*.xml'
@@ -89,7 +106,7 @@
     scm:
     - git:
         branches:
-        - '4bd2b15193b171593cc622364b3013f69727d4eb'
+        - '*/master'
         url: https://github.com/project-ncl/sourceclear-invoker.git
         extensions:
           per-build-tag: false
