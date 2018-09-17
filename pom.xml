@@ -32,6 +32,7 @@
   <version>0.1-SNAPSHOT</version>
 
   <name>SourceClear JUnit Wrapper</name>
+  <url>https://github.com/project-ncl/sourceclear-invoker</url>
   <inceptionYear>2018</inceptionYear>
 
   <licenses>
@@ -48,6 +49,13 @@
       <email>ncross@redhat.com</email>
     </developer>
   </developers>
+
+  <scm>
+    <connection>scm:git:http://github.com/project-ncl/sourceclear-invoker.git</connection>
+    <developerConnection>scm:git:git@github.com:project-ncl/sourceclear-invoker.git</developerConnection>
+    <url>http://github.com/project-ncl/sourceclear-invoker</url>
+    <tag>HEAD</tag>
+  </scm>
 
 
   <dependencyManagement>
