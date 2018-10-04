@@ -17,7 +17,9 @@ package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SourceClearTest;
 import com.redhat.engineering.srcclr.utils.ScanException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import java.io.FileNotFoundException;
 
@@ -30,9 +32,8 @@ public class SourceClearInvokerTest
 
     private final SourceClearTest wrapper = new SourceClearTest();
 
-    // TODO: Enable once finished.
-    // @Rule
-    // public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     // TODO : This will need to be changed once binary is implemented.
     @Test( expected = FileNotFoundException.class )
