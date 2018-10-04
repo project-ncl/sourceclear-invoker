@@ -85,26 +85,35 @@ public class Binary implements Callable<Void>
             parent.setDebug();
         }
 
-        Path temporaryLocation = Files.createTempDirectory( "sourceclear-" );
+        Path urlDownloadLocation = Files.createTempDirectory( "sourceclear-remote-cache-" );
+        Path temporaryLocation = Files.createTempDirectory( "sourceclear-unpack-" );
         try
         {
             URL processedUrl = new URL( url );
-            File target = new File( temporaryLocation.toFile(), FilenameUtils.getName( processedUrl.getPath() ) );
+            File target = new File( urlDownloadLocation.toFile(), FilenameUtils.getName( processedUrl.getPath() ) );
 
             if ( name.contains( " " ) )
             {
                 logger.warn ("Replace whitespace with '-' in {}", name);
                 name = name.replace( ' ', '-' );
             }
-            logger.debug( "Created temporary as {} and downloading {} to {}", temporaryLocation, processedUrl, target );
+            logger.debug( "Created temporary as {} and downloading {} to {} using temporary directory of {}",
+                          urlDownloadLocation, processedUrl, target, temporaryLocation);
 
             // TODO : Implement concurrent axel/aria2c downloader
             FileUtils.copyURLToFile( processedUrl, target );
 
-            // Unpack the target ready for a scan.
-            final Exploder exploder = new Exploder().excludeSuffix( ArchiveStreamFactory.JAR );
-            exploder.unpack( target );
-
+            // Don't attempt to unpack if we have a single jar file.
+            if ( ! target.getName().endsWith( ArchiveStreamFactory.JAR ) )
+            {
+                // Unpack the target ready for a scan.
+                final Exploder exploder = new Exploder().excludeSuffix( ArchiveStreamFactory.JAR ).useTargetDirectory( temporaryLocation.toFile() );
+                exploder.unpack( target );
+            }
+            else
+            {
+                FileUtils.copyFileToDirectory( target, temporaryLocation.toFile() );
+            }
             Map<String,String> env = new HashMap<>(  );
             env.put( "SRCCLR_SCM_NAME", name );
 
@@ -138,6 +147,7 @@ public class Binary implements Callable<Void>
         }
         finally
         {
+            FileUtils.deleteDirectory( urlDownloadLocation.toFile() );
             FileUtils.deleteDirectory( temporaryLocation.toFile() );
         }
     }
