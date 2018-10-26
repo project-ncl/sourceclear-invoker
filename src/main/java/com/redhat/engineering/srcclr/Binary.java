@@ -18,7 +18,6 @@ package com.redhat.engineering.srcclr;
 import com.redhat.engineering.srcclr.json.Record;
 import com.redhat.engineering.srcclr.json.SourceClearJSON;
 import com.redhat.engineering.srcclr.json.Vulnerability;
-import com.redhat.engineering.srcclr.utils.JSONProcessor;
 import com.redhat.engineering.srcclr.utils.ScanException;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.FileUtils;
@@ -50,9 +49,6 @@ public class Binary implements Callable<Void>
     @Option( names = { "-e", "--exception" }, description = "Throw exception on vulnerabilities found." )
     boolean exception = true;
 
-    @Option( names = { "-t", "--threshold" }, description = "Threshold on which exception is thrown.", converter=ThresholdConverter.class)
-    int threshold = 0;
-
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     boolean debug;
 
@@ -80,9 +76,9 @@ public class Binary implements Callable<Void>
     @Override
     public Void call() throws Exception
     {
-        if ( debug || parent.debug )
+        if ( debug || parent.isDebug() )
         {
-            parent.setDebug();
+            parent.enableDebug();
         }
 
         Path urlDownloadLocation = Files.createTempDirectory( "sourceclear-remote-cache-" );
@@ -136,7 +132,7 @@ public class Binary implements Callable<Void>
             args.add( temporaryLocation.toFile().getAbsolutePath() );
 
             SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
-            ArrayList<Vulnerability> matched = JSONProcessor.process( threshold, json );
+            ArrayList<Vulnerability> matched = parent.getProcessor().process( parent, json );
             Record record = json.getRecords().get( 0 );
             if ( exception && matched.size() > 0 )
             {

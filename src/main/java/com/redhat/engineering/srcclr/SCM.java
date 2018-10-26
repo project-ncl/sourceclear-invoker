@@ -18,7 +18,6 @@ package com.redhat.engineering.srcclr;
 import com.redhat.engineering.srcclr.json.Record;
 import com.redhat.engineering.srcclr.json.SourceClearJSON;
 import com.redhat.engineering.srcclr.json.Vulnerability;
-import com.redhat.engineering.srcclr.utils.JSONProcessor;
 import com.redhat.engineering.srcclr.utils.ScanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +42,6 @@ public class SCM implements Callable<Void>
     @Option( names = { "-e", "--exception" }, description = "Throw exception on vulnerabilities found." )
     boolean exception = true;
 
-    @Option( names = { "-t", "--threshold" }, description = "Threshold on which exception is thrown.", converter=ThresholdConverter.class)
-    int threshold = 0;
-
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     boolean debug;
 
@@ -64,9 +60,9 @@ public class SCM implements Callable<Void>
     @Override
     public Void call() throws Exception
     {
-        if ( debug || parent.debug )
+        if ( debug || parent.isDebug() )
         {
-            parent.setDebug();
+            parent.enableDebug();
         }
 
         List<String> args = new ArrayList<>();
@@ -94,7 +90,7 @@ public class SCM implements Callable<Void>
 //        logger.info( "Found json unmatched {} ", json.getRecords().size() );
 
         Record record = json.getRecords().get( 0 );
-        ArrayList<Vulnerability> matched = JSONProcessor.process ( threshold, json );
+        ArrayList<Vulnerability> matched = parent.getProcessor().process ( parent, json );
 
         if ( exception && matched.size() > 0 )
         {

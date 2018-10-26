@@ -20,31 +20,47 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
+import com.redhat.engineering.srcclr.converters.ProcessorConvertor;
+import com.redhat.engineering.srcclr.converters.ThresholdConverter;
+import com.redhat.engineering.srcclr.processor.CVSSProcessor;
+import com.redhat.engineering.srcclr.processor.ScanResult;
 import com.redhat.engineering.srcclr.utils.ManifestVersionProvider;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 import java.util.concurrent.Callable;
 
 /**
  * Main entry point.
  */
-@CommandLine.Command(name = "SrcClrWrapper",
+@Command(name = "SrcClrWrapper",
                 description = "Wrap SourceClear and invoke it.",
                 mixinStandardHelpOptions = true, // add --help and --version options
                 versionProvider = ManifestVersionProvider.class,
-                subcommands = { SCM.class, Binary.class }
-)public class SrcClrWrapper implements Callable<Void>
+                subcommands = { SCM.class, Binary.class } )
+@Getter
+public class SrcClrWrapper implements Callable<Void>
 {
-    @CommandLine.Option( names = { "-d", "--debug" }, description = "Enable debug." )
-    boolean debug;
+    @Option( names = { "-d", "--debug" }, description = "Enable debug." )
+    private boolean debug;
+
+    @Option( names = { "-t", "--threshold" }, converter=ThresholdConverter.class,
+                    description = "Threshold on which exception is thrown. Only used with CVSS Processor")
+    private int threshold = 0;
+
+    @Option( names = { "-p", "--processor" }, converter = ProcessorConvertor.class,
+                    description = "Processor to use to analyse SourceClear results. Default is '${DEFAULT-VALUE}'")
+    private ScanResult processor = new CVSSProcessor();
 
     public static void main( String[] args ) throws Exception
     {
         try
         {
-            new CommandLine( new SrcClrWrapper() ).parseWithHandler( new CommandLine.RunLast(), args );
+            new CommandLine( new SrcClrWrapper() ).parseWithHandler( new CommandLine.RunAll(), args );
         }
         catch ( CommandLine.ExecutionException e )
         {
@@ -62,7 +78,7 @@ import java.util.concurrent.Callable;
         return null;
     }
 
-    void setDebug()
+    void enableDebug()
     {
         ch.qos.logback.classic.Logger rootLogger =
                         (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME );
