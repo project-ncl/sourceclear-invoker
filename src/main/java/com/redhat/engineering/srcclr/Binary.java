@@ -46,9 +46,6 @@ public class Binary implements Callable<Void>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Option( names = { "-e", "--exception" }, description = "Throw exception on vulnerabilities found." )
-    boolean exception = true;
-
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     boolean debug;
 
@@ -134,8 +131,10 @@ public class Binary implements Callable<Void>
             SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
             ArrayList<Vulnerability> matched = parent.getProcessor().process( parent, json );
             Record record = json.getRecords().get( 0 );
-            if ( exception && matched.size() > 0 )
+            if ( parent.isException() && matched.size() > 0 )
             {
+                matched.forEach( v -> parent.notifyListeners( v ) );
+
                 throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
             }

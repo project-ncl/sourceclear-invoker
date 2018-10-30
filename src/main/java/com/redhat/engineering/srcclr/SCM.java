@@ -39,9 +39,6 @@ public class SCM implements Callable<Void>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Option( names = { "-e", "--exception" }, description = "Throw exception on vulnerabilities found." )
-    boolean exception = true;
-
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     boolean debug;
 
@@ -92,8 +89,10 @@ public class SCM implements Callable<Void>
         Record record = json.getRecords().get( 0 );
         ArrayList<Vulnerability> matched = parent.getProcessor().process ( parent, json );
 
-        if ( exception && matched.size() > 0 )
+        if ( parent.isException() && matched.size() > 0 )
         {
+            matched.forEach( v -> parent.notifyListeners( v ) );
+
             throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
         }
