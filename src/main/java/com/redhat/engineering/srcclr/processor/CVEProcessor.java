@@ -51,7 +51,7 @@ public class CVEProcessor
                 // TODO: Call onto API with possible notification system
 
                 matched.add( vuln );
-                logger.info ( "Found vulnerability '{}' with identity {} in library {}:{}:{} and report is {}",
+                logger.info ( "Found vulnerability '{}' with CVE ID {} in library {}:{}:{} and report is {}",
                               vuln.getTitle(), vuln.getCve(), library.getCoordinate1(),
                               library.getCoordinate2(), library.getVersions().get( 0 ).getVersion(),
                               record.getMetadata().getReport()
