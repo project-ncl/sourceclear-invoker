@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.engineering.srcclr;
+package com.redhat.engineering.srcclr.converters;
 
 import picocli.CommandLine;
 

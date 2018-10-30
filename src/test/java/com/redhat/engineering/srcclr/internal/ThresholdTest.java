@@ -30,7 +30,7 @@ public class ThresholdTest
     @Test
     public void invalidThreshold1Test() throws Exception
     {
-        SrcClrWrapper.main( new String [] { "scm", "-t", "-1" } );
+        SrcClrWrapper.main( new String [] { "-t", "-1", "scm" } );
 
         assertTrue( systemRule.getLog().contains( "Invalid CVSS Score parameter" ) );
     }
@@ -38,7 +38,7 @@ public class ThresholdTest
     @Test
     public void invalidThreshold2Test() throws Exception
     {
-        SrcClrWrapper.main( new String [] { "scm", "-t", "11" } );
+        SrcClrWrapper.main( new String [] { "-t", "11", "scm" } );
 
         assertTrue( systemRule.getLog().contains( "Invalid CVSS Score parameter" ) );
     }

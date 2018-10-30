@@ -23,6 +23,9 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import java.io.FileNotFoundException;
 
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
+
 /**
  * Test for Jenkins interface.
  */
@@ -73,7 +76,7 @@ public class SourceClearInvokerTest
         try
         {
             System.setProperty( SC,
-                                "scm --url=https://github.com/srcclr/example-java-maven.git --ref=a4c94e9 -t 8 --no-upload" );
+                                "-t 8 scm --url=https://github.com/srcclr/example-java-maven.git --ref=a4c94e9 --no-upload" );
             wrapper.runSourceClear();
         }
         finally
@@ -95,5 +98,23 @@ public class SourceClearInvokerTest
         {
             System.clearProperty( SC );
         }
+        assertTrue( systemRule.getLog().contains( "score 7.5" ) );
+    }
+
+    @Test( expected = ScanException.class )
+    public void runScanFailureSC_CVE() throws Exception
+    {
+        try
+        {
+            System.setProperty( SC,
+                                "-p cve scm --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
+            wrapper.runSourceClear();
+        }
+        finally
+        {
+            System.clearProperty( SC );
+        }
+        assertFalse( systemRule.getLog().contains( "score 7.5" ) );
+        assertTrue( systemRule.getLog().contains( "2017-2646" ) );
     }
 }
