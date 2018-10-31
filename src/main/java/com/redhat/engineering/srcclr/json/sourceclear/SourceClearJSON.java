@@ -13,48 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.engineering.srcclr.json;
+package com.redhat.engineering.srcclr.json.sourceclear;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "recordType",
-    "report"
+    "metadata",
+    "records"
 })
-public class Metadata_ {
+public class SourceClearJSON {
 
-    @JsonProperty("recordType")
-    private String recordType;
-    @JsonProperty("report")
-    private Object report;
+    @JsonProperty("metadata")
+    private Metadata metadata;
+    @JsonProperty("records")
+    private List<Record> records = new ArrayList<Record>();
 
-    @JsonProperty("recordType")
-    public String getRecordType() {
-        return recordType;
+    @JsonProperty("metadata")
+    public Metadata getMetadata() {
+        return metadata;
     }
 
-    @JsonProperty("recordType")
-    public void setRecordType(String recordType) {
-        this.recordType = recordType;
+    @JsonProperty("metadata")
+    public void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
     }
 
-    @JsonProperty("report")
-    public Object getReport() {
-        return report;
+    @JsonProperty("records")
+    public List<Record> getRecords() {
+        return records;
     }
 
-    @JsonProperty("report")
-    public void setReport(Object report) {
-        this.report = report;
+    @JsonProperty("records")
+    public void setRecords(List<Record> records) {
+        this.records = records;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("recordType", recordType).append("report", report).toString();
+        return new ToStringBuilder( this).append( "metadata", metadata).append( "records", records).toString();
     }
 
 }

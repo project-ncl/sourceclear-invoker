@@ -13,35 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.engineering.srcclr.json;
+package com.redhat.engineering.srcclr.json.sourceclear;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "html"
+    "details",
+    "_links"
 })
-public class Links_ {
+public class Library_ {
 
-    @JsonProperty("html")
-    private String html;
+    @JsonProperty("details")
+    private List<Detail> details = new ArrayList<Detail>();
+    @JsonProperty("_links")
+    private Links__ links;
 
-    @JsonProperty("html")
-    public String getHtml() {
-        return html;
+    @JsonProperty("details")
+    public List<Detail> getDetails() {
+        return details;
     }
 
-    @JsonProperty("html")
-    public void setHtml(String html) {
-        this.html = html;
+    @JsonProperty("details")
+    public void setDetails(List<Detail> details) {
+        this.details = details;
+    }
+
+    @JsonProperty("_links")
+    public Links__ getLinks() {
+        return links;
+    }
+
+    @JsonProperty("_links")
+    public void setLinks(Links__ links) {
+        this.links = links;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("html", html).toString();
+        return new ToStringBuilder(this).append("details", details).append("links", links).toString();
     }
 
 }

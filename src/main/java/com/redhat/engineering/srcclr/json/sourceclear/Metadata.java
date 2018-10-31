@@ -13,51 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.engineering.srcclr.json;
+package com.redhat.engineering.srcclr.json.sourceclear;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "metadata",
-    "records"
+    "requestDate"
 })
-public class SourceClearJSON {
+public class Metadata {
 
-    @JsonProperty("metadata")
-    private Metadata metadata;
-    @JsonProperty("records")
-    private List<Record> records = new ArrayList<Record>();
+    @JsonProperty("requestDate")
+    private String requestDate;
 
-    @JsonProperty("metadata")
-    public Metadata getMetadata() {
-        return metadata;
+    @JsonProperty("requestDate")
+    public String getRequestDate() {
+        return requestDate;
     }
 
-    @JsonProperty("metadata")
-    public void setMetadata(Metadata metadata) {
-        this.metadata = metadata;
-    }
-
-    @JsonProperty("records")
-    public List<Record> getRecords() {
-        return records;
-    }
-
-    @JsonProperty("records")
-    public void setRecords(List<Record> records) {
-        this.records = records;
+    @JsonProperty("requestDate")
+    public void setRequestDate(String requestDate) {
+        this.requestDate = requestDate;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder( this).append( "metadata", metadata).append( "records", records).toString();
+        return new ToStringBuilder(this).append("requestDate", requestDate).toString();
     }
 
 }

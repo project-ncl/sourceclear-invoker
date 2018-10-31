@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.engineering.srcclr.json;
+package com.redhat.engineering.srcclr.json.sourceclear;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,26 +22,26 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "ref"
+    "html"
 })
-public class Links__ {
+public class Links_ {
 
-    @JsonProperty("ref")
-    private String ref;
+    @JsonProperty("html")
+    private String html;
 
-    @JsonProperty("ref")
-    public String getRef() {
-        return ref;
+    @JsonProperty("html")
+    public String getHtml() {
+        return html;
     }
 
-    @JsonProperty("ref")
-    public void setRef(String ref) {
-        this.ref = ref;
+    @JsonProperty("html")
+    public void setHtml(String html) {
+        this.html = html;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("ref", ref).toString();
+        return new ToStringBuilder(this).append("html", html).toString();
     }
 
 }

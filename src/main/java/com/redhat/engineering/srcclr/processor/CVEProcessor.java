@@ -16,10 +16,10 @@
 package com.redhat.engineering.srcclr.processor;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
-import com.redhat.engineering.srcclr.json.Library;
-import com.redhat.engineering.srcclr.json.Record;
-import com.redhat.engineering.srcclr.json.SourceClearJSON;
-import com.redhat.engineering.srcclr.json.Vulnerability;
+import com.redhat.engineering.srcclr.json.sourceclear.Library;
+import com.redhat.engineering.srcclr.json.sourceclear.Record;
+import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
+import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
