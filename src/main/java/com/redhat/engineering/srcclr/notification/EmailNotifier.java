@@ -8,6 +8,8 @@ import org.simplejavamail.mailer.MailerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+
 public class EmailNotifier implements Notifier
 {
     // Keep as class variable as used by test code.
@@ -16,29 +18,32 @@ public class EmailNotifier implements Notifier
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Override
-    public void notify( SrcClrWrapper parent, Vulnerability v )
+    public void notify( SrcClrWrapper parent, Set<Vulnerability> v )
     {
-
-        String sb = "Located a possible vulnerability within product "
-                        + parent.getProduct()
-                        + System.lineSeparator()
-                        + "Vulnerability is "
-                        + v.getTitle()
-                        + System.lineSeparator()
-                        + "CVE-"
-                        + v.getCve()
-                        + " with CVSS "
-                        + v.getCvssScore()
-                        + " and overview "
-                        + System.lineSeparator()
-                        + v.getOverview()
-                        + System.lineSeparator();
+        StringBuffer sb = new StringBuffer( "Located a possible vulnerabilities within product " )
+                        .append( parent.getProduct() )
+                        .append( System.lineSeparator() )
+                        .append( System.lineSeparator() );
+        v.forEach( vuln -> sb.append( "Vulnerability is " )
+                  .append( vuln.getTitle() )
+                  .append( System.lineSeparator() )
+                  .append( "CVE-" )
+                  .append( vuln.getCve() )
+                  .append(" with CVSS " )
+                  .append( vuln.getCvssScore() )
+                  .append( " and overview " )
+                  .append( System.lineSeparator() )
+                  .append( vuln.getOverview() )
+                  .append( System.lineSeparator() )
+                  .append( System.lineSeparator() )
+        );
+        sb.append( System.lineSeparator() );
 
         Email email = EmailBuilder.startingBlank()
                                   .from( "sourceclear-scanner" + parent.getEmailAddress().substring( parent.getEmailAddress().indexOf( "@" ) ) )
                                   .to( parent.getEmailAddress() )
                                   .withSubject( "SourceClear Vulnerability Warning" )
-                                  .withPlainText( sb )
+                                  .withPlainText( sb.toString() )
                                   .buildEmail();
 
         logger.info ( "Sending email to {} on server {} ", parent.getEmailAddress(), parent.getEmailServer() );

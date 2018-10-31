@@ -35,6 +35,9 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
@@ -124,7 +127,7 @@ public class SrcClrWrapper implements Callable<Void>
     }
 
 
-    void notifyListeners( Vulnerability v )
+    void notifyListeners( Set<Vulnerability> v )
     {
         if ( isNotEmpty ( emailAddress ) && isNotEmpty ( emailServer ) )
         {

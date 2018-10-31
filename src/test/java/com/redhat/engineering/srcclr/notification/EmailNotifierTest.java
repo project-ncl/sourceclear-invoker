@@ -8,7 +8,11 @@ import org.junit.Test;
 import org.subethamail.wiser.Wiser;
 import org.subethamail.wiser.WiserMessage;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -39,7 +43,9 @@ public class EmailNotifierTest
         Vulnerability v = new Vulnerability();
         v.setCve( "123456789" );
         v.setTitle( "Dummy Vulnerability" );
-        n.notify( wrapper, v );
+        Set<Vulnerability> vulns = new HashSet<>(  );
+        vulns.add( v );
+        n.notify( wrapper, vulns );
 
         List<WiserMessage> messages = wiser.getMessages();
         for ( WiserMessage wm : messages )

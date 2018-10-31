@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
@@ -129,11 +130,11 @@ public class Binary implements Callable<Void>
             args.add( temporaryLocation.toFile().getAbsolutePath() );
 
             SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
-            ArrayList<Vulnerability> matched = parent.getProcessor().process( parent, json );
+            HashMap<Vulnerability, Boolean> matched = parent.getProcessor().process( parent, json );
             Record record = json.getRecords().get( 0 );
             if ( parent.isException() && matched.size() > 0 )
             {
-                matched.forEach( v -> parent.notifyListeners( v ) );
+                parent.notifyListeners( matched.keySet().stream().filter( matched::get ).collect( Collectors.toSet()) );
 
                 throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
