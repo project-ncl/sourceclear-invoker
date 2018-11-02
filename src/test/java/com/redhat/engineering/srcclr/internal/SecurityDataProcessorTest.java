@@ -139,6 +139,7 @@ public class SecurityDataProcessorTest
         assertEquals( true, sdpr.isToFail() );
     }
 
+    @Test
     public void processInputCVETest() throws Exception
     {
         // To test this:
