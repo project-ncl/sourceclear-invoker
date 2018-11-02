@@ -21,7 +21,7 @@ import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
 import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import com.redhat.engineering.srcclr.utils.InternalException;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,7 +30,7 @@ public interface ScanResult
 {
     Pattern pattern = Pattern.compile( "(/records/0/libraries/)([0-9]+)(.*)");
 
-    ArrayList<Vulnerability> process( SrcClrWrapper parent, SourceClearJSON json ) throws InternalException;
+    HashMap<Vulnerability, Boolean> process( SrcClrWrapper parent, SourceClearJSON json ) throws InternalException;
 
     default Library locateLibrary ( List<Library> libs, Vulnerability vuln ) throws InternalException
     {
