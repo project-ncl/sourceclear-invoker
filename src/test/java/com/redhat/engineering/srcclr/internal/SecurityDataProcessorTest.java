@@ -21,9 +21,9 @@ import com.redhat.engineering.srcclr.processor.SecurityDataProcessorResult;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.MethodRule;
-import org.junit.rules.TestWatchman;
-import org.junit.runners.model.FrameworkMethod;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +38,14 @@ import java.io.FileNotFoundException;
 
 public class SecurityDataProcessorTest
 {
-    @Rule 
-    public MethodRule watchman = new TestWatchman() {
-        public void starting(FrameworkMethod method) {
-          logger.info("<<< {} >>> being run...", method.getName());
-        }
-      };
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
+    
+    @Rule
+    public TestRule watcher = new TestWatcher() {
+         protected void starting(Description description) {
+            logger.info("Starting test: <<< {} >>>>", description.getMethodName());
+         }
+    };
     
 
     private SecurityDataProcessorResult processTestHelper(String cve_id) throws Exception
