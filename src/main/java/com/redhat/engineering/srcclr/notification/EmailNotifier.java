@@ -1,7 +1,7 @@
 package com.redhat.engineering.srcclr.notification;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
-import com.redhat.engineering.srcclr.json.Vulnerability;
+import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import org.simplejavamail.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
@@ -42,7 +42,7 @@ public class EmailNotifier implements Notifier
         Email email = EmailBuilder.startingBlank()
                                   .from( "sourceclear-scanner" + parent.getEmailAddress().substring( parent.getEmailAddress().indexOf( "@" ) ) )
                                   .to( parent.getEmailAddress() )
-                                  .withSubject( "SourceClear Vulnerability Warning" )
+                                  .withSubject( "SRCCLR-WARN " + parent.getProduct() )
                                   .withPlainText( sb.toString() )
                                   .buildEmail();
 

@@ -1,7 +1,7 @@
 package com.redhat.engineering.srcclr.notification;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
-import com.redhat.engineering.srcclr.json.Vulnerability;
+import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 
 import java.util.Set;
 

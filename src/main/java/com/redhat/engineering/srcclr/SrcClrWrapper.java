@@ -22,7 +22,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import com.redhat.engineering.srcclr.converters.ProcessorConvertor;
 import com.redhat.engineering.srcclr.converters.ThresholdConverter;
-import com.redhat.engineering.srcclr.json.Vulnerability;
+import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import com.redhat.engineering.srcclr.notification.EmailNotifier;
 import com.redhat.engineering.srcclr.notification.Notifier;
 import com.redhat.engineering.srcclr.processor.CVSSProcessor;
@@ -35,8 +35,6 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
