@@ -15,9 +15,9 @@
  */
 package com.redhat.engineering.srcclr;
 
-import com.redhat.engineering.srcclr.json.Record;
-import com.redhat.engineering.srcclr.json.SourceClearJSON;
-import com.redhat.engineering.srcclr.json.Vulnerability;
+import com.redhat.engineering.srcclr.json.sourceclear.Record;
+import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
+import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import com.redhat.engineering.srcclr.utils.ScanException;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.FileUtils;
@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
@@ -45,9 +46,6 @@ import static picocli.CommandLine.Unmatched;
 public class Binary implements Callable<Void>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    @Option( names = { "-e", "--exception" }, description = "Throw exception on vulnerabilities found." )
-    boolean exception = true;
 
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     boolean debug;
@@ -132,10 +130,12 @@ public class Binary implements Callable<Void>
             args.add( temporaryLocation.toFile().getAbsolutePath() );
 
             SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
-            ArrayList<Vulnerability> matched = parent.getProcessor().process( parent, json );
+            HashMap<Vulnerability, Boolean> matched = parent.getProcessor().process( parent, json );
             Record record = json.getRecords().get( 0 );
-            if ( exception && matched.size() > 0 )
+            if ( parent.isException() && matched.size() > 0 )
             {
+                parent.notifyListeners( matched.keySet().stream().filter( matched::get ).collect( Collectors.toSet()) );
+
                 throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
             }

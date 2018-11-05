@@ -17,7 +17,7 @@ package com.redhat.engineering.srcclr;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.engineering.srcclr.json.SourceClearJSON;
+import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

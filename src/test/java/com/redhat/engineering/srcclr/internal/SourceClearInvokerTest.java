@@ -19,9 +19,11 @@ import com.redhat.engineering.srcclr.SourceClearTest;
 import com.redhat.engineering.srcclr.utils.ScanException;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import java.io.FileNotFoundException;
+import java.util.UUID;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -38,7 +40,9 @@ public class SourceClearInvokerTest
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
-    // TODO : This will need to be changed once binary is implemented.
+    @Rule
+	public final ProvideSystemProperty overideHome = new ProvideSystemProperty("user.home", UUID.randomUUID().toString() );
+
     @Test( expected = FileNotFoundException.class )
     public void runBinarySC1() throws Exception
     {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.engineering.srcclr.json;
+package com.redhat.engineering.srcclr.json.sourceclear;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,26 +22,39 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "requestDate"
+    "recordType",
+    "report"
 })
-public class Metadata {
+public class Metadata_ {
 
-    @JsonProperty("requestDate")
-    private String requestDate;
+    @JsonProperty("recordType")
+    private String recordType;
+    @JsonProperty("report")
+    private Object report;
 
-    @JsonProperty("requestDate")
-    public String getRequestDate() {
-        return requestDate;
+    @JsonProperty("recordType")
+    public String getRecordType() {
+        return recordType;
     }
 
-    @JsonProperty("requestDate")
-    public void setRequestDate(String requestDate) {
-        this.requestDate = requestDate;
+    @JsonProperty("recordType")
+    public void setRecordType(String recordType) {
+        this.recordType = recordType;
+    }
+
+    @JsonProperty("report")
+    public Object getReport() {
+        return report;
+    }
+
+    @JsonProperty("report")
+    public void setReport(Object report) {
+        this.report = report;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("requestDate", requestDate).toString();
+        return new ToStringBuilder(this).append("recordType", recordType).append("report", report).toString();
     }
 
 }

@@ -15,9 +15,9 @@
  */
 package com.redhat.engineering.srcclr;
 
-import com.redhat.engineering.srcclr.json.Record;
-import com.redhat.engineering.srcclr.json.SourceClearJSON;
-import com.redhat.engineering.srcclr.json.Vulnerability;
+import com.redhat.engineering.srcclr.json.sourceclear.Record;
+import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
+import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import com.redhat.engineering.srcclr.utils.ScanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static picocli.CommandLine.Command;
@@ -38,9 +39,6 @@ import static picocli.CommandLine.Unmatched;
 public class SCM implements Callable<Void>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    @Option( names = { "-e", "--exception" }, description = "Throw exception on vulnerabilities found." )
-    boolean exception = true;
 
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     boolean debug;
@@ -90,10 +88,12 @@ public class SCM implements Callable<Void>
 //        logger.info( "Found json unmatched {} ", json.getRecords().size() );
 
         Record record = json.getRecords().get( 0 );
-        ArrayList<Vulnerability> matched = parent.getProcessor().process ( parent, json );
+        HashMap<Vulnerability, Boolean> matched = parent.getProcessor().process ( parent, json );
 
-        if ( exception && matched.size() > 0 )
+        if ( parent.isException() && matched.size() > 0 )
         {
+            parent.notifyListeners( matched.keySet().stream().filter( matched::get ).collect( Collectors.toSet()) );
+
             throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
         }

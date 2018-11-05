@@ -16,15 +16,16 @@
 package com.redhat.engineering.srcclr.processor;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
-import com.redhat.engineering.srcclr.json.Library;
-import com.redhat.engineering.srcclr.json.Record;
-import com.redhat.engineering.srcclr.json.SourceClearJSON;
-import com.redhat.engineering.srcclr.json.Vulnerability;
+import com.redhat.engineering.srcclr.json.sourceclear.Library;
+import com.redhat.engineering.srcclr.json.sourceclear.Record;
+import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
+import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class CVSSProcessor implements ScanResult
@@ -32,11 +33,11 @@ public class CVSSProcessor implements ScanResult
     private final Logger logger = LoggerFactory.getLogger( CVSSProcessor.class );
 
     @Override
-    public ArrayList<Vulnerability> process( SrcClrWrapper parent, SourceClearJSON json ) throws InternalException
+    public HashMap<Vulnerability, Boolean> process( SrcClrWrapper parent, SourceClearJSON json ) throws InternalException
     {
         Record record = json.getRecords().get( 0 );
         List<Library> libs = record.getLibraries();
-        ArrayList<Vulnerability> matched = new ArrayList<>( );
+        HashMap<Vulnerability, Boolean> matched = new HashMap<>( );
 
         for ( Vulnerability vuln : record.getVulnerabilities() )
         {
@@ -44,7 +45,7 @@ public class CVSSProcessor implements ScanResult
 
             if ( vuln.getCvssScore() >= parent.getThreshold() )
             {
-                matched.add( vuln );
+                matched.put( vuln, true );
                 logger.info ( "Found vulnerability '{}' with score {} in library {}:{}:{} and report is {}",
                               vuln.getTitle(), vuln.getCvssScore(), library.getCoordinate1(),
                               library.getCoordinate2(), library.getVersions().get( 0 ).getVersion(),
