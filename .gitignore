@@ -3,5 +3,6 @@ target/
 .settings
 .classpath
 .idea
+.factorypath
 
 *.iml
