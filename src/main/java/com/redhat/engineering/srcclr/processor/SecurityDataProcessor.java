@@ -22,8 +22,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.List;
 import java.util.stream.*;
 
 
@@ -60,7 +58,7 @@ public class SecurityDataProcessor {
         return sb.toString();
     }
     
-    public SecurityDataJSON lookUpAPI(String cve_id) throws IOException, FileNotFoundException {
+    public SecurityDataJSON lookUpAPI(String cve_id) throws IOException {
         String url = REDHAT_SECURITY_DATA_CVE + cve_id;
         HttpsURLConnection conn = (HttpsURLConnection)new URL(url).openConnection();
     
@@ -86,7 +84,7 @@ public class SecurityDataProcessor {
         }
     }
 
-    public SecurityDataProcessorResult process(String cve_id) throws Exception 
+    public SecurityDataProcessorResult process(String cve_id) throws IOException 
     {
         Boolean is_fail = false;
         
@@ -138,7 +136,7 @@ public class SecurityDataProcessor {
         } 
         catch (FileNotFoundException e)  
         {
-            logger.info("No CVE date in security data API. URL {}", e.getMessage());
+            logger.info("No CVE data in security data API. URL {}", e.getMessage());
             sdpr.setMessage("No CVE data in security data API");
             is_fail = true;
         }      
