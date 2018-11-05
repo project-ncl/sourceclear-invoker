@@ -40,6 +40,7 @@ public class CVEProcessor
         Record record = json.getRecords().get( 0 );
         List<Library> libs = record.getLibraries();
         HashMap<Vulnerability,Boolean> matched = new HashMap<>( );
+        SecurityDataProcessor securityDataProcessor = new SecurityDataProcessor( parent.getProduct() );
 
         for ( Vulnerability vuln : record.getVulnerabilities() )
         {
@@ -47,10 +48,10 @@ public class CVEProcessor
 
             if ( isNotEmpty ( vuln.getCve() ) )
             {
-                // TODO: Call onto API with possible notification system
+                SecurityDataResult securityDataResult = securityDataProcessor.process( vuln.getCve() );
+                securityDataResult.updateMessage( vuln );
 
-                // TODO: Replace 'true' with results of pseudo code algorithm flow.
-                matched.put( vuln, true);
+                matched.put( vuln, securityDataResult.getNotify());
 
                 logger.info ( "Found vulnerability '{}' with CVE ID {} in library {}:{}:{} and report is {}",
                               vuln.getTitle(), vuln.getCve(), library.getCoordinate1(),

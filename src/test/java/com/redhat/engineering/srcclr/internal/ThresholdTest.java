@@ -18,7 +18,10 @@ package com.redhat.engineering.srcclr.internal;
 import com.redhat.engineering.srcclr.SrcClrWrapper;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 import org.junit.contrib.java.lang.system.SystemErrRule;
+
+import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 
@@ -26,6 +29,9 @@ public class ThresholdTest
 {
     @Rule
 	public final SystemErrRule systemRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+
+    @Rule
+    public final ProvideSystemProperty overideHome = new ProvideSystemProperty( "user.home", UUID.randomUUID().toString() );
 
     @Test
     public void invalidThreshold1Test() throws Exception

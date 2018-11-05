@@ -16,42 +16,32 @@
 package com.redhat.engineering.srcclr.processor;
 
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
+import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
+import lombok.Getter;
+import lombok.Setter;
 
-public class SecurityDataProcessorResult {
-    private Boolean to_notify = false;
-    private Boolean to_fail = false;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
+@Getter
+@Setter
+public class SecurityDataResult
+{
+    private Boolean notify = false;
+    private Boolean fail = false;
     private String message = "";
     private SecurityDataJSON json = null;
 
-    public Boolean isToNotify() {
-        return this.to_notify;
-    }
 
-    public void setToNotify(Boolean to_notify) {
-        this.to_notify = to_notify;
-    }
-
-    public Boolean isToFail() {
-        return this.to_fail;
-    }
-
-    public void setToFail(Boolean to_fail) {
-        this.to_fail = to_fail;
-    }
-
-    public SecurityDataJSON getJSON() {
-        return this.json;
-    }
-
-    public void setJSON(SecurityDataJSON json) {
-        this.json = json;
-    }
-    
-    public String getMessage() {
-        return this.message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    void updateMessage( Vulnerability vulnerability )
+    {
+        if ( isNotEmpty( message ))
+        {
+            String sb = message
+                            + System.lineSeparator()
+                            + "Original SourceClear warning:"
+                            + System.lineSeparator()
+                            + vulnerability.getOverview();
+            vulnerability.setOverview( sb );
+        }
     }
 }

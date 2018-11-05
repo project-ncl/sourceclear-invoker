@@ -66,7 +66,7 @@ public class SrcClrWrapper implements Callable<Void>
                     description = "Processor to use to analyse SourceClear results. Default is '${DEFAULT-VALUE}'")
     private ScanResult processor = new CVSSProcessor();
 
-    @Option( names = { "-c", "--cpe" }, description = "CPE (Product) Name")
+    @Option( names = { "-c", "--cpe" }, defaultValue="", description = "CPE (Product) Name")
     private String product;
 
     @Option ( names = "--email-server", description = "SMTP Server to use to send notification email" )

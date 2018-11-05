@@ -17,24 +17,21 @@ package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
 import com.redhat.engineering.srcclr.processor.SecurityDataProcessor;
-import com.redhat.engineering.srcclr.processor.SecurityDataProcessorResult;
-
+import com.redhat.engineering.srcclr.processor.SecurityDataResult;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.junit.contrib.java.lang.system.SystemErrRule;
+
+import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import java.io.FileNotFoundException;
-
-
 
 public class SecurityDataProcessorTest
 {
@@ -48,15 +45,15 @@ public class SecurityDataProcessorTest
     };
     
 
-    private SecurityDataProcessorResult processTestHelper(String cve_id) throws Exception
+    private SecurityDataResult processTestHelper( String cve_id) throws Exception
     {
         String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
 
         SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
 
-        SecurityDataProcessorResult sdpr = sdp.process(cve_id);
-        logger.info("to_notify {}, to_fail {}", sdpr.isToNotify(), sdpr.isToFail());
-        if (sdpr.isToFail())
+        SecurityDataResult sdpr = sdp.process( cve_id);
+        logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());
+        if (sdpr.getFail())
         {
             logger.info("message: {}", sdpr.getMessage());
         }   
@@ -69,11 +66,11 @@ public class SecurityDataProcessorTest
     public void validLookUpTest() throws Exception
     {
             
-        String cve_id = "CVE-2016-6346";
+        String cve_id = "2016-6346";
 
         SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
 
-        SecurityDataJSON json = sdp.lookUpAPI(cve_id);
+        SecurityDataJSON json = (SecurityDataJSON)executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
 
         logger.info("ID {}", json.getName().toString());
 
@@ -91,12 +88,11 @@ public class SecurityDataProcessorTest
         SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
 
         try {
-            SecurityDataJSON json = sdp.lookUpAPI(cve_id);
+            SecurityDataJSON json = (SecurityDataJSON)executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
             logger.info("json {}", json.toString());
         } catch (FileNotFoundException e)  {
             logger.info("catched exception. {}", e.toString());
         }
-        
         assertTrue( true );
     }
 
@@ -107,11 +103,11 @@ public class SecurityDataProcessorTest
         // this test won't be able to use anymore, once CVE-2016-6346 security data is updated 
         String cve_id = "CVE-2016-6346";
 
-        SecurityDataProcessorResult sdpr = processTestHelper(cve_id);
+        SecurityDataResult sdpr = processTestHelper( cve_id);
 
-        sdpr.isToFail();
+        sdpr.getFail();
 
-        assertEquals( true, sdpr.isToFail() );
+        assertEquals( true, sdpr.getFail() );
     }
 
     @Test
@@ -120,11 +116,11 @@ public class SecurityDataProcessorTest
         // this test won't be able to use anymore, once CVE-2018-10327 security data is updated 
         String cve_id = "CVE-2018-10237";
 
-        SecurityDataProcessorResult sdpr = processTestHelper(cve_id);
+        SecurityDataResult sdpr = processTestHelper( cve_id);
 
-        sdpr.isToFail();
+        sdpr.getFail();
 
-        assertEquals( true, sdpr.isToFail() );
+        assertEquals( true, sdpr.getFail() );
     }
 
     @Test
@@ -132,11 +128,11 @@ public class SecurityDataProcessorTest
     {
         String cve_id = "CVE-2018-102371";
 
-        SecurityDataProcessorResult sdpr = processTestHelper(cve_id);
+        SecurityDataResult sdpr = processTestHelper( cve_id);
 
-        sdpr.isToFail();
+        sdpr.getFail();
 
-        assertEquals( true, sdpr.isToFail() );
+        assertEquals( true, sdpr.getFail() );
     }
 
     @Test
@@ -148,9 +144,38 @@ public class SecurityDataProcessorTest
         String cve_id = "CVE-2018-10237"; // default
         
         cve_id=String.valueOf(System.getProperty("cve"));
-        SecurityDataProcessorResult sdpr = processTestHelper(cve_id);
+        SecurityDataResult sdpr = processTestHelper( cve_id);
 
         assert(true);
         
+    }
+
+
+    /**
+     * Executes a method on an object instance.  The name and parameters of
+     * the method are specified.  The method will be executed and the value
+     * of it returned, even if the method would have private or protected access.
+     */
+    private Object executeMethod( Object instance, String name, Object[] params ) throws Exception
+    {
+        Class<?> c = instance.getClass();
+
+        // Fetch the Class types of all method parameters
+        Class[] types = new Class[params.length];
+
+        for ( int i = 0; i < params.length; i++ )
+            types[i] = params[i].getClass();
+
+        Method m = c.getDeclaredMethod( name, types );
+        m.setAccessible( true );
+
+        try
+        {
+            return m.invoke( instance, params );
+        }
+        catch( InvocationTargetException e )
+        {
+            throw (Exception)e.getCause();
+        }
     }
 }
