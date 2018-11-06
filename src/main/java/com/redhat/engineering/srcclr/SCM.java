@@ -92,11 +92,17 @@ public class SCM implements Callable<Void>
 
         if ( parent.isException() && matched.size() > 0 )
         {
-            parent.notifyListeners( matched.keySet().stream().filter( matched::get ).collect( Collectors.toSet()) );
+            parent.notifyListeners( this.toString(), matched.keySet().stream().filter( matched::get ).collect( Collectors.toSet()) );
 
             throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
         }
         return null;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "scanning " + url + " version " + tag;
     }
 }

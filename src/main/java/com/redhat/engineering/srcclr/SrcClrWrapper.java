@@ -125,11 +125,11 @@ public class SrcClrWrapper implements Callable<Void>
     }
 
 
-    void notifyListeners( Set<Vulnerability> v )
+    void notifyListeners( String scanInfo, Set<Vulnerability> v )
     {
         if ( isNotEmpty ( emailAddress ) && isNotEmpty ( emailServer ) )
         {
-            notifier.notify( this, v );
+            notifier.notify( this, scanInfo, v );
         }
     }
 }

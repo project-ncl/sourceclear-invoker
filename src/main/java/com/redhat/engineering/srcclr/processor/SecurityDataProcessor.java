@@ -98,10 +98,10 @@ public class SecurityDataProcessor {
 
             PackageState ps_found = json.getPackageState() == null ? null :
                             json.getPackageState().stream().filter(ps -> cpe.equals(ps.getCpe())).findAny().orElse(null);
+
             if (ps_found != null)
             {
                 String fixed_state = ps_found.getFixState();
-
 
                 if (Stream.of("will not fix", "not affected", "fix deferred").anyMatch(fixed_state::equalsIgnoreCase))
                 {
@@ -124,6 +124,7 @@ public class SecurityDataProcessor {
             {
                 AffectedRelease ar_found = json.getAffectedRelease() == null ? null :
                                 json.getAffectedRelease().stream().filter(ar -> cpe.equals(ar.getCpe())).findAny().orElse(null);
+
                 if (ar_found != null)
                 {
                     sdpr.setMessage("AffectedRelease exists");
@@ -134,7 +135,6 @@ public class SecurityDataProcessor {
                     sdpr.setMessage("No cpe exists");
                     is_fail = true;
                 }
-
             }
         } 
         catch (FileNotFoundException e)  
