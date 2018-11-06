@@ -34,11 +34,12 @@ import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
 import com.redhat.engineering.srcclr.json.securitydata.AffectedRelease;
 import com.redhat.engineering.srcclr.json.securitydata.PackageState;
 
+import com.redhat.engineering.srcclr.utils.InternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SecurityDataProcessor {
-    private final static String REDHAT_SECURITY_DATA_CVE = "https://access.redhat.com/labs/securitydataapi/cve/";
+    private final static String REDHAT_SECURITY_DATA_CVE = "https://access.redhat.com/labs/securitydataapi/cve/CVE-";
     private final Logger logger = LoggerFactory.getLogger( getClass() );
     private String cpe;
 
@@ -58,80 +59,82 @@ public class SecurityDataProcessor {
         return sb.toString();
     }
     
-    public SecurityDataJSON lookUpAPI(String cve_id) throws IOException {
+    private SecurityDataJSON lookUpAPI(String cve_id) throws IOException {
         String url = REDHAT_SECURITY_DATA_CVE + cve_id;
+
+        logger.debug( "Looking up {}", url);
+
         HttpsURLConnection conn = (HttpsURLConnection)new URL(url).openConnection();
-    
+
         // Dealing with 406 error returns
         conn.setRequestProperty("Accept", "*/*");
     
-        InputStream is = conn.getInputStream();
-        
-        SecurityDataJSON json = null;
-        try 
+        SecurityDataJSON json;
+
+        try ( InputStream is = conn.getInputStream() )
         {
             BufferedReader rd = new BufferedReader(new InputStreamReader(is));
             String jsonText = readAll(rd);
 
-            ObjectMapper mapper = new ObjectMapper().configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
+            ObjectMapper mapper = new ObjectMapper()
+                            .configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false )
+                            .configure( DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true );
             json = mapper.readValue( jsonText, SecurityDataJSON.class );
 
             return json;
         } 
-        finally 
-        {
-          is.close();
-        }
     }
 
-    public SecurityDataProcessorResult process(String cve_id) throws IOException 
+    public SecurityDataResult process( String cve_id) throws InternalException
     {
-        Boolean is_fail = false;
+        Boolean is_fail;
         
-        SecurityDataProcessorResult sdpr = new SecurityDataProcessorResult();
+        SecurityDataResult sdpr = new SecurityDataResult();
 
-        try 
+        try
         {
             SecurityDataJSON json = lookUpAPI(cve_id);
-            sdpr.setJSON(json);
+            sdpr.setJson(json);
 
-            PackageState ps_found = json.getPackageState().stream().filter(ps -> cpe.equals(ps.getCpe())).findAny().orElse(null);
-            if (ps_found != null) 
+            PackageState ps_found = json.getPackageState() == null ? null :
+                            json.getPackageState().stream().filter(ps -> cpe.equals(ps.getCpe())).findAny().orElse(null);
+            if (ps_found != null)
             {
                 String fixed_state = ps_found.getFixState();
-                
-                
+
+
                 if (Stream.of("will not fix", "not affected", "fix deferred").anyMatch(fixed_state::equalsIgnoreCase))
                 {
                     is_fail = false;
                 }
-                else if (Stream.of("affected", "new").anyMatch(fixed_state::equalsIgnoreCase)) 
+                else if (Stream.of("affected", "new").anyMatch(fixed_state::equalsIgnoreCase))
                 {
                     sdpr.setMessage("fixed_state is " + fixed_state);
                     // setMessage or logger
                     is_fail = true;
                 }
-                else 
+                else
                 {
                     sdpr.setMessage("Unexpected fixed_state: " + fixed_state);
                     // setMessage or logger
                     is_fail = true;
                 }
-            } 
-            else 
+            }
+            else
             {
-                AffectedRelease ar_found = json.getAffectedRelease().stream().filter(ar -> cpe.equals(ar.getCpe())).findAny().orElse(null);
-                if (ar_found != null) 
+                AffectedRelease ar_found = json.getAffectedRelease() == null ? null :
+                                json.getAffectedRelease().stream().filter(ar -> cpe.equals(ar.getCpe())).findAny().orElse(null);
+                if (ar_found != null)
                 {
                     sdpr.setMessage("AffectedRelease exists");
                     is_fail = true;
-                } 
-                else 
+                }
+                else
                 {
                     sdpr.setMessage("No cpe exists");
                     is_fail = true;
                 }
-                    
+
             }
         } 
         catch (FileNotFoundException e)  
@@ -139,18 +142,22 @@ public class SecurityDataProcessor {
             logger.info("No CVE data in security data API. URL {}", e.getMessage());
             sdpr.setMessage("No CVE data in security data API");
             is_fail = true;
-        }      
+        }
+        catch ( IOException e )
+        {
+            throw new InternalException( "Unable to process Security Data", e );
+        }
 
         // if need to block
         if (is_fail)
         {
-            sdpr.setToFail(true);
+            sdpr.setFail(true);
 
             /* 
-            * Currenlty, notification will be sent for every fails.
+            * Currently, notification will be sent for every fails.
             * However in case we need a case that test fails but no notification is necessary, set to 'false'.
             */
-            sdpr.setToNotify(true);
+            sdpr.setNotify(true);
         }
 
         return sdpr;

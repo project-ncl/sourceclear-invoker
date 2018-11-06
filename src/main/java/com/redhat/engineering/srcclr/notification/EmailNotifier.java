@@ -20,7 +20,7 @@ public class EmailNotifier implements Notifier
     @Override
     public void notify( SrcClrWrapper parent, Set<Vulnerability> v )
     {
-        StringBuffer sb = new StringBuffer( "Located a possible vulnerabilities within product " )
+        StringBuffer sb = new StringBuffer( "Located a possible vulnerability within product " )
                         .append( parent.getProduct() )
                         .append( System.lineSeparator() )
                         .append( System.lineSeparator() );
