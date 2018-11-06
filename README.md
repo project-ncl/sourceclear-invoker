@@ -16,6 +16,28 @@ It has a pre-requisisite that SourceClear has been installed via its rpm (it sho
 Currently this project will build a jar-with-dependencies although this is primarily aimed at local testing only. It provides a simplified interface to SourceClear e.g.
 
 ``` bash
+Usage: SrcClrWrapper [-dehV] [--email-address=<emailAddress>]
+                     [--email-server=<emailServer>] [-c=<product>]
+                     [-p=<processor>] [-t=<threshold>] [COMMAND]
+Wrap SourceClear and invoke it.
+      --email-address=<emailAddress>
+                        Email address to notify. Domain portion will be used as FROM
+                          address
+      --email-server=<emailServer>
+                        SMTP Server to use to send notification email
+  -c, --cpe=<product>   CPE (Product) Name
+  -d, --debug           Enable debug.
+  -e, --exception       Throw exception on vulnerabilities found.
+  -h, --help            Show this help message and exit.
+  -p, --processor=<processor>
+                        Processor to use to analyse SourceClear results. Default is
+                          'cvss'
+  -t, --threshold=<threshold>
+                        Threshold on which exception is thrown. Only used with CVSS
+                          Processor
+  -V, --version         Print version information and exit.
+
+
 Usage: SrcClrWrapper scm [-dehV] [--ref=REF] --url=URL [-t=<threshold>]
 Scan a SCM URL
       --ref=REF     the SCM reference (e.g. git sha, tag)
@@ -46,4 +68,9 @@ Its main use is to be ran inside Jenkins as a JUnit test suite e.g.
 
     mvn -Pjenkins clean test -DargLine='-Dsourceclear="--url=https://github.com/release-engineering/koji-build-finder.git --ref=koji-build-finder-1.0.0"'
 
-Note that a Jenkins job is provided in the `jenkins/SC.yml` directory.
+## Features
+
+* It supports reading a configuration from the command or from `$HOME/.srcclr/invoker.properties`.
+* It can send a notification email to a specified email address with a summary of any problems found.
+* It can examine either the CVSS score returned from SourceClear or examine the CVE identifier and then query the results using the CPE (product name) against the Red Hat Security Data API ( https://access.redhat.com/labs/securitydataapi/ )
+* Sample Jenkins jobs are provided in the `jenkins` directory.
