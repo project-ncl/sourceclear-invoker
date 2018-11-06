@@ -20,6 +20,7 @@ import com.redhat.engineering.srcclr.processor.SecurityDataProcessor;
 import com.redhat.engineering.srcclr.processor.SecurityDataResult;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -36,7 +37,10 @@ import static org.junit.Assert.assertTrue;
 public class SecurityDataProcessorTest
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-    
+
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
     @Rule
     public TestRule watcher = new TestWatcher() {
          protected void starting(Description description) {
@@ -83,7 +87,7 @@ public class SecurityDataProcessorTest
     public void invalidLookUpTest() throws Exception
     {
             
-        String cve_id = "CVE-2016-63461";
+        String cve_id = "2016-63461";
 
         SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
 
@@ -101,7 +105,7 @@ public class SecurityDataProcessorTest
     public void failByNoCPETest() throws Exception
     {
         // this test won't be able to use anymore, once CVE-2016-6346 security data is updated 
-        String cve_id = "CVE-2016-6346";
+        String cve_id = "2016-6346";
 
         SecurityDataResult sdpr = processTestHelper( cve_id);
 
@@ -114,7 +118,7 @@ public class SecurityDataProcessorTest
     public void failByAffectedReleaseTest() throws Exception
     {
         // this test won't be able to use anymore, once CVE-2018-10327 security data is updated 
-        String cve_id = "CVE-2018-10237";
+        String cve_id = "2018-10237";
 
         SecurityDataResult sdpr = processTestHelper( cve_id);
 
@@ -126,7 +130,7 @@ public class SecurityDataProcessorTest
     @Test
     public void failByNoCVETest() throws Exception
     {
-        String cve_id = "CVE-2018-102371";
+        String cve_id = "2018-102371";
 
         SecurityDataResult sdpr = processTestHelper( cve_id);
 

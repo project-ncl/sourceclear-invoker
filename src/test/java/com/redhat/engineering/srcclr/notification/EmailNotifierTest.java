@@ -43,7 +43,7 @@ public class EmailNotifierTest
         v.setTitle( "Dummy Vulnerability" );
         Set<Vulnerability> vulns = new HashSet<>(  );
         vulns.add( v );
-        n.notify( wrapper, vulns );
+        n.notify( wrapper, "", vulns );
 
         List<WiserMessage> messages = wiser.getMessages();
         for ( WiserMessage wm : messages )
