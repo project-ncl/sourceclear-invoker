@@ -7,5 +7,5 @@ import java.util.Set;
 
 public interface Notifier
 {
-    void notify( SrcClrWrapper parent, Set<Vulnerability> v );
+    void notify( SrcClrWrapper parent, String scanInfo, Set<Vulnerability> v );
 }

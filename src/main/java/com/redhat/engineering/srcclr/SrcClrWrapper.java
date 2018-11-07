@@ -25,7 +25,6 @@ import com.redhat.engineering.srcclr.converters.ThresholdConverter;
 import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import com.redhat.engineering.srcclr.notification.EmailNotifier;
 import com.redhat.engineering.srcclr.notification.Notifier;
-import com.redhat.engineering.srcclr.processor.CVSSProcessor;
 import com.redhat.engineering.srcclr.processor.ScanResult;
 import com.redhat.engineering.srcclr.utils.ManifestVersionProvider;
 import lombok.Getter;
@@ -62,11 +61,11 @@ public class SrcClrWrapper implements Callable<Void>
                     description = "Threshold on which exception is thrown. Only used with CVSS Processor")
     private int threshold = 0;
 
-    @Option( names = { "-p", "--processor" }, converter = ProcessorConvertor.class,
-                    description = "Processor to use to analyse SourceClear results. Default is '${DEFAULT-VALUE}'")
-    private ScanResult processor = new CVSSProcessor();
+    @Option( names = { "-p", "--processor" }, defaultValue = "cvss", converter = ProcessorConvertor.class,
+                    description = "Processor (cve|cvss) to use to analyse SourceClear results. Default is cvss")
+    private ScanResult processor;
 
-    @Option( names = { "-c", "--cpe" }, description = "CPE (Product) Name")
+    @Option( names = { "-c", "--cpe" }, defaultValue="", description = "CPE (Product) Name")
     private String product;
 
     @Option ( names = "--email-server", description = "SMTP Server to use to send notification email" )
@@ -125,11 +124,11 @@ public class SrcClrWrapper implements Callable<Void>
     }
 
 
-    void notifyListeners( Set<Vulnerability> v )
+    void notifyListeners( String scanInfo, Set<Vulnerability> v )
     {
         if ( isNotEmpty ( emailAddress ) && isNotEmpty ( emailServer ) )
         {
-            notifier.notify( this, v );
+            notifier.notify( this, scanInfo, v );
         }
     }
 }

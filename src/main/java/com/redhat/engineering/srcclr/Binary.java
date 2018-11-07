@@ -134,7 +134,8 @@ public class Binary implements Callable<Void>
             Record record = json.getRecords().get( 0 );
             if ( parent.isException() && matched.size() > 0 )
             {
-                parent.notifyListeners( matched.keySet().stream().filter( matched::get ).collect( Collectors.toSet()) );
+                parent.notifyListeners( this.toString(),
+                                        matched.keySet().stream().filter( matched::get ).collect( Collectors.toSet()) );
 
                 throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
@@ -146,5 +147,11 @@ public class Binary implements Callable<Void>
             FileUtils.deleteDirectory( urlDownloadLocation.toFile() );
             FileUtils.deleteDirectory( temporaryLocation.toFile() );
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        return "scanning " + name + " version " + rev + " from " + url;
     }
 }
