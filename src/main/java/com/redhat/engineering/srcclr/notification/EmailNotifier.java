@@ -27,17 +27,23 @@ public class EmailNotifier implements Notifier
                         .append( System.lineSeparator() )
                         .append( System.lineSeparator() );
         v.forEach( vuln -> sb.append( "Vulnerability is " )
-                  .append( vuln.getTitle() )
-                  .append( System.lineSeparator() )
-                  .append( "CVE-" )
-                  .append( vuln.getCve() )
-                  .append(" with CVSS " )
-                  .append( vuln.getCvssScore() )
-                  .append( " and overview " )
-                  .append( System.lineSeparator() )
-                  .append( vuln.getOverview() )
-                  .append( System.lineSeparator() )
-                  .append( System.lineSeparator() )
+                         .append( vuln.getTitle() )
+                         .append( " within version range " )
+                         // Every instance of Libraries/Details appears to be a valid size 1 list.
+                         // This test is to avoid layered construction within tests.
+                         .append( vuln.getLibraries().size() == 0 ? "" : vuln.getLibraries().get( 0 ).getDetails().get( 0 ).getVersionRange() )
+                         .append( " and fixed version is " )
+                         .append( vuln.getLibraries().size() == 0 ? "" : vuln.getLibraries().get( 0 ).getDetails().get( 0 ).getUpdateToVersion() )
+                         .append( System.lineSeparator() )
+                         .append( "CVE-" )
+                         .append( vuln.getCve() )
+                         .append(" with CVSS " )
+                         .append( vuln.getCvssScore() )
+                         .append( " and overview " )
+                         .append( System.lineSeparator() )
+                         .append( vuln.getOverview() )
+                         .append( System.lineSeparator() )
+                         .append( System.lineSeparator() )
         );
         sb.append( System.lineSeparator() );
 

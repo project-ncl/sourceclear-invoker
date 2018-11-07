@@ -41,14 +41,6 @@ public class SecurityDataProcessorTest
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
-    @Rule
-    public TestRule watcher = new TestWatcher() {
-         protected void starting(Description description) {
-            logger.info("Starting test: <<< {} >>>>", description.getMethodName());
-         }
-    };
-    
-
     private SecurityDataResult processTestHelper( String cve_id) throws Exception
     {
         String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
