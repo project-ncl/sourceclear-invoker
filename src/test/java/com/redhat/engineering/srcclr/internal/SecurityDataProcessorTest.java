@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class SecurityDataProcessorTest
 {
@@ -50,6 +51,22 @@ public class SecurityDataProcessorTest
     
 
     private SecurityDataResult processTestHelper( String cve_id) throws Exception
+    {
+        String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
+
+        SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
+
+        SecurityDataResult sdpr = sdp.process( cve_id);
+        logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());
+        if (sdpr.getFail())
+        {
+            logger.info("message: {}", sdpr.getMessage());
+        }   
+
+        return sdpr;
+    }
+
+    private SecurityDataResult processMultitestHelper( String cve_id) throws Exception
     {
         String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
 
@@ -139,6 +156,8 @@ public class SecurityDataProcessorTest
         assertEquals( true, sdpr.getFail() );
     }
 
+
+
     @Test
     public void processInputCVETest() throws Exception
     {
@@ -150,10 +169,71 @@ public class SecurityDataProcessorTest
         cve_id=String.valueOf(System.getProperty("cve"));
         SecurityDataResult sdpr = processTestHelper( cve_id);
 
-        assert(true);
+        SecurityDataJSON json = (SecurityDataJSON) sdpr.getJson();
+
+        if (json != null)
+        {
+           logger.info("package_state = {}", json.getPackageState()==null ? "null" : json.getPackageState().toString());
+           logger.info("affected_release = {}", json.getAffectedRelease()==null ? "null" : json.getAffectedRelease().toString());
+        }
+
+        assertEquals( false, sdpr.getFail() );
         
     }
 
+    @Test 
+    public void failByNewFixedStateTest() throws Exception
+    {
+        String cve_id = "2018-11784";
+
+        SecurityDataResult sdpr = processTestHelper( cve_id);
+
+        assertTrue(sdpr.getFail());
+        assertEquals("fixed_state is New", sdpr.getMessage());
+    }
+
+
+    @Test
+    public void failByWillNotFixTest() throws Exception
+    {
+        String cve_id = "2018-17456";
+
+        String cpe="cpe:/o:redhat:enterprise_linux:6";
+
+        SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
+
+        SecurityDataResult sdpr = sdp.process( cve_id);
+
+        logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());
+        if (sdpr.getFail())
+        {
+            logger.info("message: {}", sdpr.getMessage());
+        }   
+
+        // Will not fix - no blocking
+        assertFalse(sdpr.getFail());
+    }
+
+    @Test
+    public void failByNotAffectedTest() throws Exception
+    {
+        String cve_id = "2018-17456";
+
+        String cpe="cpe:/a:redhat:mapc:4";
+
+        SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
+
+        SecurityDataResult sdpr = sdp.process( cve_id);
+
+        logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());
+        if (sdpr.getFail())
+        {
+            logger.info("message: {}", sdpr.getMessage());
+        }   
+
+        // not affected - no blocking
+        assertFalse(sdpr.getFail());
+    }
 
     /**
      * Executes a method on an object instance.  The name and parameters of
