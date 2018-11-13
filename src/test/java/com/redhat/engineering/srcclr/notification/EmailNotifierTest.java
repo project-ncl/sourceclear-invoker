@@ -4,7 +4,9 @@ import com.redhat.engineering.srcclr.SrcClrWrapper;
 import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.subethamail.wiser.Wiser;
 import org.subethamail.wiser.WiserMessage;
 
@@ -18,6 +20,9 @@ public class EmailNotifierTest
 {
     private final int port = 25000;
     private Wiser wiser;
+
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Before
     public void before()
