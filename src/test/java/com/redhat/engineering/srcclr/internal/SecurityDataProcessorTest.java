@@ -42,10 +42,16 @@ public class SecurityDataProcessorTest
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
-    private SecurityDataResult processTestHelper( String cve_id) throws Exception
-    {
-        String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
+    @Rule
+    public TestRule watcher = new TestWatcher() {
+         protected void starting(Description description) {
+            logger.info("Starting test: <<< {} >>>>", description.getMethodName());
+         }
+    };
+    
 
+    private SecurityDataResult processTestHelper( String cpe, String cve_id) throws Exception
+    {
         SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
 
         SecurityDataResult sdpr = sdp.process( cve_id);
@@ -56,47 +62,13 @@ public class SecurityDataProcessorTest
         }   
 
         return sdpr;
-    }
-
-    private SecurityDataResult processMultitestHelper( String cve_id) throws Exception
-    {
-        String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
-
-        SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
-
-        SecurityDataResult sdpr = sdp.process( cve_id);
-        logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());
-        if (sdpr.getFail())
-        {
-            logger.info("message: {}", sdpr.getMessage());
-        }   
-
-        return sdpr;
-    }
-
-
-    @Test
-    public void validLookUpTest() throws Exception
-    {
-            
-        String cve_id = "2016-6346";
-
-        SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
-
-        SecurityDataJSON json = (SecurityDataJSON)executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
-
-        logger.info("ID {}", json.getName().toString());
-
-        logger.info("package_state {}", json.getPackageState().get(0).getCpe());
-      
-        assertTrue( true );
     }
 
     @Test
     public void invalidLookUpTest() throws Exception
     {
-            
-        String cve_id = "2016-63461";
+        Boolean catched = false;
+        String cve_id = "2016-634611";
 
         SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
 
@@ -104,9 +76,10 @@ public class SecurityDataProcessorTest
             SecurityDataJSON json = (SecurityDataJSON)executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
             logger.info("json {}", json.toString());
         } catch (FileNotFoundException e)  {
-            logger.info("catched exception. {}", e.toString());
+            catched = true;
         }
-        assertTrue( true );
+        
+        assertTrue( catched );
     }
 
     
@@ -114,71 +87,55 @@ public class SecurityDataProcessorTest
     public void failByNoCPETest() throws Exception
     {
         // this test won't be able to use anymore, once CVE-2016-6346 security data is updated 
+        String cpe="arbitrary_cpe";
         String cve_id = "2016-6346";
 
-        SecurityDataResult sdpr = processTestHelper( cve_id);
+        SecurityDataResult sdpr = processTestHelper(cpe, cve_id);
 
         sdpr.getFail();
 
-        assertEquals( true, sdpr.getFail() );
+        assertTrue( sdpr.getFail() );
+        assertEquals("No cpe exists", sdpr.getMessage());
     }
 
     @Test
-    public void failByAffectedReleaseTest() throws Exception
+    public void failByAffectedPackageStateTest() throws Exception
     {
         // this test won't be able to use anymore, once CVE-2018-10327 security data is updated 
+        String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
         String cve_id = "2018-10237";
 
-        SecurityDataResult sdpr = processTestHelper( cve_id);
+        SecurityDataResult sdpr = processTestHelper(cpe, cve_id);
 
         sdpr.getFail();
 
-        assertEquals( true, sdpr.getFail() );
+        assertTrue( sdpr.getFail() );
+        assertEquals("fixed_state is Affected", sdpr.getMessage());
+        
     }
 
     @Test
     public void failByNoCVETest() throws Exception
     {
-        String cve_id = "2018-102371";
+        String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
+        String cve_id = "2018-1023711";
 
-        SecurityDataResult sdpr = processTestHelper( cve_id);
+        SecurityDataResult sdpr = processTestHelper(cpe, cve_id);
 
         sdpr.getFail();
 
-        assertEquals( true, sdpr.getFail() );
+        assertTrue( sdpr.getFail() );
+        assertEquals("No CVE data in security data API", sdpr.getMessage());
     }
 
-
-
-    @Test
-    public void processInputCVETest() throws Exception
-    {
-        // To test this:
-        //  $ mvn -Dtest=SecurityDataProcessorTest#processInputCVETest -Dcve=CVE-2018-10237 
-
-        String cve_id = "CVE-2018-10237"; // default
-        
-        cve_id=String.valueOf(System.getProperty("cve"));
-        SecurityDataResult sdpr = processTestHelper( cve_id);
-
-        SecurityDataJSON json = (SecurityDataJSON) sdpr.getJson();
-
-        if (json != null)
-        {
-           logger.info("package_state = {}", json.getPackageState()==null ? "null" : json.getPackageState().toString());
-           logger.info("affected_release = {}", json.getAffectedRelease()==null ? "null" : json.getAffectedRelease().toString());
-        }
-
-        assertEquals( false, sdpr.getFail() );
-        
-    }
 
     @Test 
-    public void failByNewFixedStateTest() throws Exception
+    public void failByNewPackageStateTest() throws Exception
     {
+        String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
         String cve_id = "2018-11784";
 
-        SecurityDataResult sdpr = processTestHelper( cve_id);
+        SecurityDataResult sdpr = processTestHelper(cpe, cve_id);
 
         assertTrue(sdpr.getFail());
         assertEquals("fixed_state is New", sdpr.getMessage());
@@ -192,15 +149,7 @@ public class SecurityDataProcessorTest
 
         String cpe="cpe:/o:redhat:enterprise_linux:6";
 
-        SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
-
-        SecurityDataResult sdpr = sdp.process( cve_id);
-
-        logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());
-        if (sdpr.getFail())
-        {
-            logger.info("message: {}", sdpr.getMessage());
-        }   
+        SecurityDataResult sdpr = processTestHelper(cpe, cve_id);
 
         // Will not fix - no blocking
         assertFalse(sdpr.getFail());
@@ -213,18 +162,34 @@ public class SecurityDataProcessorTest
 
         String cpe="cpe:/a:redhat:mapc:4";
 
-        SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
-
-        SecurityDataResult sdpr = sdp.process( cve_id);
-
-        logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());
-        if (sdpr.getFail())
-        {
-            logger.info("message: {}", sdpr.getMessage());
-        }   
+        SecurityDataResult sdpr = processTestHelper(cpe, cve_id);
 
         // not affected - no blocking
         assertFalse(sdpr.getFail());
+    }
+
+    @Test
+    public void packageStateNullTest() throws Exception
+    {
+        String cve_id = "2018-3149";
+        String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
+
+        SecurityDataResult sdpr = processTestHelper(cpe, cve_id);
+
+        SecurityDataJSON json = (SecurityDataJSON) sdpr.getJson();
+        assertTrue(json.getPackageState() == null);
+    }
+
+    @Test
+    public void affectedReleaseNullTest() throws Exception
+    {
+        String cve_id = "2018-10933";
+        String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
+
+        SecurityDataResult sdpr = processTestHelper(cpe, cve_id);
+
+        SecurityDataJSON json = (SecurityDataJSON) sdpr.getJson();
+        assertTrue(json.getAffectedRelease() == null);
     }
 
     /**
