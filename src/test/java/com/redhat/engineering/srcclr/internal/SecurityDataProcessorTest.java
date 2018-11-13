@@ -64,22 +64,14 @@ public class SecurityDataProcessorTest
         return sdpr;
     }
 
-    @Test
+    @Test(expected = FileNotFoundException.class)
     public void invalidLookUpTest() throws Exception
     {
-        Boolean catched = false;
-        String cve_id = "2016-634611";
+        String cve_id = "2016-634611"; // non-existing cve id
 
         SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
 
-        try {
-            SecurityDataJSON json = (SecurityDataJSON)executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
-            logger.info("json {}", json.toString());
-        } catch (FileNotFoundException e)  {
-            catched = true;
-        }
-        
-        assertTrue( catched );
+        SecurityDataJSON json = (SecurityDataJSON)executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
     }
 
     
