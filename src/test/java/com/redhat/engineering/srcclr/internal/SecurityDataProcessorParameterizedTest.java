@@ -15,11 +15,9 @@
  */
 package com.redhat.engineering.srcclr.internal;
 
-
-import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.SecurityDataProcessor;
-import com.redhat.engineering.srcclr.processor.SecurityDataResult;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,31 +31,22 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.junit.Assert.assertEquals;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-
-import com.github.tomakehurst.wiremock.client.VerificationException;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collection;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.junit.Assert.assertEquals;
 
 
 @RunWith(Parameterized.class)
@@ -134,7 +123,7 @@ public class SecurityDataProcessorParameterizedTest
 
     @Test
     public void test() throws Exception {
-        SecurityDataResult sdpr = paramTestHelper();
+        ProcessorResult sdpr = paramTestHelper();
         assertEquals(bExpected, sdpr.getFail());
 
         if (sdpr.getFail() == true)
@@ -143,7 +132,7 @@ public class SecurityDataProcessorParameterizedTest
         }
     }
 
-    private SecurityDataResult paramTestHelper() throws Exception
+    private ProcessorResult paramTestHelper() throws Exception
     {
         givenThat(get(urlEqualTo("/CVE-mock"))
         .willReturn(aResponse()
@@ -152,7 +141,7 @@ public class SecurityDataProcessorParameterizedTest
 
         SecurityDataProcessor sdp = new SecurityDataProcessor(cpeInput, mock_url);
 
-        SecurityDataResult sdpr = sdp.process("CVE-mock");
+        ProcessorResult sdpr = sdp.process( "CVE-mock");
         logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());
         if (sdpr.getFail())
         {

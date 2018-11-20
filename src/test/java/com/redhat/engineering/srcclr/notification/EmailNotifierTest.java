@@ -1,7 +1,10 @@
 package com.redhat.engineering.srcclr.notification;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
+import com.redhat.engineering.srcclr.json.sourceclear.Library;
+import com.redhat.engineering.srcclr.json.sourceclear.Version;
 import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
+import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -10,6 +13,7 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.subethamail.wiser.Wiser;
 import org.subethamail.wiser.WiserMessage;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,12 +47,20 @@ public class EmailNotifierTest
         Notifier n = new EmailNotifier();
         FieldUtils.writeStaticField( EmailNotifier.class, "port", port, true );
 
+        ProcessorResult pr = new ProcessorResult();
+        Library l = new Library();
+        List<Version> versions = new ArrayList<>(  );
+        Version version = new Version();
+        versions.add( version );
+        l.setVersions( versions );
         Vulnerability v = new Vulnerability();
+        Set<ProcessorResult> processorResults = new HashSet<>(  );
         v.setCve( "123456789" );
         v.setTitle( "Dummy Vulnerability" );
-        Set<Vulnerability> vulns = new HashSet<>(  );
-        vulns.add( v );
-        n.notify( wrapper, "", vulns );
+        pr.setVulnerability( v );
+        pr.setLibrary( l );
+        processorResults.add( pr );
+        n.notify( wrapper, "", processorResults );
 
         List<WiserMessage> messages = wiser.getMessages();
         for ( WiserMessage wm : messages )

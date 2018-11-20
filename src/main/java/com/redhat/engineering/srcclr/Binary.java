@@ -17,7 +17,7 @@ package com.redhat.engineering.srcclr;
 
 import com.redhat.engineering.srcclr.json.sourceclear.Record;
 import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
-import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
+import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.utils.ScanException;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.FileUtils;
@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -130,12 +131,12 @@ public class Binary implements Callable<Void>
             args.add( temporaryLocation.toFile().getAbsolutePath() );
 
             SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
-            HashMap<Vulnerability, Boolean> matched = parent.getProcessor().process( parent, json );
+            Set<ProcessorResult> matched = parent.getProcessor().process( parent, json );
             Record record = json.getRecords().get( 0 );
             if ( parent.isException() && matched.size() > 0 )
             {
                 parent.notifyListeners( this.toString(),
-                                        matched.keySet().stream().filter( matched::get ).collect( Collectors.toSet()) );
+                                        matched.stream().filter( ProcessorResult::getNotify ).collect( Collectors.toSet()) );
 
                 throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
