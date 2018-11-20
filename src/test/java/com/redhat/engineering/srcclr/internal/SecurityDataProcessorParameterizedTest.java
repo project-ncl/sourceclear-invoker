@@ -27,20 +27,29 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
+import com.github.tomakehurst.wiremock.client.VerificationException;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 import javax.net.ssl.HostnameVerifier;
@@ -50,16 +59,14 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-public class SecurityDataProcessorTest
+
+@RunWith(Parameterized.class)
+public class SecurityDataProcessorParameterizedTest
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().httpsPort(8089)); 
-    private final String mock_url = "https://localhost:8089/";
 
     @Rule
     public TestRule watcher = new TestWatcher() {
@@ -68,6 +75,9 @@ public class SecurityDataProcessorTest
          }
     };
     
+    @Rule
+    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().httpsPort(8089)); 
+    private final String mock_url = "https://localhost:8089/";
 
     @Before
     public void ignoreCert() throws Exception
@@ -98,78 +108,57 @@ public class SecurityDataProcessorTest
 
         // Install the all-trusting host verifier
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+
+    }
+
+    @Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {     
+                 { "cpe:/a:redhat:jboss_data_grid:7", false, "" }, // fixed_state: will not fix
+                 { "cpe:/a:redhat:openshift_application_runtimes:1.0", false, "" },  // fixed_state: not affected
+                 { "arbitrary_cpe", true, "No cpe exists" },
+                 {"cpe:/a:redhat:jboss_operations_network:3", true, "fixed_state is Affected"},
+                 {"cpe:/a:redhat:jboss_data_virtualization:6", true, "fixed_state is New"}
+           });
+    }
+
+    private String cpeInput;
+    private Boolean bExpected;
+    private String msgExpected;
+
+    public SecurityDataProcessorParameterizedTest(String cpe, Boolean to_fail, String msg ) {
+        this.cpeInput = cpe;
+        this.bExpected = to_fail;
+        this.msgExpected = msg;
     }
 
     @Test
-    // test where packageState and affectRelease don't exist 
-    public void fieldNullTest() throws Exception
-    {
-        givenThat(get(urlEqualTo("/null"))
-                .willReturn(aResponse()
-                    .withHeader("Content-Type", "application/json")
-                    .withBodyFile("security_data_processor_test/fields_null.json")));
+    public void test() throws Exception {
+        SecurityDataResult sdpr = paramTestHelper();
+        assertEquals(bExpected, sdpr.getFail());
 
-        SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe", mock_url);
-        SecurityDataJSON json = (SecurityDataJSON)executeMethod( sdp, "lookUpAPI", new Object [] { "null" });
-
-        logger.info(json.toString());
-
-        assertTrue(json.getPackageState() == null);
-        assertTrue(json.getAffectedRelease() == null);
+        if (sdpr.getFail() == true)
+        {
+            assertEquals(msgExpected, sdpr.getMessage());
+        }
     }
 
-    @Test(expected = FileNotFoundException.class)
-    public void invalidLookUpTest() throws Exception
+    private SecurityDataResult paramTestHelper() throws Exception
     {
-        String cve_id = "CVE-nonexistent"; // non-existing cve id
+        givenThat(get(urlEqualTo("/CVE-mock"))
+        .willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));
 
-        SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
+        SecurityDataProcessor sdp = new SecurityDataProcessor(cpeInput, mock_url);
 
-        executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
-    }   
-
-    @Test
-    public void failByNoCVETest() throws Exception
-    {
-        // need test this case with real API rather than using mock 
-
-        String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
-        String cve_id="CVE-nonexistent";
-        
-        SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
-
-        SecurityDataResult sdpr = sdp.process(cve_id);
-
-        assertTrue( sdpr.getFail() );
-        assertEquals("No CVE data in security data API", sdpr.getMessage());
-    }
-
-
-    /**
-     * Executes a method on an object instance.  The name and parameters of
-     * the method are specified.  The method will be executed and the value
-     * of it returned, even if the method would have private or protected access.
-     */
-    private Object executeMethod( Object instance, String name, Object[] params ) throws Exception
-    {
-        Class<?> c = instance.getClass();
-
-        // Fetch the Class types of all method parameters
-        Class[] types = new Class[params.length];
-
-        for ( int i = 0; i < params.length; i++ )
-            types[i] = params[i].getClass();
-
-        Method m = c.getDeclaredMethod( name, types );
-        m.setAccessible( true );
-
-        try
+        SecurityDataResult sdpr = sdp.process("CVE-mock");
+        logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());
+        if (sdpr.getFail())
         {
-            return m.invoke( instance, params );
-        }
-        catch( InvocationTargetException e )
-        {
-            throw (Exception)e.getCause();
-        }
+            logger.info("message: {}", sdpr.getMessage());
+        }   
+
+        return sdpr;
     }
 }

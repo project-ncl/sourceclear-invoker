@@ -42,11 +42,18 @@ public class SecurityDataProcessor {
     private final static String REDHAT_SECURITY_DATA_CVE = "https://access.redhat.com/labs/securitydataapi/cve/CVE-";
     private final Logger logger = LoggerFactory.getLogger( getClass() );
     private String cpe;
+    private String base_url = REDHAT_SECURITY_DATA_CVE;
 
     
     public SecurityDataProcessor(String startCPE) 
     {
         cpe = startCPE;
+    }
+
+    public SecurityDataProcessor(String startCPE, String startBaseUrl)
+    {
+        cpe = startCPE;
+        base_url = startBaseUrl;
     }
 
     private static String readAll(Reader rd) throws IOException 
@@ -58,9 +65,9 @@ public class SecurityDataProcessor {
         }
         return sb.toString();
     }
-    
+
     private SecurityDataJSON lookUpAPI(String cve_id) throws IOException {
-        String url = REDHAT_SECURITY_DATA_CVE + cve_id;
+        String url = base_url + cve_id;
 
         logger.debug( "Looking up {}", url);
 
