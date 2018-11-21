@@ -21,6 +21,8 @@ import com.redhat.engineering.srcclr.json.securitydata.AffectedRelease;
 import com.redhat.engineering.srcclr.json.securitydata.PackageState;
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
 import com.redhat.engineering.srcclr.utils.InternalException;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,18 @@ public class SecurityDataProcessor {
     private String cpe;
     private String base_url = REDHAT_SECURITY_DATA_CVE;
 
-    
+    private String subpackage;
+
+    public void setSubPackage(String subpackage)
+    {
+        this.subpackage = subpackage;
+    }
+
+    public String getSubPackage()
+    {
+        return subpackage;
+    }
+
     public SecurityDataProcessor(String startCPE) 
     {
         cpe = startCPE;
@@ -96,10 +109,26 @@ public class SecurityDataProcessor {
 
         try
         {
+            PackageState ps_found = null;
+
             SecurityDataJSON json = lookUpAPI(cve_id);
 
-            PackageState ps_found = json.getPackageState() == null ? null :
-                            json.getPackageState().stream().filter(ps -> cpe.equals(ps.getCpe())).findAny().orElse(null);
+            if (StringUtils.isEmpty(subpackage))
+            {
+                ps_found = json.getPackageState() == null ? null :
+                    json.getPackageState().stream()
+                        .filter(ps -> cpe.equals(ps.getCpe()))
+                        .findAny().orElse(null);
+            }
+            else
+            {
+                ps_found = json.getPackageState() == null ? null :
+                    json.getPackageState().stream()
+                        .filter(ps -> cpe.equals(ps.getCpe()))
+                        .filter(ps -> subpackage.equals(ps.getPackageName()))
+                        .findAny().orElse(null);
+
+            }
 
             if (ps_found != null)
             {
@@ -124,9 +153,23 @@ public class SecurityDataProcessor {
             }
             else
             {
-                AffectedRelease ar_found = json.getAffectedRelease() == null ? null :
-                                json.getAffectedRelease().stream().filter(ar -> cpe.equals(ar.getCpe())).findAny().orElse(null);
-
+                AffectedRelease ar_found = null;
+                if (StringUtils.isEmpty(subpackage))
+                {
+                    ar_found = json.getAffectedRelease() == null ? null :
+                        json.getAffectedRelease().stream()
+                            .filter(ar -> cpe.equals(ar.getCpe()))
+                            .findAny().orElse(null);
+                }
+                else
+                {
+                    ar_found = json.getAffectedRelease() == null ? null :
+                        json.getAffectedRelease().stream()
+                            .filter(ar -> cpe.equals(ar.getCpe()))
+                            .filter(ar -> subpackage.equals(ar.getPackage()))
+                            .findAny().orElse(null);
+                }
+                
                 if (ar_found != null)
                 {
                     sdpr.setMessage("AffectedRelease exists");

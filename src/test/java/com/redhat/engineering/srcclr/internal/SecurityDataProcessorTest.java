@@ -127,6 +127,36 @@ public class SecurityDataProcessorTest
     }   
 
     @Test
+    public void subPackageTest() throws Exception
+    {
+        // test with cve-2017-7536-multi-rhoar.json
+        givenThat(get(urlEqualTo("/CVE-mock"))
+        .willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));
+
+
+        String cpe = "cpe:/a:redhat:openshift_application_runtimes:1.0";
+        String subpackage_affected = "swarm";
+        String subpackage_notaffected = "springboot";
+
+        SecurityDataProcessor sdp = new SecurityDataProcessor(cpe, mock_url);
+        sdp.setSubPackage(subpackage_affected);
+
+        SecurityDataResult sdpr = sdp.process("CVE-mock");
+
+        assertEquals("fixed_state is affected", sdpr.getMessage());
+        assertEquals(true, sdpr.getFail() );
+
+        sdp.setSubPackage(subpackage_notaffected);
+
+        sdpr = sdp.process("CVE-mock");
+
+        assertEquals(false, sdpr.getFail() );
+        
+    }
+    
+    @Test
     public void failByNoCVETest() throws Exception
     {
         // need test this case with real API rather than using mock 
