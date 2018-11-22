@@ -43,7 +43,7 @@ import static picocli.CommandLine.Option;
 import static picocli.CommandLine.ParentCommand;
 import static picocli.CommandLine.Unmatched;
 
-@Command(name = "binary", description = "Scan a remote binary", mixinStandardHelpOptions = true )
+@Command(name = "binary", description = "Scan a remote binary" + SrcClrWrapper.UNMATCHED, mixinStandardHelpOptions = true )
 public class Binary implements Callable<Void>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );

@@ -51,6 +51,8 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 @Getter
 public class SrcClrWrapper implements Callable<Void>
 {
+    static final String UNMATCHED = " (unmatched args are passed directly to SourceClear)";
+
     private final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
 
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )

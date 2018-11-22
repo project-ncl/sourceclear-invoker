@@ -53,7 +53,6 @@ public class CVEProcessor
                 processorResult.setVulnerability (vuln);
                 processorResult.setLibrary (library);
                 processorResult.setScanReport( record.getMetadata() );
-                processorResult.updateMessage( vuln );
                 matched.add( processorResult );
 
                 logger.info ( "Found vulnerability '{}' with CVE ID {} in library {}:{}:{} and report is {}",

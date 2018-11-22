@@ -34,8 +34,10 @@ public class ProcessorResult
     private Library library;
     private String scanReport;
 
-    void updateMessage( Vulnerability vulnerability )
+    public void setVulnerability ( Vulnerability vulnerability )
     {
+        this.vulnerability = vulnerability;
+
         if ( isNotEmpty( message ))
         {
             String sb = message
