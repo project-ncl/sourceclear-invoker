@@ -46,16 +46,16 @@ public class EmailNotifier implements Notifier
                          .append( System.lineSeparator() )
                          .append ( "Vulnerability is " )
                          .append( pRes.getVulnerability().getTitle() )
-                         .append( " within version range " )
+                         .append( System.lineSeparator() )
+                         .append( pRes.getVulnerability().getOverview() )
+                         .append( System.lineSeparator() )
+                         .append( "Original SourceClear version range " )
                          // Every instance of Libraries/Details appears to be a valid size 1 list.
                          // This test is to avoid layered construction within tests.
                          .append( pRes.getVulnerability().getLibraries().size() == 0 ? "" : pRes.getVulnerability().getLibraries().get( 0 ).getDetails().get( 0 ).getVersionRange() )
-                         .append( " and fixed version is " )
+                         .append( System.lineSeparator() )
+                         .append( "Original SourceClear fixed version is " )
                          .append( pRes.getVulnerability().getLibraries().size() == 0 ? "" : pRes.getVulnerability().getLibraries().get( 0 ).getDetails().get( 0 ).getUpdateToVersion() )
-                         .append( System.lineSeparator() )
-                         .append( " and overview " )
-                         .append( System.lineSeparator() )
-                         .append( pRes.getVulnerability().getOverview() )
                          .append( System.lineSeparator() )
                          .append( System.lineSeparator() )
         );
