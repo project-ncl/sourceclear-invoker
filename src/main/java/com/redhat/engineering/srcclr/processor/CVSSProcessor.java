@@ -24,19 +24,20 @@ import com.redhat.engineering.srcclr.utils.InternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CVSSProcessor implements ScanResult
 {
     private final Logger logger = LoggerFactory.getLogger( CVSSProcessor.class );
 
     @Override
-    public HashMap<Vulnerability, Boolean> process( SrcClrWrapper parent, SourceClearJSON json ) throws InternalException
+    public Set<ProcessorResult> process( SrcClrWrapper parent, SourceClearJSON json ) throws InternalException
     {
         Record record = json.getRecords().get( 0 );
         List<Library> libs = record.getLibraries();
-        HashMap<Vulnerability, Boolean> matched = new HashMap<>( );
+        Set<ProcessorResult> matched = new HashSet<>( );
 
         for ( Vulnerability vuln : record.getVulnerabilities() )
         {
@@ -44,11 +45,18 @@ public class CVSSProcessor implements ScanResult
 
             if ( vuln.getCvssScore() >= parent.getThreshold() )
             {
-                matched.put( vuln, true );
+                ProcessorResult processorResult = new ProcessorResult();
+                processorResult.setFail( true );
+                processorResult.setNotify( true );
+                processorResult.setVulnerability (vuln);
+                processorResult.setLibrary (library);
+                processorResult.setScanReport( record.getMetadata());
+                matched.add( processorResult );
+
                 logger.info ( "Found vulnerability '{}' with score {} in library {}:{}:{} and report is {}",
                               vuln.getTitle(), vuln.getCvssScore(), library.getCoordinate1(),
                               library.getCoordinate2(), library.getVersions().get( 0 ).getVersion(),
-                              record.getMetadata().getReport()
+                              processorResult.getScanReport()
                 );
             }
         }

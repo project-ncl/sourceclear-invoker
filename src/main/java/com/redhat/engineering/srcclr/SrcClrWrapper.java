@@ -22,9 +22,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import com.redhat.engineering.srcclr.converters.ProcessorConvertor;
 import com.redhat.engineering.srcclr.converters.ThresholdConverter;
-import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import com.redhat.engineering.srcclr.notification.EmailNotifier;
 import com.redhat.engineering.srcclr.notification.Notifier;
+import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.ScanResult;
 import com.redhat.engineering.srcclr.utils.ManifestVersionProvider;
 import lombok.Getter;
@@ -51,6 +51,10 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 @Getter
 public class SrcClrWrapper implements Callable<Void>
 {
+    static final String UNMATCHED = " (unmatched args are passed directly to SourceClear)";
+
+    private final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
+
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     private boolean debug;
 
@@ -124,7 +128,7 @@ public class SrcClrWrapper implements Callable<Void>
     }
 
 
-    void notifyListeners( String scanInfo, Set<Vulnerability> v )
+    void notifyListeners( String scanInfo, Set<ProcessorResult> v )
     {
         if ( isNotEmpty ( emailAddress ) && isNotEmpty ( emailServer ) )
         {

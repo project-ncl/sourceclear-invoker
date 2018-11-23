@@ -24,8 +24,9 @@ import com.redhat.engineering.srcclr.utils.InternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
@@ -35,11 +36,11 @@ public class CVEProcessor
     private final Logger logger = LoggerFactory.getLogger( CVEProcessor.class );
 
     @Override
-    public HashMap<Vulnerability, Boolean> process( SrcClrWrapper parent, SourceClearJSON json ) throws InternalException
+    public Set<ProcessorResult> process( SrcClrWrapper parent, SourceClearJSON json ) throws InternalException
     {
         Record record = json.getRecords().get( 0 );
         List<Library> libs = record.getLibraries();
-        HashMap<Vulnerability,Boolean> matched = new HashMap<>( );
+        Set<ProcessorResult> matched = new HashSet<>( );
         SecurityDataProcessor securityDataProcessor = new SecurityDataProcessor( parent.getProduct() );
 
         for ( Vulnerability vuln : record.getVulnerabilities() )
@@ -48,15 +49,16 @@ public class CVEProcessor
 
             if ( isNotEmpty ( vuln.getCve() ) )
             {
-                SecurityDataResult securityDataResult = securityDataProcessor.process( vuln.getCve() );
-                securityDataResult.updateMessage( vuln );
-
-                matched.put( vuln, securityDataResult.getNotify());
+                ProcessorResult processorResult = securityDataProcessor.process( vuln.getCve() );
+                processorResult.setVulnerability (vuln);
+                processorResult.setLibrary (library);
+                processorResult.setScanReport( record.getMetadata() );
+                matched.add( processorResult );
 
                 logger.info ( "Found vulnerability '{}' with CVE ID {} in library {}:{}:{} and report is {}",
                               vuln.getTitle(), vuln.getCve(), library.getCoordinate1(),
                               library.getCoordinate2(), library.getVersions().get( 0 ).getVersion(),
-                              record.getMetadata().getReport()
+                              processorResult.getScanReport()
                 );
             }
         }

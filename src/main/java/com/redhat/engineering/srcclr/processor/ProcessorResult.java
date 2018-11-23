@@ -15,7 +15,8 @@
  */
 package com.redhat.engineering.srcclr.processor;
 
-import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
+import com.redhat.engineering.srcclr.json.sourceclear.Library;
+import com.redhat.engineering.srcclr.json.sourceclear.Metadata_;
 import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,16 +25,19 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 @Getter
 @Setter
-public class SecurityDataResult
+public class ProcessorResult
 {
     private Boolean notify = false;
     private Boolean fail = false;
     private String message = "";
-    private SecurityDataJSON json = null;
+    private Vulnerability vulnerability;
+    private Library library;
+    private String scanReport;
 
-
-    void updateMessage( Vulnerability vulnerability )
+    public void setVulnerability ( Vulnerability vulnerability )
     {
+        this.vulnerability = vulnerability;
+
         if ( isNotEmpty( message ))
         {
             String sb = message
@@ -43,5 +47,10 @@ public class SecurityDataResult
                             + vulnerability.getOverview();
             vulnerability.setOverview( sb );
         }
+    }
+
+    public void setScanReport( Metadata_ metadata )
+    {
+        scanReport = ( metadata != null && metadata.getReport() != null ) ? (String) metadata.getReport() : "<no-report-available>";
     }
 }

@@ -1,7 +1,7 @@
 package com.redhat.engineering.srcclr.notification;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
-import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
+import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import org.simplejavamail.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public class EmailNotifier implements Notifier
 {
@@ -18,37 +20,56 @@ public class EmailNotifier implements Notifier
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Override
-    public void notify( SrcClrWrapper parent, String scanInfo, Set<Vulnerability> v )
+    public void notify( SrcClrWrapper parent, String scanInfo, Set<ProcessorResult> processorResults )
     {
+        // We know we have at least one result ; use it to extra the link to the full scan results.
+        ProcessorResult first = processorResults.stream().findFirst().get();
+
         StringBuffer sb = new StringBuffer( "Located a possible vulnerability within product " )
                         .append( parent.getProduct() )
                         .append( System.lineSeparator() )
                         .append( scanInfo )
                         .append( System.lineSeparator() )
+                        .append( "and full scan result is " )
+                        .append( first.getScanReport() )
+                        .append( System.lineSeparator() )
                         .append( System.lineSeparator() );
-        v.forEach( vuln -> sb.append( "Vulnerability is " )
-                         .append( vuln.getTitle() )
+        processorResults.forEach( pRes -> sb.append( "In library " )
+                         .append ( pRes.getLibrary().getCoordinate1() )
+                         .append( ':' )
+                         .append ( pRes.getLibrary().getCoordinate2() )
+                         .append( ':' )
+                         .append ( pRes.getLibrary().getVersions().get( 0 ).getVersion() )
+                         .append( System.lineSeparator() )
+                         .append( "CVE-" )
+                         .append( pRes.getVulnerability().getCve() )
+                         .append( System.lineSeparator() )
+                         .append ( "Vulnerability is " )
+                         .append( pRes.getVulnerability().getTitle() )
                          .append( " within version range " )
                          // Every instance of Libraries/Details appears to be a valid size 1 list.
                          // This test is to avoid layered construction within tests.
-                         .append( vuln.getLibraries().size() == 0 ? "" : vuln.getLibraries().get( 0 ).getDetails().get( 0 ).getVersionRange() )
+                         .append( pRes.getVulnerability().getLibraries().size() == 0 ? "" : pRes.getVulnerability().getLibraries().get( 0 ).getDetails().get( 0 ).getVersionRange() )
                          .append( " and fixed version is " )
-                         .append( vuln.getLibraries().size() == 0 ? "" : vuln.getLibraries().get( 0 ).getDetails().get( 0 ).getUpdateToVersion() )
+                         .append( pRes.getVulnerability().getLibraries().size() == 0 ? "" : pRes.getVulnerability().getLibraries().get( 0 ).getDetails().get( 0 ).getUpdateToVersion() )
                          .append( System.lineSeparator() )
-                         .append( "CVE-" )
-                         .append( vuln.getCve() )
-                         .append(" with CVSS " )
-                         .append( vuln.getCvssScore() )
                          .append( " and overview " )
                          .append( System.lineSeparator() )
-                         .append( vuln.getOverview() )
+                         .append( pRes.getVulnerability().getOverview() )
                          .append( System.lineSeparator() )
                          .append( System.lineSeparator() )
         );
         sb.append( System.lineSeparator() );
 
+        // If the Jenkins BUILD_USER_EMAAIL exists use that in preference to the default email from address.
+        String userEmailAddress = System.getenv( "BUILD_USER_EMAIL" );
+        if ( isEmpty ( userEmailAddress ) )
+        {
+            userEmailAddress = "soureclear-scanner" + parent.getEmailAddress().substring( parent.getEmailAddress().indexOf( "@" ) ) ;
+        }
+
         Email email = EmailBuilder.startingBlank()
-                                  .from( "sourceclear-scanner" + parent.getEmailAddress().substring( parent.getEmailAddress().indexOf( "@" ) ) )
+                                  .from( userEmailAddress )
                                   .to( parent.getEmailAddress() )
                                   .withSubject( "SRCCLR-WARN " + parent.getProduct() )
                                   .withPlainText( sb.toString() )

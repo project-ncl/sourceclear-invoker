@@ -15,6 +15,16 @@
  */
 package com.redhat.engineering.srcclr.processor;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.engineering.srcclr.json.securitydata.AffectedRelease;
+import com.redhat.engineering.srcclr.json.securitydata.PackageState;
+import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
+import com.redhat.engineering.srcclr.utils.InternalException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,21 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.util.stream.*;
-
-
-import javax.net.ssl.HttpsURLConnection;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
-import com.redhat.engineering.srcclr.json.securitydata.AffectedRelease;
-import com.redhat.engineering.srcclr.json.securitydata.PackageState;
-
-import com.redhat.engineering.srcclr.utils.InternalException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Stream;
 
 public class SecurityDataProcessor {
     private final static String REDHAT_SECURITY_DATA_CVE = "https://access.redhat.com/labs/securitydataapi/cve/CVE-";
@@ -92,16 +88,15 @@ public class SecurityDataProcessor {
         } 
     }
 
-    public SecurityDataResult process( String cve_id) throws InternalException
+    public ProcessorResult process( String cve_id) throws InternalException
     {
         Boolean is_fail;
         
-        SecurityDataResult sdpr = new SecurityDataResult();
+        ProcessorResult sdpr = new ProcessorResult();
 
         try
         {
             SecurityDataJSON json = lookUpAPI(cve_id);
-            sdpr.setJson(json);
 
             PackageState ps_found = json.getPackageState() == null ? null :
                             json.getPackageState().stream().filter(ps -> cpe.equals(ps.getCpe())).findAny().orElse(null);

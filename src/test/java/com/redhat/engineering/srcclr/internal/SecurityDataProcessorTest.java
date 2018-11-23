@@ -15,11 +15,10 @@
  */
 package com.redhat.engineering.srcclr.internal;
 
-
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
+import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.SecurityDataProcessor;
-import com.redhat.engineering.srcclr.processor.SecurityDataResult;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,25 +29,24 @@ import org.junit.runner.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.cert.X509Certificate;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.cert.X509Certificate;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SecurityDataProcessorTest
 {
@@ -138,7 +136,7 @@ public class SecurityDataProcessorTest
         
         SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
 
-        SecurityDataResult sdpr = sdp.process(cve_id);
+        ProcessorResult sdpr = sdp.process( cve_id);
 
         assertTrue( sdpr.getFail() );
         assertEquals("No CVE data in security data API", sdpr.getMessage());

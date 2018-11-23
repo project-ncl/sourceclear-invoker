@@ -1,11 +1,11 @@
 package com.redhat.engineering.srcclr.notification;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
-import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
+import com.redhat.engineering.srcclr.processor.ProcessorResult;
 
 import java.util.Set;
 
 public interface Notifier
 {
-    void notify( SrcClrWrapper parent, String scanInfo, Set<Vulnerability> v );
+    void notify( SrcClrWrapper parent, String scanInfo, Set<ProcessorResult> v );
 }
