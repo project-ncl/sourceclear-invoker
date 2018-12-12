@@ -72,6 +72,9 @@ public class SrcClrWrapper implements Callable<Void>
     @Option( names = { "-c", "--cpe" }, defaultValue="", description = "CPE (Product) Name")
     private String product;
 
+    @Option( names = "--package", defaultValue="", description = "Package name. It's optional but required for RHOAR, e.g. (vertx|swarm|springboot) for RHOAR")
+    private String packageName;
+
     @Option ( names = "--email-server", description = "SMTP Server to use to send notification email" )
     private String emailServer;
 

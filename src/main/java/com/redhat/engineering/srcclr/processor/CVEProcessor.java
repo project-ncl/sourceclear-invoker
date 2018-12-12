@@ -42,6 +42,10 @@ public class CVEProcessor
         List<Library> libs = record.getLibraries();
         Set<ProcessorResult> matched = new HashSet<>( );
         SecurityDataProcessor securityDataProcessor = new SecurityDataProcessor( parent.getProduct() );
+        if ( isNotEmpty(parent.getPackageName()) )
+        {
+            securityDataProcessor.setPackageName(parent.getPackageName());
+        }
 
         for ( Vulnerability vuln : record.getVulnerabilities() )
         {

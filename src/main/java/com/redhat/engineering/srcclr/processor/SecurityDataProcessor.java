@@ -42,16 +42,16 @@ public class SecurityDataProcessor {
     private String cpe;
     private String base_url = REDHAT_SECURITY_DATA_CVE;
 
-    private String subpackage;
+    private String packageName;
 
-    public void setSubPackage(String subpackage)
+    public void setPackageName(String packageName)
     {
-        this.subpackage = subpackage;
+        this.packageName = packageName;
     }
 
-    public String getSubPackage()
+    public String getPackageName()
     {
-        return subpackage;
+        return packageName;
     }
 
     public SecurityDataProcessor(String startCPE) 
@@ -113,7 +113,7 @@ public class SecurityDataProcessor {
 
             SecurityDataJSON json = lookUpAPI(cve_id);
 
-            if (StringUtils.isEmpty(subpackage))
+            if (StringUtils.isEmpty(packageName))
             {
                 ps_found = json.getPackageState() == null ? null :
                     json.getPackageState().stream()
@@ -125,7 +125,7 @@ public class SecurityDataProcessor {
                 ps_found = json.getPackageState() == null ? null :
                     json.getPackageState().stream()
                         .filter(ps -> cpe.equals(ps.getCpe()))
-                        .filter(ps -> subpackage.equals(ps.getPackageName()))
+                        .filter(ps -> packageName.equals(ps.getPackageName()))
                         .findAny().orElse(null);
 
             }
@@ -154,7 +154,7 @@ public class SecurityDataProcessor {
             else
             {
                 AffectedRelease ar_found = null;
-                if (StringUtils.isEmpty(subpackage))
+                if (StringUtils.isEmpty(packageName))
                 {
                     ar_found = json.getAffectedRelease() == null ? null :
                         json.getAffectedRelease().stream()
@@ -166,7 +166,7 @@ public class SecurityDataProcessor {
                     ar_found = json.getAffectedRelease() == null ? null :
                         json.getAffectedRelease().stream()
                             .filter(ar -> cpe.equals(ar.getCpe()))
-                            .filter(ar -> subpackage.equals(ar.getPackage()))
+                            .filter(ar -> packageName.equals(ar.getPackage()))
                             .findAny().orElse(null);
                 }
                 
