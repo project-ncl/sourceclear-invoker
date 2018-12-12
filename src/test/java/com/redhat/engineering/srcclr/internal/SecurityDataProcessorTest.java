@@ -16,9 +16,13 @@
 package com.redhat.engineering.srcclr.internal;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+
+import com.redhat.engineering.srcclr.SrcClrWrapper;
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.SecurityDataProcessor;
+
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -126,6 +130,75 @@ public class SecurityDataProcessorTest
         executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
     }   
 
+    @Test
+    public void packageTest() throws Exception
+    {
+        // test with cve-2017-7536-multi-rhoar.json
+        givenThat(get(urlEqualTo("/CVE-mock"))
+        .willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));
+
+        String cpe = "cpe:/a:redhat:openshift_application_runtimes:1.0";
+        String package_affected = "swarm";
+        String package_notaffected = "springboot";
+
+        SrcClrWrapper wrapper = new SrcClrWrapper();
+
+        FieldUtils.writeField( wrapper, "product", cpe, true );
+
+        SecurityDataProcessor sdp = new SecurityDataProcessor(wrapper.getProduct(), mock_url);
+
+        // Test 1: swarm
+        FieldUtils.writeField( wrapper, "packageName", package_affected, true );
+        sdp.setPackageName(wrapper.getPackageName());
+
+        ProcessorResult sdpr = sdp.process("CVE-mock");
+
+        assertEquals("fixed_state is affected", sdpr.getMessage());
+        assertEquals(true, sdpr.getFail() );
+
+        // Test 2: springboot 
+        FieldUtils.writeField( wrapper, "packageName", package_notaffected, true );
+        sdp.setPackageName(wrapper.getPackageName());
+
+        sdpr = sdp.process("CVE-mock");
+
+        assertEquals(false, sdpr.getFail() );
+        
+    }
+
+    @Test
+    public void packageEmptyTest() throws Exception
+    {
+        // test with cve-2017-7536-multi-rhoar.json
+        givenThat(get(urlEqualTo("/CVE-mock"))
+        .willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));
+
+        SrcClrWrapper wrapper = new SrcClrWrapper();
+
+        FieldUtils.writeField( wrapper, "product", "cpe:/a:redhat:jboss_fuse:7", true );
+        
+        SecurityDataProcessor sdp = new SecurityDataProcessor(wrapper.getProduct(), mock_url);
+        
+        // both tests should PASS by finding the cpe's info when package is not set
+        // TEST 1: when not calling setPackageName()
+        ProcessorResult sdpr = sdp.process("CVE-mock");
+        assertEquals("fixed_state is affected", sdpr.getMessage());
+        assertEquals(true, sdpr.getFail() );
+
+        // TEST 2: when package is empty
+        FieldUtils.writeField( wrapper, "packageName", "", true );
+        sdp.setPackageName(wrapper.getPackageName());
+
+        sdpr = sdp.process("CVE-mock");
+        assertEquals("fixed_state is affected", sdpr.getMessage());
+        assertEquals(true, sdpr.getFail() );
+
+    }
+    
     @Test
     public void failByNoCVETest() throws Exception
     {
