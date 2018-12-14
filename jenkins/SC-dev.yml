@@ -29,7 +29,7 @@
     builders:
     - maven-target:
         pom: pom.xml
-        goals: '-Pjenkins clean test -DargLine=''-Dsourceclear="-d --cpe=${CPE} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL}
+        goals: '-Pjenkins clean test -DargLine=''-Dsourceclear="-d --package=${PACKAGE} --cpe=${CPE} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL}
           ${VERSIONPARAM}=${VERSION} ${NAMEPARAM} ${RECURSE} ${EXTRA}"'' '
         maven-version: maven-3-5-0
         private-repository: false
@@ -50,6 +50,10 @@
         default: ''
         name: CPE
         description: Product Name formatted as a CPE e.g. "cpe:/a:redhat:openshift_application_runtimes:1.0".
+    - string:
+        default: ''
+        name: PACKAGE
+        description: Subpackage of from CPE data e.g. "vertx".
     - string:
         default: ''
         name: NAME
@@ -121,4 +125,3 @@
     triggers: []
     wrappers:
       - build-user-vars
-      
