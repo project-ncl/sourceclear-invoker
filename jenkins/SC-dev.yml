@@ -55,10 +55,6 @@
         name: PACKAGE
         description: Subpackage of from CPE data e.g. "vertx".
     - string:
-        default: ''
-        name: NAME
-        description: Name of the binary to scan e.g. "KeyCloak". Only used if scanning a binary.
-    - string:
         default: master
         description: Either, for SCM scanning, a SCM reference (e.g. branch/tag/commit) or
           for binary scanning an explicit version (e.g. 1.2.1.Final).

@@ -38,7 +38,7 @@ public class SourceClearInvokerTest
     private final SourceClearTest wrapper = new SourceClearTest();
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
     @Rule
 	public final ProvideSystemProperty overideHome = new ProvideSystemProperty("user.home", UUID.randomUUID().toString() );
@@ -64,7 +64,7 @@ public class SourceClearInvokerTest
         try
         {
             System.setProperty( SC,
-                                "-d binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --name=CommonsIO --rev=2.1 --no-upload" );
+                                "-d binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --rev=2.1 --no-upload" );
             wrapper.runSourceClear();
         }
         finally
@@ -73,6 +73,37 @@ public class SourceClearInvokerTest
         }
     }
 
+    @Test
+    public void runBinarySC3() throws Exception
+    {
+        try
+        {
+            System.setProperty( SC,
+                                "-d binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar --rev=2.6 --no-upload" );
+            wrapper.runSourceClear();
+        }
+        finally
+        {
+            System.clearProperty( SC );
+        }
+        assertTrue( systemRule.getLog().contains( "SRCCLR_SCM_NAME=commons-io-2.6.jar" ) );
+    }
+
+    @Test
+    public void runBinarySC4() throws Exception
+    {
+        try
+        {
+            System.setProperty( SC,
+                                "-t 10 --cpe=PRODUCT --package=SUBPACKAGE -d binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --rev=2.1 --no-upload" );
+            wrapper.runSourceClear();
+        }
+        finally
+        {
+            System.clearProperty( SC );
+        }
+        assertTrue( systemRule.getLog().contains( "SRCCLR_SCM_NAME=PRODUCT-SUBPACKAGE-commons-io-2.1.jar" ) );
+    }
 
     @Test
     public void runThresholdSC() throws Exception

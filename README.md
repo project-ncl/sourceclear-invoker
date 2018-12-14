@@ -21,21 +21,22 @@ Usage: SrcClrWrapper [-dehV] [--email-address=<emailAddress>]
                      [-p=<processor>] [-t=<threshold>] [COMMAND]
 Wrap SourceClear and invoke it.
       --email-address=<emailAddress>
-                        Email address to notify. Domain portion will be used as FROM
-                          address
+                         Email address to notify. Domain portion will be used as FROM
+                           address
       --email-server=<emailServer>
-                        SMTP Server to use to send notification email
-  -c, --cpe=<product>   CPE (Product) Name
-  -d, --debug           Enable debug.
-  -e, --exception       Throw exception on vulnerabilities found.
-  -h, --help            Show this help message and exit.
+                         SMTP Server to use to send notification email
+  -c, --cpe=<product>    CPE (Product) Name
+  --package=<subpackage> CPE Subpackage Name
+  -d, --debug            Enable debug.
+  -e, --exception        Throw exception on vulnerabilities found.
+  -h, --help             Show this help message and exit.
   -p, --processor=<processor>
-                        Processor to use to analyse SourceClear results. Default is
-                          'cvss'
+                         Processor to use to analyse SourceClear results. Default is
+                           'cvss'
   -t, --threshold=<threshold>
-                        Threshold on which exception is thrown. Only used with CVSS
-                          Processor
-  -V, --version         Print version information and exit.
+                         Threshold on which exception is thrown. Only used with CVSS
+                           Processor
+  -V, --version          Print version information and exit.
 
 
 Usage: SrcClrWrapper scm [-dehV] [--ref=REF] --url=URL [-t=<threshold>]
@@ -53,7 +54,6 @@ Scan a SCM URL
 Usage: SrcClrWrapper binary [-dehV] --name=NAME --rev=REV --url=URL
                             [-t=<threshold>]
 Scan a remote binary
-      --name=NAME   Name of binary
       --rev=REV     Version of the binary
       --url=URL     the remote file url
   -d, --debug       Enable debug.

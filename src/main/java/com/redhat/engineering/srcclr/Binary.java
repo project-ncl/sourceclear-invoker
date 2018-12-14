@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.ParentCommand;
@@ -54,9 +55,6 @@ public class Binary implements Callable<Void>
     @Option(names = { "--url" }, required = true, paramLabel = "URL", description = "the remote file url")
     String url;
 
-    @Option(names = { "--name" }, required = true, paramLabel = "NAME", description = "Name of binary")
-    String name;
-
     @Option(names = { "--rev" }, required = true, paramLabel = "REV", description = "Version of the binary")
     String rev;
 
@@ -65,6 +63,8 @@ public class Binary implements Callable<Void>
 
     @ParentCommand
     SrcClrWrapper parent; // picocli injects reference to parent command
+
+    String name;
 
     /**
      * Computes a result, or throws an exception if unable to do so.
@@ -85,15 +85,19 @@ public class Binary implements Callable<Void>
         try
         {
             URL processedUrl = new URL( url );
-            File target = new File( urlDownloadLocation.toFile(), FilenameUtils.getName( processedUrl.getPath() ) );
+            name = FilenameUtils.getName( processedUrl.getPath() );
+            File target = new File( urlDownloadLocation.toFile(), name );
 
             if ( name.contains( " " ) )
             {
                 logger.warn ("Replace whitespace with '-' in {}", name);
                 name = name.replace( ' ', '-' );
             }
-            logger.debug( "Created temporary as {} and downloading {} to {} using temporary directory of {}",
-                          urlDownloadLocation, processedUrl, target, temporaryLocation);
+            name = ( isEmpty ( parent.getProduct() ) ? "" : parent.getProduct() + '-' )
+                            + ( isEmpty ( parent.getPackageName() ) ? "" : parent.getPackageName() + '-' )
+                            + name;
+            logger.debug( "Created temporary as {} and downloading {} to {} using temporary directory of {} with name of {}",
+                          urlDownloadLocation, processedUrl, target, temporaryLocation, name);
 
             // TODO : Implement concurrent axel/aria2c downloader
             FileUtils.copyURLToFile( processedUrl, target );
