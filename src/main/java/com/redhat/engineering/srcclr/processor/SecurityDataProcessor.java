@@ -21,7 +21,6 @@ import com.redhat.engineering.srcclr.json.securitydata.AffectedRelease;
 import com.redhat.engineering.srcclr.json.securitydata.PackageState;
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
 import com.redhat.engineering.srcclr.utils.InternalException;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
