@@ -57,8 +57,10 @@ public class EmailNotifierTest
         Set<ProcessorResult> processorResults = new HashSet<>(  );
         v.setCve( "123456789" );
         v.setTitle( "Dummy Vulnerability" );
+        pr.setMessage("No CPE exist");
         pr.setVulnerability( v );
         pr.setLibrary( l );
+       
         processorResults.add( pr );
         n.notify( wrapper, "", processorResults );
 

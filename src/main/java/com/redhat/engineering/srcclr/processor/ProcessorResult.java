@@ -34,17 +34,39 @@ public class ProcessorResult
     private Library library;
     private String scanReport;
 
+    
+    private String enhanceMessageForNotification(String cve_id)
+    {
+        /*
+        * make the message look better in the notification email. The final result will look like:
+        *    Reason flagged: 
+        *    no CPE exists
+        *    https://access.redhat.com/security/cve/cve-2017-7536
+        */
+        String customer_portal_url_prefix = "https://access.redhat.com/security/cve/cve-";
+        String enhanced = "Reason flagged: " 
+            + System.lineSeparator()
+            + message
+            + System.lineSeparator()
+            + customer_portal_url_prefix 
+            + cve_id;
+
+        return enhanced;
+    }
+
     public void setVulnerability ( Vulnerability vulnerability )
     {
         this.vulnerability = vulnerability;
 
         if ( isNotEmpty( message ))
         {
-            String sb = message
+            String sb = "Original SourceClear warning:"
                             + System.lineSeparator()
-                            + "Original SourceClear warning:"
+                            + vulnerability.getOverview()
                             + System.lineSeparator()
-                            + vulnerability.getOverview();
+                            + System.lineSeparator()
+                            + enhanceMessageForNotification(vulnerability.getCve());
+                            
             vulnerability.setOverview( sb );
         }
     }
