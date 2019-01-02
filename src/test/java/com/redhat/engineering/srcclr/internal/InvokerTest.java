@@ -30,7 +30,6 @@ import static org.junit.Assert.assertTrue;
 
 public class InvokerTest
 {
-
     private final SrcClrInvoker srccr = new SrcClrInvoker();
 
     @Test
