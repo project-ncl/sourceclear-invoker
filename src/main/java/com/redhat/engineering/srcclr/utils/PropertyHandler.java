@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 public class PropertyHandler
 {
     //private static final Logger logger = LoggerFactory.getLogger( PropertyHandler.class );
@@ -40,6 +42,10 @@ public class PropertyHandler
      */
     public static String[] convertProperty (String property) throws InternalException
     {
+        if ( isEmpty( property ) )
+        {
+            throw new InternalException( "Invalid property string to match: " + property );
+        }
         Matcher m = PATTERN.matcher( property );
 
         if ( !m.matches() || m.groupCount() != 2)

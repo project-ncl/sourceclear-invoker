@@ -40,11 +40,11 @@ public class SourceClearTest
         System.getProperties().forEach( ( k, v ) -> {
             if ( k.toString().contains( "sourceclear" ) )
             {
-                logger.info( "Properties {}  and {} ", k, v );
+                logger.info( "Properties {} and {} ", k, v );
             }
         } );
 
-        String[] arguments = PropertyHandler.convertProperty ( System.getProperty( "sourceclear" ).trim() );
+        String[] arguments = PropertyHandler.convertProperty ( System.getProperty( "sourceclear" ) );
         logger.info( "Retrieved argument {} ", Arrays.toString( arguments ) );
 
         // TODO: Configure for threshold of exception failure?
