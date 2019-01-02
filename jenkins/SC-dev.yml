@@ -29,8 +29,7 @@
     builders:
     - maven-target:
         pom: pom.xml
-        goals: '-Pjenkins clean test -DargLine=''-Dsourceclear="-d --package=${PACKAGE} --cpe=${CPE} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL}
-          ${VERSIONPARAM}=${VERSION} ${NAMEPARAM} ${RECURSE} ${EXTRA}"'' '
+        goals: '-Pjenkins clean test -DargLine=''-Dsourceclear="-d --version=${VERSION} --package=${PACKAGE} --product=${NAME} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${SCMVERSIONPARAM}${SCMVERSION} ${RECURSE} ${EXTRA}"'' '
         maven-version: maven-3-5-0
         private-repository: false
 
@@ -48,17 +47,20 @@
         name: URL
     - string:
         default: ''
-        name: CPE
-        description: Product Name formatted as a CPE e.g. "cpe:/a:redhat:openshift_application_runtimes:1.0".
+        name: NAME
+        description: Product Name (as per CPE Name e.g. for "cpe:/a:redhat:openshift_application_runtimes:1.0" it is openshift_application_runtimes)
+    - string:
+        default: ''
+        name: VERSION
+        description: Product Version
     - string:
         default: ''
         name: PACKAGE
-        description: Subpackage of from CPE data e.g. "vertx".
+        description: Optional subpackage used in conjunction with CPE data e.g. "vertx".
     - string:
         default: master
-        description: Either, for SCM scanning, a SCM reference (e.g. branch/tag/commit) or
-          for binary scanning an explicit version (e.g. 1.2.1.Final).
-        name: VERSION
+        description: Only used for SCM scanning. A SCM reference (e.g. branch/tag/commit).
+        name: SCMVERSION
     - dynamic-choice:
         name: THRESHOLD
         script: 'return list = [ 1,2,3,4,5,6,7,8,9,10 ]'
@@ -93,11 +95,9 @@
           }
 
           if ( SCAN_TYPE == "scm" ) {
-          map.put("VERSIONPARAM"," --ref")
-          map.put("NAMEPARAM", "")
+          map.put("SCMVERSIONPARAM"," --ref=")
           } else {
-          map.put("VERSIONPARAM"," --rev")
-          map.put("NAMEPARAM", "--name=${NAME}")
+          map.put("SCMVERSIONPARAM","")
           }
 
           return map

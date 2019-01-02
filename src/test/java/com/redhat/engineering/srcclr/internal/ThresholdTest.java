@@ -16,6 +16,7 @@
 package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
+import com.redhat.engineering.srcclr.utils.InternalException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
@@ -33,7 +34,7 @@ public class ThresholdTest
     @Rule
     public final ProvideSystemProperty overideHome = new ProvideSystemProperty( "user.home", UUID.randomUUID().toString() );
 
-    @Test
+    @Test(expected = InternalException.class )
     public void invalidThreshold1Test() throws Exception
     {
         SrcClrWrapper.main( new String [] { "-t", "-1", "scm" } );
@@ -41,7 +42,7 @@ public class ThresholdTest
         assertTrue( systemRule.getLog().contains( "Invalid CVSS Score parameter" ) );
     }
 
-    @Test
+    @Test(expected = InternalException.class)
     public void invalidThreshold2Test() throws Exception
     {
         SrcClrWrapper.main( new String [] { "-t", "11", "scm" } );

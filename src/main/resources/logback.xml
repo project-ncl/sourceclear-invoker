@@ -15,13 +15,16 @@
     limitations under the License.
 -->
 <configuration>
+  <conversionRule conversionWord="highlightex" converterClass="com.redhat.engineering.srcclr.converters.HighlightCompositeConverterEx" />
+
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>[%highlight(%level)] %msg%n</pattern>
+      <pattern>[%highlightex(%level)] %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
 
   <logger name="org.goots.exploder" level="INFO" />
+  <logger name="org.simplejavamail" level="INFO" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

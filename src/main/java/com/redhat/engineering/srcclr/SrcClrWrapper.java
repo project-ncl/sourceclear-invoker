@@ -16,16 +16,13 @@
 package com.redhat.engineering.srcclr;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.ConsoleAppender;
 import com.redhat.engineering.srcclr.converters.ProcessorConvertor;
 import com.redhat.engineering.srcclr.converters.ThresholdConverter;
 import com.redhat.engineering.srcclr.notification.EmailNotifier;
 import com.redhat.engineering.srcclr.notification.Notifier;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.ScanResult;
+import com.redhat.engineering.srcclr.utils.InternalException;
 import com.redhat.engineering.srcclr.utils.ManifestVersionProvider;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -53,7 +50,8 @@ public class SrcClrWrapper implements Callable<Void>
 {
     static final String UNMATCHED = " (unmatched args are passed directly to SourceClear)";
 
-    private final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
+    private static final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
+
 
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     private boolean debug;
@@ -65,12 +63,15 @@ public class SrcClrWrapper implements Callable<Void>
                     description = "Threshold on which exception is thrown. Only used with CVSS Processor")
     private int threshold = 0;
 
-    @Option( names = { "-p", "--processor" }, defaultValue = "cvss", converter = ProcessorConvertor.class,
+    @Option( names = { "--processor" }, defaultValue = "cvss", converter = ProcessorConvertor.class,
                     description = "Processor (cve|cvss) to use to analyse SourceClear results. Default is cvss")
     private ScanResult processor;
 
-    @Option( names = { "-c", "--cpe" }, defaultValue="", description = "CPE (Product) Name")
+    @Option( names = { "-p", "--product" }, /*required = true,*/ description = "Product Name (in same format as CPE Product Name)")
     private String product;
+
+    @Option(names = { "-v", "--product-version" }, required = true, description = "Version of the product")
+    private String version;
 
     @Option( names = "--package", defaultValue="", description = "Package name. It's optional but required for RHOAR, e.g. (vertx|swarm|springboot) for RHOAR")
     private String packageName;
@@ -81,15 +82,22 @@ public class SrcClrWrapper implements Callable<Void>
     @Option ( names = "--email-address", description = "Email address to notify. Domain portion will be used as FROM address")
     private String emailAddress;
 
+    private String cpe;
+
     // TODO: Long term should support multiple types of notification.
     private Notifier notifier = new EmailNotifier();
 
-
     public static void main( String[] args ) throws Exception
     {
+        final ExceptionHandler handler = new ExceptionHandler();
         try
         {
-            new CommandLine( new SrcClrWrapper() ).parseWithHandler( new CommandLine.RunAll(), args );
+            new CommandLine( new SrcClrWrapper() ).parseWithHandlers( new CommandLine.RunAll(), handler, args );
+
+            if ( handler.isParseException() )
+            {
+                throw new InternalException( "Command line parse exception" );
+            }
         }
         catch ( CommandLine.ExecutionException e )
         {
@@ -104,30 +112,19 @@ public class SrcClrWrapper implements Callable<Void>
     @Override
     public Void call()
     {
+        // If we had further use of CPE than just simply assembling a string (e.g. comparison, parsing)
+        // then we could have used https://github.com/stevespringett/CPE-Parser
+        cpe = "cpe:/a:redhat:" + product + ':' + version;
+
         return null;
     }
 
     void enableDebug()
     {
         ch.qos.logback.classic.Logger rootLogger =
-                        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME );
+            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME );
+
         rootLogger.setLevel( Level.DEBUG );
-
-        LoggerContext loggerContext = rootLogger.getLoggerContext();
-
-        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-        encoder.setContext( loggerContext );
-        encoder.setPattern( "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" );
-        encoder.start();
-
-        ConsoleAppender<ILoggingEvent> appender = (ConsoleAppender<ILoggingEvent>) rootLogger.getAppender( "STDOUT" );
-
-        if ( appender != null )
-        {
-            appender.setContext( loggerContext );
-            appender.setEncoder( encoder );
-            appender.start();
-        }
     }
 
 
@@ -136,6 +133,28 @@ public class SrcClrWrapper implements Callable<Void>
         if ( isNotEmpty ( emailAddress ) && isNotEmpty ( emailServer ) )
         {
             notifier.notify( this, scanInfo, v );
+        }
+    }
+
+
+    @Getter
+    private static class ExceptionHandler<R> extends CommandLine.DefaultExceptionHandler<R>
+    {
+        private boolean parseException;
+
+        /**
+         * Prints the message of the specified exception, followed by the usage message for the command or subcommand
+         * whose input was invalid, to the stream returned by {@link #err()}.
+         * @param ex the ParameterException describing the problem that occurred while parsing the command line arguments,
+         *           and the CommandLine representing the command or subcommand whose input was invalid
+         * @param args the command line arguments that could not be parsed
+         * @return the empty list
+         * @since 3.0 */
+        public R handleParseException( CommandLine.ParameterException ex, String[] args)
+        {
+            parseException = true;
+            super.handleParseException( ex, args );
+            return super.returnResultOrExit( null );
         }
     }
 }

@@ -55,16 +55,13 @@ public class Binary implements Callable<Void>
     @Option(names = { "--url" }, required = true, paramLabel = "URL", description = "the remote file url")
     String url;
 
-    @Option(names = { "--rev" }, required = true, paramLabel = "REV", description = "Version of the binary")
-    String rev;
-
     @Unmatched
     List<String> unmatched;
 
     @ParentCommand
     SrcClrWrapper parent; // picocli injects reference to parent command
 
-    String name;
+    String filename;
 
     /**
      * Computes a result, or throws an exception if unable to do so.
@@ -85,17 +82,29 @@ public class Binary implements Callable<Void>
         try
         {
             URL processedUrl = new URL( url );
-            name = FilenameUtils.getName( processedUrl.getPath() );
+            filename = FilenameUtils.getName( processedUrl.getPath() );
+            String name = filename;
             File target = new File( urlDownloadLocation.toFile(), name );
+
+            // If the subpackage is NOT a duplicate prefix of the filename then add that as well.
+            if ( ! isEmpty( parent.getPackageName() ) )
+            {
+                if ( ! name.startsWith( parent.getPackageName() ) )
+                {
+                    name = parent.getPackageName() + '-' + name;
+                }
+            }
+
+            // Format:
+            // [ ProductName [ - ProductVersion ] - ]   [ SubPackageName - ]  FileName
+            name = ( isEmpty ( parent.getProduct() ) ? "" : parent.getProduct() + '-' + ( isEmpty ( parent.getVersion() ) ? "" : parent.getVersion() + '-' ))
+                + name;
 
             if ( name.contains( " " ) )
             {
                 logger.warn ("Replace whitespace with '-' in {}", name);
                 name = name.replace( ' ', '-' );
             }
-            name = ( isEmpty ( parent.getProduct() ) ? "" : parent.getProduct() + '-' )
-                            + ( isEmpty ( parent.getPackageName() ) ? "" : parent.getPackageName() + '-' )
-                            + name;
             logger.debug( "Created temporary as {} and downloading {} to {} using temporary directory of {} with name of {}",
                           urlDownloadLocation, processedUrl, target, temporaryLocation, name);
 
@@ -118,11 +127,11 @@ public class Binary implements Callable<Void>
 
             List<String> args = new ArrayList<>();
             args.add ( "--scm-rev" );
-            args.add ( rev );
+            args.add ( parent.getVersion() );
             args.add ( "--scm-ref" );
             args.add ( "tag" );
             args.add ( "--scm-uri" );
-            args.add ( "data://" + name );
+            args.add ( "data://RedHat/" + name );
             //args.add ( "--scm-ref-type" );
             //args.add ( "tag" );
 
@@ -157,6 +166,6 @@ public class Binary implements Callable<Void>
     @Override
     public String toString()
     {
-        return "scanning " + name + " version " + rev + " from " + url;
+        return "scanning " + filename + " version " + parent.getVersion() + " from " + url;
     }
 }
