@@ -43,15 +43,12 @@ public class ProcessorResult
         *    no CPE exists
         *    https://access.redhat.com/security/cve/cve-2017-7536
         */
-        String customer_portal_url_prefix = "https://access.redhat.com/security/cve/cve-";
-        String enhanced = "Reason flagged: " 
+        return "Reason flagged: "
             + System.lineSeparator()
             + message
             + System.lineSeparator()
-            + customer_portal_url_prefix 
+            + "https://access.redhat.com/security/cve/cve-"
             + cve_id;
-
-        return enhanced;
     }
 
     public void setVulnerability ( Vulnerability vulnerability )
@@ -64,14 +61,13 @@ public class ProcessorResult
                             + System.lineSeparator()
                             + vulnerability.getOverview()
                             + System.lineSeparator()
-                            + System.lineSeparator()
                             + enhanceMessageForNotification(vulnerability.getCve());
                             
             vulnerability.setOverview( sb );
         }
     }
 
-    public void setScanReport( Metadata_ metadata )
+    void setScanReport( Metadata_ metadata )
     {
         scanReport = ( metadata != null && metadata.getReport() != null ) ? (String) metadata.getReport() : "<no-report-available>";
     }
