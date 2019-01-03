@@ -73,7 +73,7 @@ public class EmailNotifier implements Notifier
         );
         sb.append( System.lineSeparator() );
 
-        // If the Jenkins BUILD_USER_EMAAIL exists use that in preference to the default email from address.
+        // If the Jenkins BUILD_USER_EMAIL exists use that in preference to the default email from address.
         String userEmailAddress = System.getenv( "BUILD_USER_EMAIL" );
         if ( isEmpty ( userEmailAddress ) )
         {

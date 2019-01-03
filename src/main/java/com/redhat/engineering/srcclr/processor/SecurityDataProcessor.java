@@ -35,156 +35,170 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.stream.Stream;
 
-public class SecurityDataProcessor {
+public class SecurityDataProcessor
+{
     private final static String REDHAT_SECURITY_DATA_CVE = "https://access.redhat.com/labs/securitydataapi/cve/CVE-";
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
+
     private String cpe;
+
     private String base_url = REDHAT_SECURITY_DATA_CVE;
 
     private String packageName;
 
-    public void setPackageName(String packageName)
+    public void setPackageName( String packageName )
     {
         this.packageName = packageName;
     }
 
-    public String getPackageName()
-    {
-        return packageName;
-    }
-
-    public SecurityDataProcessor(String startCPE) 
+    public SecurityDataProcessor( String startCPE )
     {
         cpe = startCPE;
     }
 
-    public SecurityDataProcessor(String startCPE, String startBaseUrl)
+    public SecurityDataProcessor( String startCPE, String startBaseUrl )
     {
         cpe = startCPE;
         base_url = startBaseUrl;
     }
 
-    private static String readAll(Reader rd) throws IOException 
+    private static String readAll( Reader rd ) throws IOException
     {
         StringBuilder sb = new StringBuilder();
         int cp;
-        while ((cp = rd.read()) != -1) {
-          sb.append((char) cp);
+        while ( ( cp = rd.read() ) != -1 )
+        {
+            sb.append( (char) cp );
         }
         return sb.toString();
     }
 
-    private SecurityDataJSON lookUpAPI(String cve_id) throws IOException {
+    private SecurityDataJSON lookUpAPI( String cve_id ) throws IOException
+    {
         String url = base_url + cve_id;
 
-        logger.debug( "Looking up {}", url);
+        logger.debug( "Looking up {}", url );
 
-        HttpsURLConnection conn = (HttpsURLConnection)new URL(url).openConnection();
+        HttpsURLConnection conn = (HttpsURLConnection) new URL( url ).openConnection();
 
         // Dealing with 406 error returns
-        conn.setRequestProperty("Accept", "*/*");
-    
+        conn.setRequestProperty( "Accept", "*/*" );
+
         SecurityDataJSON json;
 
-        try ( InputStream is = conn.getInputStream() )
+        try (InputStream is = conn.getInputStream())
         {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-            String jsonText = readAll(rd);
+            BufferedReader rd = new BufferedReader( new InputStreamReader( is ) );
+            String jsonText = readAll( rd );
 
-            ObjectMapper mapper = new ObjectMapper()
-                            .configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false )
-                            .configure( DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true );
+            ObjectMapper mapper =
+                            new ObjectMapper().configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false )
+                                              .configure( DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true );
             json = mapper.readValue( jsonText, SecurityDataJSON.class );
 
             return json;
-        } 
+        }
     }
 
-    public ProcessorResult process( String cve_id) throws InternalException
+    public ProcessorResult process( String cve_id ) throws InternalException
     {
-        Boolean is_fail;
-        
+        boolean is_fail;
+
         ProcessorResult sdpr = new ProcessorResult();
 
         try
         {
-            PackageState ps_found = null;
+            PackageState ps_found;
 
-            SecurityDataJSON json = lookUpAPI(cve_id);
+            SecurityDataJSON json = lookUpAPI( cve_id );
 
-            if (StringUtils.isEmpty(packageName))
+            if ( StringUtils.isEmpty( packageName ) )
             {
-                ps_found = json.getPackageState() == null ? null :
-                    json.getPackageState().stream()
-                        .filter(ps -> cpe.equals(ps.getCpe()))
-                        .findAny().orElse(null);
+                ps_found = json.getPackageState() == null ?
+                                null :
+                                json.getPackageState()
+                                    .stream()
+                                    .filter( ps -> cpe.equals( ps.getCpe() ) )
+                                    .findAny()
+                                    .orElse( null );
             }
             else
             {
-                ps_found = json.getPackageState() == null ? null :
-                    json.getPackageState().stream()
-                        .filter(ps -> cpe.equals(ps.getCpe()))
-                        .filter(ps -> packageName.equals(ps.getPackageName()))
-                        .findAny().orElse(null);
+                ps_found = json.getPackageState() == null ?
+                                null :
+                                json.getPackageState()
+                                    .stream()
+                                    .filter( ps -> cpe.equals( ps.getCpe() ) )
+                                    .filter( ps -> packageName.equals( ps.getPackageName() ) )
+                                    .findAny()
+                                    .orElse( null );
 
             }
 
-            if (ps_found != null)
+            if ( ps_found != null )
             {
                 String fixed_state = ps_found.getFixState();
 
-                if (Stream.of("will not fix", "not affected", "fix deferred").anyMatch(fixed_state::equalsIgnoreCase))
+                if ( Stream.of( "will not fix", "not affected", "fix deferred" )
+                           .anyMatch( fixed_state::equalsIgnoreCase ) )
                 {
                     is_fail = false;
                 }
-                else if (Stream.of("affected", "new").anyMatch(fixed_state::equalsIgnoreCase))
+                else if ( Stream.of( "affected", "new" ).anyMatch( fixed_state::equalsIgnoreCase ) )
                 {
-                    sdpr.setMessage("fixed_state is " + fixed_state);
+                    sdpr.setMessage( "fixed_state is " + fixed_state );
                     // setMessage or logger
                     is_fail = true;
                 }
                 else
                 {
-                    sdpr.setMessage("Unexpected fixed_state: " + fixed_state);
+                    sdpr.setMessage( "Unexpected fixed_state: " + fixed_state );
                     // setMessage or logger
                     is_fail = true;
                 }
             }
             else
             {
-                AffectedRelease ar_found = null;
-                if (StringUtils.isEmpty(packageName))
+                AffectedRelease ar_found;
+                if ( StringUtils.isEmpty( packageName ) )
                 {
-                    ar_found = json.getAffectedRelease() == null ? null :
-                        json.getAffectedRelease().stream()
-                            .filter(ar -> cpe.equals(ar.getCpe()))
-                            .findAny().orElse(null);
+                    ar_found = json.getAffectedRelease() == null ?
+                                    null :
+                                    json.getAffectedRelease()
+                                        .stream()
+                                        .filter( ar -> cpe.equals( ar.getCpe() ) )
+                                        .findAny()
+                                        .orElse( null );
                 }
                 else
                 {
-                    ar_found = json.getAffectedRelease() == null ? null :
-                        json.getAffectedRelease().stream()
-                            .filter(ar -> cpe.equals(ar.getCpe()))
-                            .filter(ar -> packageName.equals(ar.getPackage()))
-                            .findAny().orElse(null);
+                    ar_found = json.getAffectedRelease() == null ?
+                                    null :
+                                    json.getAffectedRelease()
+                                        .stream()
+                                        .filter( ar -> cpe.equals( ar.getCpe() ) )
+                                        .filter( ar -> packageName.equals( ar.getPackage() ) )
+                                        .findAny()
+                                        .orElse( null );
                 }
-                
-                if (ar_found != null)
+
+                if ( ar_found != null )
                 {
-                    sdpr.setMessage("AffectedRelease exists");
+                    sdpr.setMessage( "AffectedRelease exists" );
                     is_fail = true;
                 }
                 else
                 {
-                    sdpr.setMessage("No cpe exists");
+                    sdpr.setMessage( "No cpe exists" );
                     is_fail = true;
                 }
             }
-        } 
-        catch (FileNotFoundException e)  
+        }
+        catch ( FileNotFoundException e )
         {
-            logger.info("No CVE data in security data API. URL {}", e.getMessage());
-            sdpr.setMessage("No CVE data in security data API");
+            logger.info( "No CVE data in security data API. URL {}", e.getMessage() );
+            sdpr.setMessage( "No CVE data in security data API" );
             is_fail = true;
         }
         catch ( IOException e )
@@ -193,15 +207,15 @@ public class SecurityDataProcessor {
         }
 
         // if need to block
-        if (is_fail)
+        if ( is_fail )
         {
-            sdpr.setFail(true);
+            sdpr.setFail( true );
 
-            /* 
-            * Currently, notification will be sent for every fails.
-            * However in case we need a case that test fails but no notification is necessary, set to 'false'.
-            */
-            sdpr.setNotify(true);
+            /*
+             * Currently, notification will be sent for every fails.
+             * However in case we need a case that test fails but no notification is necessary, set to 'false'.
+             */
+            sdpr.setNotify( true );
         }
 
         return sdpr;
