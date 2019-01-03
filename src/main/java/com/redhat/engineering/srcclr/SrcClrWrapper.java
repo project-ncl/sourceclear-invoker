@@ -63,11 +63,11 @@ public class SrcClrWrapper implements Callable<Void>
                     description = "Threshold on which exception is thrown. Only used with CVSS Processor")
     private int threshold = 0;
 
-    @Option( names = { "--processor" }, defaultValue = "cvss", converter = ProcessorConvertor.class,
-                    description = "Processor (cve|cvss) to use to analyse SourceClear results. Default is cvss")
+    @Option( names = { "--processor" }, defaultValue = "cve", converter = ProcessorConvertor.class,
+                    description = "Processor (cve|cvss) to use to analyse SourceClear results. Default is cve")
     private ScanResult processor;
 
-    @Option( names = { "-p", "--product" }, /*required = true,*/ description = "Product Name (in same format as CPE Product Name)")
+    @Option( names = { "-p", "--product" }, required = true, description = "Product Name (in same format as CPE Product Name)")
     private String product;
 
     @Option(names = { "-v", "--product-version" }, required = true, description = "Version of the product")

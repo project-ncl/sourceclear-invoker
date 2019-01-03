@@ -65,6 +65,12 @@ public class CVEProcessor
                               processorResult.getScanReport()
                 );
             }
+            else
+            {
+                logger.warn( "Potential vulnerability without a CVE with CVSS score of {} found as {} in library {}:{}:{}",
+                             vuln.getCvssScore(), vuln.getTitle(), library.getCoordinate1(),
+                             library.getCoordinate2(), library.getVersions().get( 0 ).getVersion() );
+            }
         }
         return matched;
     }

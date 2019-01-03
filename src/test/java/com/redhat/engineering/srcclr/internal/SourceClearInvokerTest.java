@@ -49,7 +49,7 @@ public class SourceClearInvokerTest
         try
         {
             System.setProperty( SC,
-                                "-d -v=8.0.18 binary --url=file:///home/user/foobar.jar --name=H2 Database --no-upload" );
+                                "-p=product -d -v=8.0.18 binary --url=file:///home/user/foobar.jar --name=H2 Database --no-upload" );
             wrapper.runSourceClear();
         }
         finally
@@ -64,7 +64,7 @@ public class SourceClearInvokerTest
         try
         {
             System.setProperty( SC,
-                                "-d -v=2.1 binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --no-upload" );
+                                "--processor=cvss -p=product -d -v=2.1 binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --no-upload" );
             wrapper.runSourceClear();
         }
         finally
@@ -79,14 +79,14 @@ public class SourceClearInvokerTest
         try
         {
             System.setProperty( SC,
-                                "-d -v=2.6 binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar --no-upload" );
+                                "--processor=cvss -p=product -d -v=1.0 binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar --no-upload" );
             wrapper.runSourceClear();
         }
         finally
         {
             System.clearProperty( SC );
         }
-        assertTrue( systemRule.getLog().contains( "SRCCLR_SCM_NAME=commons-io-2.6.jar" ) );
+        assertTrue( systemRule.getLog().contains( "SRCCLR_SCM_NAME=product-1.0-commons-io-2.6.jar" ) );
     }
 
     @Test
@@ -111,7 +111,7 @@ public class SourceClearInvokerTest
         try
         {
             System.setProperty( SC,
-                                "-v=0 -t 8 scm --url=https://github.com/srcclr/example-java-maven.git --ref=a4c94e9 --no-upload" );
+                                "--processor=cvss -p=product -v=0 -t 8 scm --url=https://github.com/srcclr/example-java-maven.git --ref=a4c94e9 --no-upload" );
             wrapper.runSourceClear();
         }
         finally
@@ -126,7 +126,7 @@ public class SourceClearInvokerTest
         try
         {
             System.setProperty( SC,
-                                "--product-version=0 scm --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
+                                "-p=product --product-version=0 scm --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
             wrapper.runSourceClear();
         }
         finally
