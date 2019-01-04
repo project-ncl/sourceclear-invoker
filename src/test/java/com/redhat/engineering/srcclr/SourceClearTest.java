@@ -47,7 +47,14 @@ public class SourceClearTest
         String[] arguments = PropertyHandler.convertProperty ( System.getProperty( "sourceclear" ) );
         logger.info( "Retrieved argument {} ", Arrays.toString( arguments ) );
 
-        // TODO: Configure for threshold of exception failure?
-        SrcClrWrapper.main( arguments );
+        try
+        {
+            SrcClrWrapper.main( arguments );
+        }
+        catch( Exception e )
+        {
+            logger.debug( "Caught exception executing the wrapper", e );
+            throw e;
+        }
     }
 }
