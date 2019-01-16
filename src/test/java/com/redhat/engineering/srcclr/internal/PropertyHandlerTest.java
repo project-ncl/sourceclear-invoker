@@ -29,39 +29,67 @@ public class PropertyHandlerTest
     @Test
     public void verifyPropertySplit() throws Exception
     {
-        String [] result = PropertyHandler.convertProperty( "-d binary -d --url=file:///home/user/foobar.jar --name=H2 Database --rev=8.0.18 --no-upload" );
+        String[] result = PropertyHandler.convertProperty(
+                        "-d binary -d --url=file:///home/user/foobar.jar --name=H2 Database --rev=8.0.18 --no-upload" );
 
-//        System.out.println ("Got " + Arrays.toString(result));
+        //System.out.println ("Got " + Arrays.toString(result));
 
         assertEquals( 7, result.length );
-        assertEquals(  "-d", result[2]);
-        assertEquals(  "--name=H2 Database", result[4]);
+        assertEquals( "-d", result[2] );
+        assertEquals( "--name=H2 Database", result[4] );
     }
 
-    @Test(expected = InternalException.class)
+    @Test( expected = InternalException.class )
     public void verifyPropertySplitNoCommand() throws Exception
     {
-        PropertyHandler.convertProperty( "-d --url=file:///home/user/foobar.jar --name=H2 Database --rev=8.0.18 --no-upload" );
+        PropertyHandler.convertProperty(
+                        "-d --url=file:///home/user/foobar.jar --name=H2 Database --rev=8.0.18 --no-upload" );
     }
 
-    @Test(expected = InternalException.class)
+    @Test( expected = InternalException.class )
     public void verifyPropertySplitUnknownCommand() throws Exception
     {
-        PropertyHandler.convertProperty( "-d whatareyou --url=file:///home/user/foobar.jar --name=H2 Database --rev=8.0.18 --no-upload" );
+        PropertyHandler.convertProperty(
+                        "-d whatareyou --url=file:///home/user/foobar.jar --name=H2 Database --rev=8.0.18 --no-upload" );
     }
 
     @Test
     public void verifyPropertySplitNoFirstDebug() throws Exception
     {
-        String [] result = PropertyHandler.convertProperty( "scm -d --url=file:///home/user/foobar.jar --name=H2 Database --rev=8.0.18 --no-upload" );
+        String[] result = PropertyHandler.convertProperty(
+                        "scm -d --url=file:///home/user/foobar.jar --name=H2 Database --rev=8.0.18 --no-upload" );
         assertEquals( 6, result.length );
-        assertEquals(  "-d", result[1]);
-        assertEquals(  "--name=H2 Database", result[3]);
+        assertEquals( "-d", result[1] );
+        assertEquals( "--name=H2 Database", result[3] );
     }
 
     @Test
     public void verifyPropertySplitOnlyCommand() throws Exception
     {
         PropertyHandler.convertProperty( "scm" );
+    }
+
+    @Test
+    public void verifyPropertySplitScm() throws Exception
+    {
+        String[] result = PropertyHandler.convertProperty( "-d scm -d --url=http://www.dummy.com  --ref=8.0.18" );
+
+        //System.out.println ("Got " + Arrays.toString( result));
+
+        assertEquals( 5, result.length );
+        assertEquals( "-d", result[2] );
+        assertEquals( "--url=http://www.dummy.com", result[3] );
+    }
+
+    @Test
+    public void verifyPropertySplitScmNoExtraWhitespace() throws Exception
+    {
+        String[] result = PropertyHandler.convertProperty( "-d scm -d --url=http://www.dummy.com --ref=8.0.18" );
+
+        //System.out.println ("Got " + Arrays.toString( result));
+
+        assertEquals( 5, result.length );
+        assertEquals( "-d", result[2] );
+        assertEquals( "--url=http://www.dummy.com", result[3] );
     }
 }

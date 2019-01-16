@@ -45,7 +45,7 @@ public class SourceClearTest
         } );
 
         String[] arguments = PropertyHandler.convertProperty ( System.getProperty( "sourceclear" ) );
-        logger.info( "Retrieved argument {} ", Arrays.toString( arguments ) );
+        logger.info( "Retrieved argument {}", Arrays.toString( arguments ) );
 
         try
         {

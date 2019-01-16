@@ -53,10 +53,10 @@ public class PropertyHandler
             throw new InternalException( "Unable to correct match property string: " + property );
         }
         String []first = m.group( 1 ).trim().split( "\\s+|=" );
-        String []last = m.group( 2 ).trim().split( " (?=-)");
+        String []last = m.group( 2 ).trim().split( "\\s+(?=-)");
 
-        // logger.info( "Retrieved res {} ", Arrays.toString( first ) );
-        // logger.info( "Retrieved last {} ", Arrays.toString( last ) );
+        //logger.info( "Retrieved first {} ", Arrays.toString( first ) );
+        //logger.info( "Retrieved last {} ", Arrays.toString( last ) );
 
         String []result = Arrays.copyOf( first, first.length + last.length );
         System.arraycopy(last, 0, result, first.length, last.length);
