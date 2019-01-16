@@ -29,7 +29,7 @@
     builders:
     - maven-target:
         pom: pom.xml
-        goals: '-Pjenkins clean test -DargLine=''-Dsourceclear="-d --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL}
+        goals: '-Pjenkins test -DargLine=''-Dsourceclear="-d --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL}
           ${VERSIONPARAM}=${VERSION} ${NAMEPARAM} ${RECURSE} ${EXTRA}"'' '
         maven-version: maven-3-5-0
         private-repository: false
