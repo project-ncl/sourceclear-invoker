@@ -37,7 +37,11 @@ public class EmailNotifier implements Notifier
         // We know we have at least one result ; use it to extra the link to the full scan results.
         ProcessorResult first = processorResults.stream().findFirst().get();
 
-        StringBuffer sb = new StringBuffer( "Located a possible vulnerability within product " )
+        StringBuffer sb = new StringBuffer( "Located " )
+                        .append( processorResults.size() )
+                        .append( " possible vulnerabilit" )
+                        .append( processorResults.size() > 1 ? "ies" : "y" )
+                        .append( " within product " )
                         .append( parent.getProduct() )
                         .append( System.lineSeparator() )
                         .append( scanInfo )

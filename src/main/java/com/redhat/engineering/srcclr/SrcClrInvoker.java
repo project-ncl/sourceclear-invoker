@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeroturnaround.exec.InvalidExitValueException;
 import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.stream.slf4j.Slf4jStream;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -75,6 +76,9 @@ public class SrcClrInvoker
         command.add( "-jar" );
         command.add( locateSourceClearJar().toString() );
 
+        // If we add --debug before the scan type command then that enables vast
+        // amount of debugging (but breaks the json output).
+        // command.add( "--debug" );
         if ( type == ScanType.SCM || type == ScanType.BINARY)
         {
             command.add( "scan" );
@@ -89,14 +93,20 @@ public class SrcClrInvoker
         }
         command.addAll( args );
 
+        Path temporaryLocation = Files.createTempDirectory( "sourceclear-invoker-" );
+
         SourceClearJSON json = null;
         try
         {
             String output = new ProcessExecutor().command( command ).
                             environment( env ).
                             destroyOnExit().
+                            directory( temporaryLocation.toFile() ).
                             exitValue( 0 ).
-                            readOutput( true ).execute().
+                            redirectError ( Slf4jStream.of(logger).asInfo() ).
+                            redirectOutput( Slf4jStream.of(logger).asInfo() ).
+                            readOutput( true ).
+                            execute().
                             outputUTF8();
             logger.debug( "Read output {} ", output );
 
