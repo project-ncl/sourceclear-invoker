@@ -29,7 +29,7 @@
     builders:
     - maven-target:
         pom: pom.xml
-        goals: '-Pjenkins test -DargLine=''-Dsourceclear="-d --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=${NAME} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
+        goals: '-Pjenkins test -DargLine=''-Dsourceclear="${DEBUG} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=${NAME} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
         maven-version: maven-3-5-0
         private-repository: false
 
@@ -78,6 +78,10 @@
         description: Enable recursive scanning of this project. This should NOT normally
           be required unless the project is rooted within a subdirectory. Only used if scanning a SCM repository.
         name: RECURSIVE
+    - bool:
+        default: false
+        description: Enable debug
+        name: DEBUGGING
     - string:
         default: ''
         description: Optional extra parameters to SourceClear.
@@ -98,6 +102,11 @@
           map.put("RECURSE"," --recursive ")
           } else {
           map.put("RECURSE","")
+          }
+          if ( DEBUGGING == "true" ) {
+          map.put("DEBUG"," -d ")
+          } else {
+          map.put("DEBUG","")
           }
 
           if ( SCAN_TYPE == "scm" ) {
