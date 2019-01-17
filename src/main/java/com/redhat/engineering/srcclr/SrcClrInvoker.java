@@ -103,12 +103,12 @@ public class SrcClrInvoker
                             destroyOnExit().
                             directory( temporaryLocation.toFile() ).
                             exitValue( 0 ).
-                            redirectError ( Slf4jStream.of(logger).asInfo() ).
-                            redirectOutput( Slf4jStream.of(logger).asInfo() ).
+                            redirectError ( Slf4jStream.of(logger).asDebug() ).
+                            redirectOutput( Slf4jStream.of(logger).asDebug() ).
                             readOutput( true ).
                             execute().
                             outputUTF8();
-            logger.debug( "Read output {} ", output );
+//            logger.debug( "Read output {} ", output );
 
             if ( output.contains( "Encountered errors while collecting component information" ) )
             {

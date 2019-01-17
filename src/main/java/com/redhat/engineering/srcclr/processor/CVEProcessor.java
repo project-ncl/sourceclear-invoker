@@ -59,10 +59,9 @@ public class CVEProcessor
                 processorResult.setScanReport( record.getMetadata() );
                 matched.add( processorResult );
 
-                logger.info ( "Found vulnerability '{}' with CVE ID {} in library {}:{}:{} and report is {}",
+                logger.info ( "Found vulnerability '{}' with CVE ID {} in library {}:{}:{}",
                               vuln.getTitle(), vuln.getCve(), library.getCoordinate1(),
-                              library.getCoordinate2(), library.getVersions().get( 0 ).getVersion(),
-                              processorResult.getScanReport()
+                              library.getCoordinate2(), library.getVersions().get( 0 ).getVersion()
                 );
             }
             else
@@ -71,6 +70,10 @@ public class CVEProcessor
                              vuln.getCvssScore(), vuln.getTitle(), library.getCoordinate1(),
                              library.getCoordinate2(), library.getVersions().get( 0 ).getVersion() );
             }
+        }
+        if ( matched.size() > 0 )
+        {
+            matched.stream().findAny().ifPresent( p -> logger.info ("Report is {}", p.getScanReport() ) );
         }
         return matched;
     }
