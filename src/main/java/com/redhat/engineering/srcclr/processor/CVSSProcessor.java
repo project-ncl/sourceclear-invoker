@@ -53,12 +53,15 @@ public class CVSSProcessor implements ScanResult
                 processorResult.setScanReport( record.getMetadata());
                 matched.add( processorResult );
 
-                logger.info ( "Found vulnerability '{}' with score {} in library {}:{}:{} and report is {}",
+                logger.info ( "Found vulnerability '{}' with score {} in library {}:{}:{}",
                               vuln.getTitle(), vuln.getCvssScore(), library.getCoordinate1(),
-                              library.getCoordinate2(), library.getVersions().get( 0 ).getVersion(),
-                              processorResult.getScanReport()
+                              library.getCoordinate2(), library.getVersions().get( 0 ).getVersion()
                 );
             }
+        }
+        if ( matched.size() > 0 )
+        {
+            matched.stream().findAny().ifPresent( p -> logger.info ("Report is {}", p.getScanReport() ) );
         }
         return matched;
     }
