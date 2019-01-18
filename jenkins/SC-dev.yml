@@ -27,9 +27,14 @@
     retry-count: 3
     node: sourceclear
     builders:
+    # The curl command should be altered whether we are using a stable tag, master, a branch etc.
+    - shell: |
+        cd $WORKSPACE
+        curl -s -k -L http://github.com/project-ncl/sourceclear-invoker/tarball/master > invoker.tar
+        tar xf invoker.tar --strip-components=1
     - maven-target:
         pom: pom.xml
-        goals: '-Pjenkins test -DargLine=''-Dsourceclear="${DEBUG} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=${NAME} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
+        goals: '-Pjenkins test -Dmaven.buildNumber.skip=true -DargLine=''-Dsourceclear="${DEBUG} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=${NAME} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
         maven-version: maven-3-5-0
         private-repository: false
 
@@ -122,17 +127,6 @@
         keep-long-stdio: false
         health-scale-factor: 1.0
         allow-empty-results: false
-    scm:
-    - git:
-        branches:
-        - '*/master'
-        url: https://github.com/project-ncl/sourceclear-invoker.git
-        extensions:
-          per-build-tag: false
-          wipe-workspace: true
-          clean:
-            before: false
-            after: false
     triggers: []
     wrappers:
       - build-user-vars
