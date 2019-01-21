@@ -98,6 +98,7 @@ public class SrcClrInvoker
         SourceClearJSON json = null;
         try
         {
+            logger.info( "Invoking {} ....", command );
             String output = new ProcessExecutor().command( command ).
                             environment( env ).
                             destroyOnExit().
