@@ -47,6 +47,23 @@ public class SecurityDataProcessor
 
     private String packageName;
 
+    private String getCpeOfMajorVersion()
+    {
+        String version = cpe.substring(cpe.lastIndexOf(':') + 1);
+
+        String newversion = version;
+        String[] splits = version.split("\\.");
+
+        if ( splits.length >= 2 )
+        {
+            newversion = splits[0];
+        }
+        
+        String first_part = cpe.substring(0, cpe.lastIndexOf(':') + 1);
+
+        return first_part + newversion;
+    }
+
     public void setPackageName( String packageName )
     {
         this.packageName = packageName;
@@ -101,6 +118,110 @@ public class SecurityDataProcessor
         }
     }
 
+    private PackageState searchPackageState(SecurityDataJSON json)
+    {
+        PackageState ps_found = null;
+
+        if (json.getPackageState() == null) 
+        {
+            return null;
+        }
+
+        if ( StringUtils.isEmpty( packageName ) )
+        {
+            
+            ps_found = json.getPackageState()
+                .stream()
+                .filter( ps -> cpe.equals( ps.getCpe() ) )
+                .findAny()
+                .orElse( null );
+        
+            if ( ps_found == null )
+            {
+                ps_found = json.getPackageState()
+                    .stream()
+                    .filter( ps -> getCpeOfMajorVersion().equals( ps.getCpe() ) )
+                    .findAny()
+                    .orElse( null );
+            }
+        
+        }
+        else
+        {
+            ps_found = json.getPackageState()
+                                .stream()
+                                .filter( ps -> cpe.equals( ps.getCpe() ) )
+                                .filter( ps -> packageName.equals( ps.getPackageName() ) )
+                                .findAny()
+                                .orElse( null );
+
+            if ( ps_found == null )
+            {
+                ps_found = json.getPackageState()
+                    .stream()
+                    .filter( ps -> getCpeOfMajorVersion().equals( ps.getCpe() ) )
+                    .filter( ps -> packageName.equals( ps.getPackageName() ) )
+                    .findAny()
+                    .orElse( null );     
+            }
+        }
+
+
+        return ps_found;
+    }
+
+    private AffectedRelease searchAffectedRelease(SecurityDataJSON json)
+    {
+        AffectedRelease ar_found = null;
+
+        if (json.getAffectedRelease() == null) 
+        {
+            return null;
+        }
+
+        if ( StringUtils.isEmpty( packageName ) )
+        {
+            
+            ar_found = json.getAffectedRelease()
+                .stream()
+                .filter( ar -> cpe.equals( ar.getCpe() ) )
+                .findAny()
+                .orElse( null );
+        
+            if ( ar_found == null )
+            {
+                ar_found = json.getAffectedRelease()
+                    .stream()
+                    .filter( ar -> getCpeOfMajorVersion().equals( ar.getCpe() ) )
+                    .findAny()
+                    .orElse( null );
+            }
+        
+        }
+        else
+        {
+            ar_found = json.getAffectedRelease()
+                                .stream()
+                                .filter( ar -> cpe.equals( ar.getCpe() ) )
+                                .filter( ar -> packageName.equals( ar.getPackage() ) )
+                                .findAny()
+                                .orElse( null );
+
+            if ( ar_found == null )
+            {
+                ar_found = json.getAffectedRelease()
+                    .stream()
+                    .filter( ar -> getCpeOfMajorVersion().equals( ar.getCpe() ) )
+                    .filter( ar -> packageName.equals( ar.getPackage() ) )
+                    .findAny()
+                    .orElse( null );     
+            }
+        }
+
+
+        return ar_found;
+    }
+
     public ProcessorResult process( String cve_id ) throws InternalException
     {
         boolean is_fail;
@@ -109,33 +230,11 @@ public class SecurityDataProcessor
 
         try
         {
-            PackageState ps_found;
-
             SecurityDataJSON json = lookUpAPI( cve_id );
 
-            if ( StringUtils.isEmpty( packageName ) )
-            {
-                ps_found = json.getPackageState() == null ?
-                                null :
-                                json.getPackageState()
-                                    .stream()
-                                    .filter( ps -> cpe.equals( ps.getCpe() ) )
-                                    .findAny()
-                                    .orElse( null );
-            }
-            else
-            {
-                ps_found = json.getPackageState() == null ?
-                                null :
-                                json.getPackageState()
-                                    .stream()
-                                    .filter( ps -> cpe.equals( ps.getCpe() ) )
-                                    .filter( ps -> packageName.equals( ps.getPackageName() ) )
-                                    .findAny()
-                                    .orElse( null );
-
-            }
-
+            PackageState ps_found = searchPackageState(json);
+            
+            
             if ( ps_found != null )
             {
                 String fixed_state = ps_found.getFixState();
@@ -160,28 +259,8 @@ public class SecurityDataProcessor
             }
             else
             {
-                AffectedRelease ar_found;
-                if ( StringUtils.isEmpty( packageName ) )
-                {
-                    ar_found = json.getAffectedRelease() == null ?
-                                    null :
-                                    json.getAffectedRelease()
-                                        .stream()
-                                        .filter( ar -> cpe.equals( ar.getCpe() ) )
-                                        .findAny()
-                                        .orElse( null );
-                }
-                else
-                {
-                    ar_found = json.getAffectedRelease() == null ?
-                                    null :
-                                    json.getAffectedRelease()
-                                        .stream()
-                                        .filter( ar -> cpe.equals( ar.getCpe() ) )
-                                        .filter( ar -> packageName.equals( ar.getPackage() ) )
-                                        .findAny()
-                                        .orElse( null );
-                }
+                AffectedRelease ar_found = searchAffectedRelease(json);
+                
 
                 if ( ar_found != null )
                 {
