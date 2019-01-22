@@ -216,6 +216,30 @@ public class SecurityDataProcessorTest
     }
 
 
+    @Test
+    public void getMajorVersionTest() throws Exception
+    {
+        // test with cve-2017-7536-multi-rhoar.json
+        givenThat(get(urlEqualTo("/CVE-mock"))
+        .willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));
+
+        SrcClrWrapper wrapper = new SrcClrWrapper();
+
+        /* While setting 7.2 to product version, if cpe:/a:redhat:jboss_fuse:7.2 does not exist
+           cpe:/a:redhat:jboss_fuse:7(its major version) must be matched. 
+        */
+     
+        FieldUtils.writeField( wrapper, "product", "cpe:/a:redhat:jboss_fuse:7.2", true );
+        
+        SecurityDataProcessor sdp = new SecurityDataProcessor(wrapper.getProduct(), mock_url);
+        
+        ProcessorResult sdpr = sdp.process("CVE-mock");
+        assertEquals("fixed_state is affected", sdpr.getMessage());
+        assertEquals(true, sdpr.getFail() );
+    }
+
     /**
      * Executes a method on an object instance.  The name and parameters of
      * the method are specified.  The method will be executed and the value
