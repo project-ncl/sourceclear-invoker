@@ -35,7 +35,7 @@
     - shell: |
         cd $WORKSPACE
         curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/archive/srcclr-1.0.tar.gz > invoker.tgz
-        tar xzf invoker.tar --strip-components=1
+        tar xzf invoker.tgz --strip-components=1
     - maven-target:
         pom: pom.xml
         goals: '-Pjenkins test -Dmaven.buildNumber.skip=true -DargLine=''-Dsourceclear="${DEBUG} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=${NAME} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
