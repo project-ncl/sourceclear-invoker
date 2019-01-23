@@ -15,7 +15,7 @@
  */
 package com.redhat.engineering.srcclr.internal;
 
-import com.redhat.engineering.srcclr.ConfigurationFileProvider;
+import com.redhat.engineering.srcclr.utils.ConfigurationFileProvider;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMRules;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
@@ -63,10 +63,10 @@ public class ConfigurationFileTest
 
     @Test
     @BMRules( rules = {
-                    @BMRule( name = "home-config-srcclr", targetClass = "com.redhat.engineering.srcclr.ConfigurationFileProvider",
+                    @BMRule( name = "home-config-srcclr", targetClass = "com.redhat.engineering.srcclr.utils.ConfigurationFileProvider",
                                  targetMethod = "getConfig", targetLocation = "AT ENTRY", condition = "$1.contains(\".srcclr\")",
                                  action = "return com.redhat.engineering.srcclr.internal.ConfigurationFileTest.userConfig" ),
-                    @BMRule( name = "global-config-srcclr", targetClass = "com.redhat.engineering.srcclr.ConfigurationFileProvider",
+                    @BMRule( name = "global-config-srcclr", targetClass = "com.redhat.engineering.srcclr.utils.ConfigurationFileProvider",
                              targetMethod = "getConfig", targetLocation = "AT ENTRY", condition = "$1.contains(\"etc\")",
                              action = "return com.redhat.engineering.srcclr.internal.ConfigurationFileTest.systemConfig" )
     } )
@@ -85,10 +85,10 @@ public class ConfigurationFileTest
 
     @Test
     @BMRules( rules = {
-                    @BMRule( name = "user-config-srcclr", targetClass = "com.redhat.engineering.srcclr.ConfigurationFileProvider",
+                    @BMRule( name = "user-config-srcclr", targetClass = "com.redhat.engineering.srcclr.utils.ConfigurationFileProvider",
                                  targetMethod = "getConfig", targetLocation = "AT ENTRY", condition = "$1.contains(\".srcclr\")",
                                  action = "return com.redhat.engineering.srcclr.internal.ConfigurationFileTest.userConfig" ),
-                    @BMRule( name = "global-config-srcclr", targetClass = "com.redhat.engineering.srcclr.ConfigurationFileProvider",
+                    @BMRule( name = "global-config-srcclr", targetClass = "com.redhat.engineering.srcclr.utils.ConfigurationFileProvider",
                              targetMethod = "getConfig", targetLocation = "AT ENTRY", condition = "$1.contains(\"etc\")",
                              action = "return com.redhat.engineering.srcclr.internal.ConfigurationFileTest.systemConfig" )
     } )
@@ -106,10 +106,10 @@ public class ConfigurationFileTest
 
     @Test
     @BMRules( rules = {
-                    @BMRule( name = "user-config-srcclr", targetClass = "com.redhat.engineering.srcclr.ConfigurationFileProvider",
+                    @BMRule( name = "user-config-srcclr", targetClass = "com.redhat.engineering.srcclr.utils.ConfigurationFileProvider",
                                  targetMethod = "getConfig", targetLocation = "AT ENTRY", condition = "$1.contains(\".srcclr\")",
                                  action = "return com.redhat.engineering.srcclr.internal.ConfigurationFileTest.userConfig" ),
-                    @BMRule( name = "global-config-srcclr", targetClass = "com.redhat.engineering.srcclr.ConfigurationFileProvider",
+                    @BMRule( name = "global-config-srcclr", targetClass = "com.redhat.engineering.srcclr.utils.ConfigurationFileProvider",
                              targetMethod = "getConfig", targetLocation = "AT ENTRY", condition = "$1.contains(\"etc\")",
                              action = "return com.redhat.engineering.srcclr.internal.ConfigurationFileTest.systemConfig" )
     } )

@@ -22,6 +22,7 @@ import com.redhat.engineering.srcclr.notification.EmailNotifier;
 import com.redhat.engineering.srcclr.notification.Notifier;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.ScanResult;
+import com.redhat.engineering.srcclr.utils.ConfigurationFileProvider;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import com.redhat.engineering.srcclr.utils.ManifestVersionProvider;
 import lombok.Getter;
@@ -50,8 +51,9 @@ public class SrcClrWrapper implements Callable<Void>
 {
     static final String UNMATCHED = " (unmatched args are passed directly to SourceClear)";
 
-    private static final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
+    private static CommandLine cl;
 
+    private final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
 
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     private boolean debug;
@@ -92,7 +94,8 @@ public class SrcClrWrapper implements Callable<Void>
         final ExceptionHandler handler = new ExceptionHandler();
         try
         {
-            new CommandLine( new SrcClrWrapper() ).parseWithHandlers( new CommandLine.RunAll(), handler, args );
+            cl = new CommandLine( new SrcClrWrapper() );
+            cl.parseWithHandlers( new CommandLine.RunAll(), handler, args );
 
             if ( handler.isParseException() )
             {
@@ -125,6 +128,9 @@ public class SrcClrWrapper implements Callable<Void>
             (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME );
 
         rootLogger.setLevel( Level.DEBUG );
+
+        logger.debug ( "{}", cl.getCommandSpec().versionProvider() );
+        logger.debug ( "{}", cl.getCommandSpec().defaultValueProvider() );
     }
 
 
