@@ -34,11 +34,11 @@
     # curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/archive/srcclr-0.2.tar.gz > invoker.tgz
     - shell: |
         cd $WORKSPACE
-        curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/archive/srcclr-0.2.tar.gz > invoker.tgz
+        curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/archive/srcclr-1.0.tar.gz > invoker.tgz
         tar xzf invoker.tar --strip-components=1
     - maven-target:
         pom: pom.xml
-        goals: '-Pjenkins test -Dmaven.buildNumber.skip=true -DargLine=''-Dsourceclear="-d --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${VERSIONPARAM}=${VERSION} ${NAMEPARAM} ${RECURSE} ${EXTRA}"'' '
+        goals: '-Pjenkins test -Dmaven.buildNumber.skip=true -DargLine=''-Dsourceclear="${DEBUG} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=${NAME} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
         maven-version: maven-3-5-0
         private-repository: false
 
@@ -57,23 +57,40 @@
     - string:
         default: ''
         name: NAME
-        description: Name of the binary to scan e.g. "KeyCloak". Only used if scanning a binary.
+        description: Product Name (as per CPE Name e.g. for "cpe:/a:redhat:openshift_application_runtimes:1.0" it is openshift_application_runtimes)
+    - string:
+        default: ''
+        name: VERSION
+        description: Product Version
+    - string:
+        default: ''
+        name: PACKAGE
+        description: Optional subpackage used in conjunction with CPE data e.g. "vertx".
     - string:
         default: master
-        description: Either, for SCM scanning, a SCM reference (e.g. branch/tag/commit) or
-          for binary scanning an explicit version (e.g. 1.2.1.Final).
-        name: VERSION
+        description: Only used for SCM scanning. A SCM reference (e.g. branch/tag/commit).
+        name: SCMVERSION
+    - choice:
+        choices:
+        - cve
+        - cvss
+        description: 'Choose whether to use CVE (PST approved) or CVSS scanning.'
+        name: PROCESSOR_TYPE
     - dynamic-choice:
         name: THRESHOLD
         script: 'return list = [ 1,2,3,4,5,6,7,8,9,10 ]'
         description: |-
-          Threshold for Vulnerability Scoring from 1-10. based on CVSS ( https://www.first.org/cvss/v2/guide ).
+          Only used for CVSS scanning. Threshold for Vulnerability Scoring from 1-10 (based on CVSS https://www.first.org/cvss/v2/guide ).
           Default is 1 which means fail on all found vulnerabilities.
     - bool:
         default: false
         description: Enable recursive scanning of this project. This should NOT normally
           be required unless the project is rooted within a subdirectory. Only used if scanning a SCM repository.
         name: RECURSIVE
+    - bool:
+        default: false
+        description: Enable debug
+        name: DEBUGGING
     - string:
         default: ''
         description: Optional extra parameters to SourceClear.
@@ -95,13 +112,16 @@
           } else {
           map.put("RECURSE","")
           }
+          if ( DEBUGGING == "true" ) {
+          map.put("DEBUG"," -d ")
+          } else {
+          map.put("DEBUG","")
+          }
 
           if ( SCAN_TYPE == "scm" ) {
-          map.put("VERSIONPARAM"," --ref")
-          map.put("NAMEPARAM", "")
+          map.put("SCMVERSIONPARAM"," --ref=${SCMVERSION}")
           } else {
-          map.put("VERSIONPARAM"," --rev")
-          map.put("NAMEPARAM", "--name=${NAME}")
+          map.put("SCMVERSIONPARAM","")
           }
 
           return map
