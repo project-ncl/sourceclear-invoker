@@ -27,7 +27,7 @@
 
   <groupId>com.redhat.engineering</groupId>
   <artifactId>srcclr</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>1.0</version>
 
   <name>SourceClear JUnit Wrapper</name>
   <url>https://github.com/project-ncl/sourceclear-invoker</url>
@@ -52,7 +52,7 @@
     <connection>scm:git:http://github.com/project-ncl/sourceclear-invoker.git</connection>
     <developerConnection>scm:git:git@github.com:project-ncl/sourceclear-invoker.git</developerConnection>
     <url>http://github.com/project-ncl/sourceclear-invoker</url>
-    <tag>HEAD</tag>
+    <tag>srcclr-1.0</tag>
   </scm>
 
 
