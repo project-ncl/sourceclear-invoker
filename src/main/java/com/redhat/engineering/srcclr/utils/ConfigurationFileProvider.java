@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.engineering.srcclr;
+package com.redhat.engineering.srcclr.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.OptionSpec;
 
@@ -39,9 +37,9 @@ public class ConfigurationFileProvider
     private static final String ETC_CONFIG_FILE =
                     File.separatorChar + "etc" + File.separatorChar + "srcclr" + File.separatorChar + "invoker.properties";
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
     private Properties configuration = new Properties();
+
+    private String targetConfig;
 
     public ConfigurationFileProvider()
     {
@@ -58,7 +56,7 @@ public class ConfigurationFileProvider
             {
                 throw new CommandLine.PicocliException( "Unable to read properties file " + invokerHomeProperties, e );
             }
-            logger.info( "Read configuration from {} with contents {} ", invokerHomeProperties, configuration );
+            targetConfig = invokerHomeProperties.toString();
         }
         else if ( invokerEtcProperties.exists() )
         {
@@ -70,7 +68,7 @@ public class ConfigurationFileProvider
             {
                 throw new CommandLine.PicocliException( "Unable to read properties file " + invokerEtcProperties, e );
             }
-            logger.info( "Read configuration from {} with contents {} ", invokerEtcProperties, configuration );
+            targetConfig = invokerEtcProperties.toString();
         }
     }
 
@@ -98,5 +96,11 @@ public class ConfigurationFileProvider
     private File getConfig( String target )
     {
         return new File( target );
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Read configuration from " + targetConfig + " with contents " + configuration;
     }
 }

@@ -29,6 +29,7 @@ public class ManifestVersionProvider
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+
    /**
      * Returns version information for a command.
      * @return version information (each string in the array is displayed on a separate line)
@@ -81,5 +82,11 @@ public class ManifestVersionProvider
             logger.warn( "Error getting SCM revision: {}", e.getMessage() );
         }
         return scmRevision;
+    }
+
+    @Override
+    public String toString ()
+    {
+        return getVersion()[0];
     }
 }
