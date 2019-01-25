@@ -17,7 +17,9 @@ package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SrcClrInvoker;
 import com.redhat.engineering.srcclr.utils.InternalException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -31,6 +33,9 @@ import static org.junit.Assert.assertTrue;
 public class InvokerTest
 {
     private final SrcClrInvoker srccr = new SrcClrInvoker();
+
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void verifylocatingsrcclTest() throws IOException

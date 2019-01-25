@@ -58,14 +58,7 @@ public class SecurityDataProcessorParameterizedTest
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
-    public TestRule watcher = new TestWatcher() {
-         protected void starting(Description description) {
-            logger.info("Starting test: <<< {} >>>>", description.getMethodName());
-         }
-    };
-    
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().httpsPort(8089)); 
+    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().httpsPort(8089));
     private final String mock_url = "https://localhost:8089/";
 
     @Before
@@ -102,7 +95,7 @@ public class SecurityDataProcessorParameterizedTest
 
     @Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {     
+        return Arrays.asList(new Object[][] {
                  { "cpe:/a:redhat:jboss_data_grid:7", false, "" }, // fixed_state: will not fix
                  { "cpe:/a:redhat:openshift_application_runtimes:1.0", false, "" },  // fixed_state: not affected
                  { "arbitrary_cpe", true, "No cpe exists" },
@@ -146,7 +139,7 @@ public class SecurityDataProcessorParameterizedTest
         if (sdpr.getFail())
         {
             logger.info("message: {}", sdpr.getMessage());
-        }   
+        }
 
         return sdpr;
     }

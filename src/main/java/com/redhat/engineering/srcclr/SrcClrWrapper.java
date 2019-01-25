@@ -34,6 +34,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -92,7 +93,7 @@ public class SrcClrWrapper implements Callable<Void>
 
     public static void main( String[] args ) throws Exception
     {
-        final ExceptionHandler handler = new ExceptionHandler();
+        final ExceptionHandler<List<Object>> handler = new ExceptionHandler<>();
         try
         {
             cl = new CommandLine( new SrcClrWrapper() );
