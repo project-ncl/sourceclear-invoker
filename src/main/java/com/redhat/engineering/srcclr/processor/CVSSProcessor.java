@@ -61,7 +61,7 @@ public class CVSSProcessor implements ScanResult
         }
         if ( matched.size() > 0 )
         {
-            matched.stream().findAny().ifPresent( p -> logger.info ("Report is {}", p.getScanReport() ) );
+            matched.stream().findAny().ifPresent( p -> logger.info ("Report is {}\n", p.getScanReport() ) );
         }
         return matched;
     }

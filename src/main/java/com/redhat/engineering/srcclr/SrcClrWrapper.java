@@ -19,6 +19,7 @@ import ch.qos.logback.classic.Level;
 import com.redhat.engineering.srcclr.converters.ProcessorConvertor;
 import com.redhat.engineering.srcclr.converters.ThresholdConverter;
 import com.redhat.engineering.srcclr.notification.EmailNotifier;
+import com.redhat.engineering.srcclr.notification.LogFileNotifier;
 import com.redhat.engineering.srcclr.notification.Notifier;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.ScanResult;
@@ -32,6 +33,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -86,8 +88,7 @@ public class SrcClrWrapper implements Callable<Void>
 
     private String cpe;
 
-    // TODO: Long term should support multiple types of notification.
-    private Notifier notifier = new EmailNotifier();
+    private Set<Notifier> notifier = new HashSet<>();
 
     public static void main( String[] args ) throws Exception
     {
@@ -119,6 +120,12 @@ public class SrcClrWrapper implements Callable<Void>
         // then we could have used https://github.com/stevespringett/CPE-Parser
         cpe = "cpe:/a:redhat:" + product + ':' + version;
 
+        if ( isNotEmpty ( emailAddress ) && isNotEmpty ( emailServer ) )
+        {
+            notifier.add( new EmailNotifier() );
+        }
+        notifier.add( new LogFileNotifier() );
+
         return null;
     }
 
@@ -134,11 +141,11 @@ public class SrcClrWrapper implements Callable<Void>
     }
 
 
-    void notifyListeners( String scanInfo, Set<ProcessorResult> v )
+    void notifyListeners( String scanInfo, Set<ProcessorResult> v ) throws InternalException
     {
-        if ( isNotEmpty ( emailAddress ) && isNotEmpty ( emailServer ) )
+        for ( Notifier n : notifier )
         {
-            notifier.notify( this, scanInfo, v );
+            n.notify( this, scanInfo, v );
         }
     }
 

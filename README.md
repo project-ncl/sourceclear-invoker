@@ -77,5 +77,4 @@ Its main use is to be ran inside Jenkins as a JUnit test suite e.g.
 
 ### Notes
 
-Currently the code requires the product name and version to be passed in. It will assemble a CPE from that information. While we did consider using the [CPE parser library](https://github.com/stevespringett/CPE-Parser)
-due to the fact we are not currently parsing or comparing CPEs the extra library isn't required.
+Currently the code requires the product name and version to be passed in. It will assemble a CPE from that information. While we did consider using the [CPE parser library](https://github.com/stevespringett/CPE-Parser) but due to the fact we are not currently parsing or comparing CPEs the extra library isn't required.

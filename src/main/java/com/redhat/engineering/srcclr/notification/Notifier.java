@@ -17,10 +17,11 @@ package com.redhat.engineering.srcclr.notification;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
+import com.redhat.engineering.srcclr.utils.InternalException;
 
 import java.util.Set;
 
 public interface Notifier
 {
-    void notify( SrcClrWrapper parent, String scanInfo, Set<ProcessorResult> v );
+    void notify( SrcClrWrapper parent, String scanInfo, Set<ProcessorResult> v ) throws InternalException;
 }

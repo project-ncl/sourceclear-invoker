@@ -21,14 +21,19 @@ import com.redhat.engineering.srcclr.json.sourceclear.Version;
 import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.utils.InternalException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.rules.TemporaryFolder;
 import org.subethamail.wiser.Wiser;
 import org.subethamail.wiser.WiserMessage;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,32 +41,26 @@ import java.util.Set;
 
 import static junit.framework.TestCase.assertTrue;
 
-public class EmailNotifierTest
+public class LogFileNotifierTest
 {
-    private final int port = 25000;
-    private Wiser wiser;
-
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
-    @Before
-    public void before()
-    {
-        wiser = Wiser.port(port);
-        wiser.start();
-    }
+    @Rule
+    public final TemporaryFolder folder = new TemporaryFolder( );
+
 
     @Test
-    public void testSendMail () throws IllegalAccessException, InternalException
+    public void testWriteLogFile () throws IllegalAccessException, InternalException, IOException
     {
         SrcClrWrapper wrapper = new SrcClrWrapper();
+        Notifier n = new LogFileNotifier();
 
         FieldUtils.writeField( wrapper, "product", "TEST PRODUCT", true );
-        FieldUtils.writeField( wrapper, "emailAddress", "test@test.com", true );
-        FieldUtils.writeField( wrapper, "emailServer", "localhost", true );
 
-        Notifier n = new EmailNotifier();
-        FieldUtils.writeStaticField( EmailNotifier.class, "port", port, true );
+        File newTarget = new File(folder.newFolder(), FieldUtils.readDeclaredField( n, "target", true ).toString());
+
+        FieldUtils.writeField( n, "target", newTarget, true );
 
         ProcessorResult pr = new ProcessorResult();
         Library l = new Library();
@@ -80,12 +79,7 @@ public class EmailNotifierTest
         processorResults.add( pr );
         n.notify( wrapper, "", processorResults );
 
-        List<WiserMessage> messages = wiser.getMessages();
-        for ( WiserMessage wm : messages )
-        {
-//            System.out.println ("### Got message " + wm.toString());
-            assertTrue ( wm.toString().contains( "TEST PRODUCT" ));
-            assertTrue ( wm.toString().contains( "CVE-123456789" ));
-        }
+        assertTrue( FileUtils.readFileToString( newTarget, Charset.defaultCharset()).contains( "Located 1 possible vulnerability within product TEST PRODUCT" ) );
+        assertTrue( newTarget.toString().contains( "target" ) );
     }
 }
