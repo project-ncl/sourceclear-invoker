@@ -131,6 +131,9 @@
         keep-long-stdio: false
         health-scale-factor: 1.0
         allow-empty-results: false
+    - archive:
+        artifacts: '**/target/vulnerabilityLogFile.txt'
+        allow-empty: true
     triggers: []
     wrappers:
       - build-user-vars
