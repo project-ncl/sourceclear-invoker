@@ -60,16 +60,8 @@ public class SecurityDataProcessorTest
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().httpsPort(8089)); 
+    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().httpsPort(8089));
     private final String mock_url = "https://localhost:8089/";
-
-    @Rule
-    public TestRule watcher = new TestWatcher() {
-         protected void starting(Description description) {
-            logger.info("Starting test: <<< {} >>>>", description.getMethodName());
-         }
-    };
-    
 
     @Before
     public void ignoreCert() throws Exception
@@ -103,7 +95,7 @@ public class SecurityDataProcessorTest
     }
 
     @Test
-    // test where packageState and affectRelease don't exist 
+    // test where packageState and affectRelease don't exist
     public void fieldNullTest() throws Exception
     {
         givenThat(get(urlEqualTo("/null"))
@@ -128,7 +120,7 @@ public class SecurityDataProcessorTest
         SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
 
         executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
-    }   
+    }
 
     @Test
     public void packageTest() throws Exception
@@ -158,14 +150,14 @@ public class SecurityDataProcessorTest
         assertEquals("fixed_state is affected", sdpr.getMessage());
         assertEquals(true, sdpr.getFail() );
 
-        // Test 2: springboot 
+        // Test 2: springboot
         FieldUtils.writeField( wrapper, "packageName", package_notaffected, true );
         sdp.setPackageName(wrapper.getPackageName());
 
         sdpr = sdp.process("CVE-mock");
 
         assertEquals(false, sdpr.getFail() );
-        
+
     }
 
     @Test
@@ -180,9 +172,9 @@ public class SecurityDataProcessorTest
         SrcClrWrapper wrapper = new SrcClrWrapper();
 
         FieldUtils.writeField( wrapper, "product", "cpe:/a:redhat:jboss_fuse:7", true );
-        
+
         SecurityDataProcessor sdp = new SecurityDataProcessor(wrapper.getProduct(), mock_url);
-        
+
         // both tests should PASS by finding the cpe's info when package is not set
         // TEST 1: when not calling setPackageName()
         ProcessorResult sdpr = sdp.process("CVE-mock");
@@ -198,15 +190,15 @@ public class SecurityDataProcessorTest
         assertEquals(true, sdpr.getFail() );
 
     }
-    
+
     @Test
     public void failByNoCVETest() throws Exception
     {
-        // need test this case with real API rather than using mock 
+        // need test this case with real API rather than using mock
 
         String cpe="cpe:/a:redhat:openshift_application_runtimes:1.0";
         String cve_id="CVE-nonexistent";
-        
+
         SecurityDataProcessor sdp = new SecurityDataProcessor(cpe);
 
         ProcessorResult sdpr = sdp.process( cve_id);
@@ -228,13 +220,13 @@ public class SecurityDataProcessorTest
         SrcClrWrapper wrapper = new SrcClrWrapper();
 
         /* While setting 7.2 to product version, if cpe:/a:redhat:jboss_fuse:7.2 does not exist
-           cpe:/a:redhat:jboss_fuse:7(its major version) must be matched. 
+           cpe:/a:redhat:jboss_fuse:7(its major version) must be matched.
         */
-     
+
         FieldUtils.writeField( wrapper, "product", "cpe:/a:redhat:jboss_fuse:7.2", true );
-        
+
         SecurityDataProcessor sdp = new SecurityDataProcessor(wrapper.getProduct(), mock_url);
-        
+
         ProcessorResult sdpr = sdp.process("CVE-mock");
         assertEquals("fixed_state is affected", sdpr.getMessage());
         assertEquals(true, sdpr.getFail() );
