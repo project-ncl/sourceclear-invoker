@@ -124,6 +124,7 @@ public class Binary implements Callable<Void>
             }
             Map<String,String> env = new HashMap<>(  );
             env.put( "SRCCLR_SCM_NAME", name );
+            env.put( "SRCCLR_MAX_DEPTH", "100" );
 
             List<String> args = new ArrayList<>();
             args.add ( "--scm-rev" );
