@@ -23,6 +23,7 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.goots.exploder.Exploder;
+import org.goots.jdownloader.JDownloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,8 +109,16 @@ public class Binary implements Callable<Void>
             logger.debug( "Created temporary as {} and downloading {} to {} using temporary directory of {} with name of {}",
                           urlDownloadLocation, processedUrl, target, temporaryLocation, name);
 
-            // TODO : Implement concurrent axel/aria2c downloader
-            FileUtils.copyURLToFile( processedUrl, target );
+            // JDownloader does not support file: protocols so just copy the file in those circumstances.
+
+            if ( processedUrl.getProtocol().equals( "file" ) )
+            {
+                Files.copy( new File( processedUrl.getPath() ).toPath(), target.toPath() );
+            }
+            else
+            {
+                new JDownloader( processedUrl ).target( target.getAbsolutePath() ).execute();
+            }
 
             // Don't attempt to unpack if we have a single jar file.
             if ( ! target.getName().endsWith( ArchiveStreamFactory.JAR ) )

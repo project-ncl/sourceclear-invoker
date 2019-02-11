@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 
-import java.io.FileNotFoundException;
+import java.nio.file.NoSuchFileException;
 import java.util.UUID;
 
 import static junit.framework.TestCase.assertTrue;
@@ -43,7 +43,7 @@ public class SourceClearInvokerTest
     @Rule
 	public final ProvideSystemProperty overideHome = new ProvideSystemProperty("user.home", UUID.randomUUID().toString() );
 
-    @Test( expected = FileNotFoundException.class )
+    @Test( expected = NoSuchFileException.class )
     public void runBinarySC1() throws Exception
     {
         try
