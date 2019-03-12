@@ -28,6 +28,7 @@ Wrap SourceClear and invoke it.
   -p, --product=<product>    Product Name
   -v, --product-version=<version>   Version of the product
   --package=<subpackage> CPE Subpackage Name
+  --trace                Enables trace logging from SourceClear. Disables JSON output.
   -d, --debug            Enable debug.
   -e, --exception        Throw exception on vulnerabilities found.
   -h, --help             Show this help message and exit.

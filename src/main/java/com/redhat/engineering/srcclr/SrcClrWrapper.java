@@ -58,6 +58,9 @@ public class SrcClrWrapper implements Callable<Void>
 
     private final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
 
+    @Option( names = { "--trace" }, description = "Enable trace. Will DISABLE JSON OUTPUT" )
+    private boolean trace;
+
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
     private boolean debug;
 

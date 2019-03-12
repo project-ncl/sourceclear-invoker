@@ -152,4 +152,23 @@ public class SourceClearInvokerTest
         assertFalse( systemRule.getLog().contains( "score 7.5" ) );
         assertTrue( systemRule.getLog().contains( "2017-2646" ) );
     }
+
+    @Test
+    public void verifyTrace() throws Exception
+    {
+        try
+        {
+            System.setProperty( SC,
+                                "--trace --processor=cvss -p=product -v=0 -t 8 scm --url=https://github.com/srcclr/example-java-maven.git --ref=a4c94e9 --no-upload" );
+            wrapper.runSourceClear();
+
+            assertTrue( systemRule.getLog().contains( "com.sourceclear.agent.services.ScanServiceImpl" ) );
+
+        }
+        finally
+        {
+            System.clearProperty( SC );
+        }
+    }
+
 }

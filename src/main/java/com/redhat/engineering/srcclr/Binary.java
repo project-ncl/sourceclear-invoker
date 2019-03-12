@@ -153,11 +153,13 @@ public class Binary implements Callable<Void>
             // Add target folder
             args.add( temporaryLocation.toFile().getAbsolutePath() );
 
-            SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
+            SourceClearJSON json = new SrcClrInvoker(parent.isTrace()).execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
             Set<ProcessorResult> matched = parent.getProcessor().process( parent, json );
-            Record record = json.getRecords().get( 0 );
+
             if ( parent.isException() && matched.size() > 0 )
             {
+                Record record = json.getRecords().get( 0 );
+
                 parent.notifyListeners( this.toString(),
                                         matched.stream().filter( ProcessorResult::getNotify ).collect( Collectors.toSet()) );
 

@@ -16,6 +16,7 @@
 package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SrcClrInvoker;
+import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 
 public class InvokerTest
 {
-    private final SrcClrInvoker srccr = new SrcClrInvoker();
+    private final SrcClrInvoker srccr = new SrcClrInvoker(false);
 
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();

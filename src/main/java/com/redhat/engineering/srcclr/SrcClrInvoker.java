@@ -45,6 +45,13 @@ public class SrcClrInvoker
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private final boolean trace;
+
+    public SrcClrInvoker( boolean trace )
+    {
+        this.trace = trace;
+    }
+
     public enum ScanType
     {
         SCM, BINARY, OTHER
@@ -78,7 +85,10 @@ public class SrcClrInvoker
 
         // If we add --debug before the scan type command then that enables vast
         // amount of debugging (but breaks the json output).
-        // command.add( "--debug" );
+        if ( trace )
+        {
+            command.add( "--debug" );
+        }
         if ( type == ScanType.SCM || type == ScanType.BINARY)
         {
             command.add( "scan" );
@@ -95,7 +105,7 @@ public class SrcClrInvoker
 
         Path temporaryLocation = Files.createTempDirectory( "sourceclear-invoker-" );
 
-        SourceClearJSON json = null;
+        SourceClearJSON json;
         try
         {
             logger.info( "Invoking {} ....", command );
@@ -117,7 +127,7 @@ public class SrcClrInvoker
             {
                 throw new InternalException( "Error executing SourceClear - found no library dependencies");
             }
-            else if ( type != ScanType.OTHER )
+            else if ( type != ScanType.OTHER && !trace )
             {
                 ObjectMapper mapper = new ObjectMapper().configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
                 json = mapper.readValue( output, SourceClearJSON.class );
@@ -126,6 +136,7 @@ public class SrcClrInvoker
             }
             else
             {
+                json = new SourceClearJSON();
                 logger.info( output );
             }
         }

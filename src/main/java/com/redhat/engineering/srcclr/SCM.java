@@ -84,15 +84,16 @@ public class SCM implements Callable<Void>
             args.addAll( unmatched );
         }
 
-        SourceClearJSON json = new SrcClrInvoker().execSourceClear( SrcClrInvoker.ScanType.SCM, env, args );
+        SourceClearJSON json = new SrcClrInvoker(parent.isTrace()).execSourceClear( SrcClrInvoker.ScanType.SCM, env, args );
 
 //        logger.info( "Found json unmatched {} ", json.getRecords().size() );
 
-        Record record = json.getRecords().get( 0 );
         Set<ProcessorResult> matched = parent.getProcessor().process ( parent, json );
 
         if ( parent.isException() && matched.size() > 0 )
         {
+            Record record = json.getRecords().get( 0 );
+
             parent.notifyListeners( this.toString(), matched.stream().filter( ProcessorResult::getNotify ).collect( Collectors.toSet()) );
 
             throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
