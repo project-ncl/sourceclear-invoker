@@ -26,6 +26,7 @@ import org.zeroturnaround.exec.InvalidExitValueException;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.stream.slf4j.Slf4jStream;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,6 +58,12 @@ public class SrcClrInvoker
         SCM, BINARY, OTHER
     }
 
+    public String locateSourceClearJRE() throws IOException
+    {
+        return getDefaultSrcClrLocation().toRealPath().getParent().getParent().toString() +
+                        File.separatorChar + "jre" + File.separatorChar + "bin" + File.separatorChar + "java";
+    }
+
     public Path locateSourceClearJar() throws IOException
     {
         List<Path> result =
@@ -79,7 +86,7 @@ public class SrcClrInvoker
     public SourceClearJSON execSourceClear( ScanType type, Map<String, String> env, List<String> args ) throws IOException, InternalException
     {
         List<String> command = new ArrayList<>();
-        command.add( "java" );
+        command.add( locateSourceClearJRE() );
         command.add( "-jar" );
         command.add( locateSourceClearJar().toString() );
 
@@ -156,7 +163,6 @@ public class SrcClrInvoker
 
     private Path getDefaultSrcClrLocation()
     {
-        // TODO: Query RPM DB? Assumption is currently its always /usr/local/bin/srcclr.
         return Paths.get( DEFAULT_LOCATION );
     }
 }

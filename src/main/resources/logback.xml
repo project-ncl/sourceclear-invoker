@@ -23,8 +23,10 @@
     </encoder>
   </appender>
 
+  <logger name="org.goots.jdownloader" level="INFO" />
   <logger name="org.goots.exploder" level="INFO" />
   <logger name="org.simplejavamail" level="INFO" />
+  <logger name="org.apache.http" level="WARN"/>
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

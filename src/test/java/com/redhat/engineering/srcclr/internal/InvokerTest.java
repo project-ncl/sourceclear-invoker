@@ -16,12 +16,12 @@
 package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SrcClrInvoker;
-import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -43,6 +43,13 @@ public class InvokerTest
     {
         Path result = srccr.locateSourceClearJar();
         assertTrue( result.toFile().exists() );
+    }
+
+    @Test
+    public void verifylocatingsrccljvmTest() throws IOException
+    {
+        String result = srccr.locateSourceClearJRE();
+        assertTrue( new File( result ).exists() );
     }
 
     @Test
