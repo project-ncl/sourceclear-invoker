@@ -35,7 +35,7 @@ public class CVSSProcessor implements ScanResult
     @Override
     public Set<ProcessorResult> process( SrcClrWrapper parent, SourceClearJSON json ) throws InternalException
     {
-        Record record = json.getRecords().stream().findFirst().orElse( new Record());
+        Record record = json.getRecords().stream().findFirst().orElse( new Record() );
         List<Library> libs = record.getLibraries();
         Set<ProcessorResult> matched = new HashSet<>( );
 

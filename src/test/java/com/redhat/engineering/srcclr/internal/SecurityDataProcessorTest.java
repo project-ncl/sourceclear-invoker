@@ -16,20 +16,15 @@
 package com.redhat.engineering.srcclr.internal;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-
 import com.redhat.engineering.srcclr.SrcClrWrapper;
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.SecurityDataProcessor;
-
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
-import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
