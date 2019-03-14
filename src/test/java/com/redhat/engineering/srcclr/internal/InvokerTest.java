@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 
 public class InvokerTest
 {
-    private final SrcClrInvoker srccr = new SrcClrInvoker(false);
+    private final SrcClrInvoker srccr = new SrcClrInvoker( false );
 
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -71,7 +71,23 @@ public class InvokerTest
         assertEquals( "6", result );
 
         String sourceclear = "--url=https://github.com/release-engineering/koji-build-finder.git --ref=v1.0.";
-        String []arguments = sourceclear.trim().split( "\\s+|=" );
+        String[] arguments = sourceclear.trim().split( "\\s+|=" );
         assertEquals( 4, arguments.length );
+    }
+
+
+    @Test
+    public void testStringSplit2() throws InternalException
+    {
+        String output = "AN ERROR! \r\n {\r\n  \"metadata\" : "
+                        + "{\r\n    \"requestDate\" : \"2019-03-14T10:41:26.309+0000\"\r\n  },\r\n  \"records\" : [ "
+                        + "{\r\n    \"metadata\" : {\r\n      \"recordType\" : \"SCAN\",\r\n      \"report\" : ";
+
+        SrcClrInvoker si = new SrcClrInvoker( false );
+
+        String result = si.stripInvalidOutput( output );
+
+        assertTrue ( systemRule.getLog().contains( "ERROR" ) );
+        assertTrue( ! result.contains( "ERROR" ) );
     }
 }

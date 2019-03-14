@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
 import com.redhat.engineering.srcclr.utils.InternalException;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeroturnaround.exec.InvalidExitValueException;
@@ -35,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +44,8 @@ import java.util.stream.Collectors;
 public class SrcClrInvoker
 {
     private final static String DEFAULT_LOCATION = "/usr/local/bin/srcclr";
+
+    private static final Pattern REGEXP = Pattern.compile("(?s)(^[^{]*)?\\{(.+)");
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -125,17 +128,15 @@ public class SrcClrInvoker
                             readOutput( true ).
                             execute().
                             outputUTF8();
-            if ( output.contains( "Encountered errors while collecting component information" ) )
-            {
-                logger.warn( "Unknown errors encountered collecting component information." );
-                output = StringUtils.remove( output, "Encountered errors while collecting component information." );
-            }
+
             if ( output.contains( "SourceClear found no library dependencies." ) )
             {
                 throw new InternalException( "Error executing SourceClear - found no library dependencies");
             }
             else if ( type != ScanType.OTHER && !trace )
             {
+                output = stripInvalidOutput( output );
+
                 ObjectMapper mapper = new ObjectMapper().configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
                 json = mapper.readValue( output, SourceClearJSON.class );
 
@@ -164,5 +165,24 @@ public class SrcClrInvoker
     private Path getDefaultSrcClrLocation()
     {
         return Paths.get( DEFAULT_LOCATION );
+    }
+
+
+    public String stripInvalidOutput( String output ) throws InternalException
+    {
+        Matcher m = REGEXP.matcher( output );
+
+        if ( m.matches() && m.groupCount() == 2 )
+        {
+            if ( m.group( 1 ).length() > 0 )
+            {
+                logger.warn( "Found problems when invoking: {}", m.group( 1 ) );
+            }
+            return '{' + m.group( 2 );
+        }
+        else
+        {
+            throw new InternalException( "Invalid split - gave group count of " + m.groupCount() + " for " + output );
+        }
     }
 }
