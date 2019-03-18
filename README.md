@@ -20,9 +20,9 @@ Usage: SrcClrWrapper [-dehV] [--email-address=<emailAddress>]
                      [--email-server=<emailServer>] [-c=<product>]
                      [--processor=<processor>] [-t=<threshold>] [COMMAND]
 Wrap SourceClear and invoke it.
-      --email-address=<emailAddress>
-                         Email address to notify. Domain portion will be used as FROM
-                           address
+      --email-address=<emailAddress>[,<emailAddress>...]
+                         Comma separated list of email addresses to notify. Domain portion of
+                         first will be used as FROM address
       --email-server=<emailServer>
                          SMTP Server to use to send notification email
   -p, --product=<product>    Product Name

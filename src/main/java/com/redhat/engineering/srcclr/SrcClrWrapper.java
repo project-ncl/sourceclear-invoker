@@ -33,6 +33,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -87,8 +88,10 @@ public class SrcClrWrapper implements Callable<Void>
     @Option ( names = "--email-server", description = "SMTP Server to use to send notification email" )
     private String emailServer;
 
-    @Option ( names = "--email-address", description = "Email address to notify. Domain portion will be used as FROM address")
-    private String emailAddress;
+    @Option ( names = "--email-address",
+              description = "Comma separated list of email address to notify. Domain portion will be used as FROM address",
+              split = ",")
+    private List<String> emailAddresses = new ArrayList<>(  );
 
     private String cpe;
 
@@ -124,7 +127,7 @@ public class SrcClrWrapper implements Callable<Void>
         // then we could have used https://github.com/stevespringett/CPE-Parser
         cpe = "cpe:/a:redhat:" + product + ':' + version;
 
-        if ( isNotEmpty ( emailAddress ) && isNotEmpty ( emailServer ) )
+        if ( emailAddresses.size() > 0 && isNotEmpty ( emailServer ) )
         {
             notifier.add( new EmailNotifier() );
         }

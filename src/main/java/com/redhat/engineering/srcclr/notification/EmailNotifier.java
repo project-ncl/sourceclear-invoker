@@ -50,23 +50,31 @@ public class EmailNotifier extends DefaultStringNotifier
     public void notify( SrcClrWrapper parent, String scanInfo, Set<ProcessorResult> processorResults )
     {
         String result = toString( parent, scanInfo, processorResults );
+        final String userEmailAddress;
 
         // If the Jenkins BUILD_USER_EMAIL exists use that in preference to the default email from address.
-        String userEmailAddress = System.getenv( "BUILD_USER_EMAIL" );
-        if ( isEmpty ( userEmailAddress ) )
+        String jenkins = System.getenv( "BUILD_USER_EMAIL" );
+        if ( isEmpty( jenkins ) )
         {
-            userEmailAddress = "soureclear-scanner" + parent.getEmailAddress().substring( parent.getEmailAddress().indexOf( "@" ) ) ;
+            String firstMail = parent.getEmailAddresses().get( 0 );
+            userEmailAddress = "sourceclear-scanner" + firstMail.substring( firstMail.indexOf( "@" ) );
+        }
+        else
+        {
+            userEmailAddress = jenkins;
         }
 
-        Email email = EmailBuilder.startingBlank()
-                                  .from( userEmailAddress )
-                                  .to( parent.getEmailAddress() )
-                                  .withSubject( "SRCCLR-WARN " + parent.getProduct() )
-                                  .withPlainText( result )
-                                  .buildEmail();
+        parent.getEmailAddresses().forEach( e -> {
+            Email email = EmailBuilder.startingBlank()
+                                      .from( userEmailAddress )
+                                      .to( e )
+                                      .withSubject( "SRCCLR-WARN " + parent.getProduct() )
+                                      .withPlainText( result )
+                                      .buildEmail();
 
-        logger.info ( "Sending email to {} on server {} ", parent.getEmailAddress(), parent.getEmailServer() );
+            logger.info( "Sending email to {} on server {} ", e, parent.getEmailServer() );
 
-        MailerBuilder.withSMTPServer( parent.getEmailServer(), port ).buildMailer().sendMail( email );
+            MailerBuilder.withSMTPServer( parent.getEmailServer(), port ).buildMailer().sendMail( email );
+        } );
     }
 }
