@@ -25,7 +25,7 @@
     block-downstream: false
     block-upstream: false
     retry-count: 3
-    node: sourceclear
+    node: psi
     builders:
     # The curl command should be altered whether we are using a stable tag, master, a branch etc.
     # Example for pulling master:
