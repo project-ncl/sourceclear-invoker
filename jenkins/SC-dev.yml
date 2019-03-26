@@ -29,13 +29,13 @@
     builders:
     # The curl command should be altered whether we are using a stable tag, master, a branch etc.
     # Example for pulling master:
-    # curl -s -k -L http://github.com/project-ncl/sourceclear-invoker/tarball/master > invoker.tar
+    # curl -s -k -L http://github.com/project-ncl/sourceclear-invoker/tarball/master > invoker.tgz
     # Example for pulling tagged release (requires tar command to be 'tar xzf') :
-    # curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/archive/srcclr-0.2.tar.gz > invoker.tgz
+    # curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/tarball/srcclr-1.1 > invoker.tgz
     - shell: |
         cd $WORKSPACE
-        curl -s -k -L http://github.com/project-ncl/sourceclear-invoker/tarball/master > invoker.tar
-        tar xf invoker.tar --strip-components=1
+        curl -s -k -L http://github.com/project-ncl/sourceclear-invoker/tarball/master > invoker.tgz
+        tar xzf invoker.tgz --strip-components=1
     - maven-target:
         pom: pom.xml
         goals: '-Pjenkins test -Dmaven.buildNumber.skip=true -DargLine=''-Dsourceclear="${DEBUG} ${TRACE} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=${NAME} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
