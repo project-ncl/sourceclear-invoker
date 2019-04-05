@@ -99,6 +99,18 @@
         default: ''
         description: Optional extra parameters to SourceClear.
         name: EXTRA
+    - raw:
+        xml: |
+          <com.datalex.jdkparameter.JavaParameterDefinition plugin="JDK_Parameter_Plugin@1.0">
+            <name>JDK Configuration</name>
+            <description>Select a JDK to invoke the project with (Default is 8).</description>
+            <defaultJDK>(Default)</defaultJDK>
+            <allowedJDKs class="java.util.Arrays$ArrayList">
+              <a class="string-array">
+                <string>(All)</string>
+              </a>
+            </allowedJDKs>
+          </com.datalex.jdkparameter.JavaParameterDefinition>
     properties:
     - inject:
         load-from-master: false
