@@ -118,12 +118,13 @@ public class SrcClrInvoker
         SourceClearJSON json;
         try
         {
-            logger.info( "Invoking {} ....", command );
+            logger.info( "Invoking in environment {} command {} ....", env, command );
             String output = new ProcessExecutor().command( command ).
                             environment( env ).
                             destroyOnExit().
                             directory( temporaryLocation.toFile() ).
                             exitValue( 0 ).
+                            redirectError( Slf4jStream.of( logger ).asDebug() ).
                             redirectOutput( Slf4jStream.of(logger).asDebug() ).
                             readOutput( true ).
                             execute().
@@ -151,7 +152,7 @@ public class SrcClrInvoker
         catch ( InvalidExitValueException e )
         {
             logger.error( e.getResult().outputUTF8() );
-            logger.error( "Invalid exit {} ", e );
+            logger.error( "Invalid exit ", e );
             throw new InternalException( "Error executing SourceClear ", e );
         }
         catch ( InterruptedException | TimeoutException e )

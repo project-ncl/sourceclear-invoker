@@ -42,19 +42,19 @@ public class SCM implements Callable<Void>
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
-    boolean debug;
+    private boolean debug;
 
     @Option(names = { "--url" }, required = true, paramLabel = "URL", description = "the SCM url")
-    String url;
+    private String url;
 
     @Option(names = { "--ref" }, /*arity = "0..1",*/ paramLabel = "REF", description = "the SCM reference (e.g. git sha, tag)")
-    String tag;
+    private String tag;
 
     @Unmatched
-    List<String> unmatched;
+    private List<String> unmatched;
 
     @ParentCommand
-    SrcClrWrapper parent; // picocli injects reference to parent command
+    private SrcClrWrapper parent; // picocli injects reference to parent command
 
     @Override
     public Void call() throws Exception
@@ -66,6 +66,7 @@ public class SCM implements Callable<Void>
 
         List<String> args = new ArrayList<>();
         Map<String,String> env = new HashMap<>(  );
+        parent.excludedEnvironment.forEach( s -> env.put( s, null ) );
 
         if ( isNotEmpty( url ) )
         {
@@ -98,6 +99,11 @@ public class SCM implements Callable<Void>
 
             throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
+        }
+        else if ( json.getRecords().size() > 0 )
+        {
+            logger.info( "Report is {}", json.getRecords().get( 0 ).getMetadata().getReport() );
+
         }
         return null;
     }

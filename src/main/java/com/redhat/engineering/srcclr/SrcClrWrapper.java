@@ -34,6 +34,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -96,6 +97,11 @@ public class SrcClrWrapper implements Callable<Void>
     private String cpe;
 
     private Set<Notifier> notifier = new HashSet<>();
+
+    /**
+     * List of environment variables to exclude from the SourceClear process to prevent interference.
+     */
+    protected final List<String>excludedEnvironment = Arrays.asList( "GIT_URL", "GIT_BRANCH" );
 
     public static void main( String[] args ) throws Exception
     {

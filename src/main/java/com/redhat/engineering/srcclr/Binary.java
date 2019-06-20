@@ -51,18 +51,18 @@ public class Binary implements Callable<Void>
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Option( names = { "-d", "--debug" }, description = "Enable debug." )
-    boolean debug;
+    private boolean debug;
 
     @Option(names = { "--url" }, required = true, paramLabel = "URL", description = "the remote file url")
-    String url;
+    private String url;
 
     @Unmatched
-    List<String> unmatched;
+    private List<String> unmatched;
 
     @ParentCommand
-    SrcClrWrapper parent; // picocli injects reference to parent command
+    private SrcClrWrapper parent; // picocli injects reference to parent command
 
-    String filename;
+    private String filename;
 
     /**
      * Computes a result, or throws an exception if unable to do so.
@@ -134,6 +134,7 @@ public class Binary implements Callable<Void>
             Map<String,String> env = new HashMap<>(  );
             env.put( "SRCCLR_SCM_NAME", name );
             env.put( "SRCCLR_MAX_DEPTH", "100" );
+            parent.excludedEnvironment.forEach( s -> env.put( s, null ) );
 
             List<String> args = new ArrayList<>();
             args.add ( "--scm-rev" );
@@ -165,6 +166,10 @@ public class Binary implements Callable<Void>
 
                 throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
+            }
+            else if ( json.getRecords().size() > 0 )
+            {
+                logger.info( "Report is {}", json.getRecords().get( 0 ).getMetadata().getReport() );
             }
             return null;
         }
