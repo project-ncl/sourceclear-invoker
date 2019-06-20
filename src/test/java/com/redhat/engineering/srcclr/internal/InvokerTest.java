@@ -29,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class InvokerTest
@@ -88,6 +89,6 @@ public class InvokerTest
         String result = si.stripInvalidOutput( output );
 
         assertTrue ( systemRule.getLog().contains( "ERROR" ) );
-        assertTrue( ! result.contains( "ERROR" ) );
+        assertFalse( result.contains( "ERROR" ) );
     }
 }

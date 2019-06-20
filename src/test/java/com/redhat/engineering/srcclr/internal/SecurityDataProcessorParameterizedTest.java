@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
@@ -56,7 +55,6 @@ public class SecurityDataProcessorParameterizedTest
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().httpsPort(8089));
-    private final String mock_url = "https://localhost:8089/";
 
     @Before
     public void ignoreCert() throws Exception
@@ -78,12 +76,7 @@ public class SecurityDataProcessorParameterizedTest
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
         // Create all-trusting host name verifier
-        HostnameVerifier allHostsValid = new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
+        HostnameVerifier allHostsValid = ( hostname, session ) -> true;
 
         // Install the all-trusting host verifier
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
@@ -116,7 +109,7 @@ public class SecurityDataProcessorParameterizedTest
         ProcessorResult sdpr = paramTestHelper();
         assertEquals(bExpected, sdpr.getFail());
 
-        if (sdpr.getFail() == true)
+        if ( sdpr.getFail() )
         {
             assertEquals(msgExpected, sdpr.getMessage());
         }
@@ -129,7 +122,7 @@ public class SecurityDataProcessorParameterizedTest
             .withHeader("Content-Type", "application/json")
             .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));
 
-        SecurityDataProcessor sdp = new SecurityDataProcessor(cpeInput, mock_url);
+        SecurityDataProcessor sdp = new SecurityDataProcessor( cpeInput, "https://localhost:8089/" );
 
         ProcessorResult sdpr = sdp.process( "CVE-mock");
         logger.info("to_notify {}, to_fail {}", sdpr.getNotify(), sdpr.getFail());

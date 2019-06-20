@@ -36,6 +36,7 @@ public class NotFoundInvokerTest
     }
 
     // Used in ByteMan rule.
+    @SuppressWarnings( "unused" )
     public static final Path DUMMY = Paths.get ("/tmp/srcclr");
 
     @Test (expected = IOException.class)

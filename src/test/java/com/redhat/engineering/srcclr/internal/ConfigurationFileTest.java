@@ -20,6 +20,7 @@ import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMRules;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -82,7 +83,6 @@ public class ConfigurationFileTest
     }
 
 
-
     @Test
     @BMRules( rules = {
                     @BMRule( name = "user-config-srcclr", targetClass = "com.redhat.engineering.srcclr.utils.ConfigurationFileProvider",
@@ -94,7 +94,7 @@ public class ConfigurationFileTest
     } )
     public void verifySystemConfig() throws IOException
     {
-        userConfig.delete();
+        Assert.assertTrue( userConfig.delete() );
         Properties p = new Properties();
         p.setProperty("config", "stest");
         p.store( new FileOutputStream( systemConfig ), null );

@@ -21,6 +21,7 @@ import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.SecurityDataProcessor;
 import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.http.client.HttpResponseException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,10 +32,8 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.cert.X509Certificate;
@@ -45,6 +44,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class SecurityDataProcessorTest
@@ -78,12 +78,7 @@ public class SecurityDataProcessorTest
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
         // Create all-trusting host name verifier
-        HostnameVerifier allHostsValid = new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
+        HostnameVerifier allHostsValid = ( hostname, session ) -> true;
 
         // Install the all-trusting host verifier
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
@@ -99,22 +94,22 @@ public class SecurityDataProcessorTest
                     .withBodyFile("security_data_processor_test/fields_null.json")));
 
         SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe", mock_url);
-        SecurityDataJSON json = (SecurityDataJSON)executeMethod( sdp, "lookUpAPI", new Object [] { "null" });
+        SecurityDataJSON json = (SecurityDataJSON)executeMethod( sdp, new Object [] { "null" });
 
         logger.info(json.toString());
 
-        assertTrue(json.getPackageState() == null);
-        assertTrue(json.getAffectedRelease() == null);
+        assertNull( json.getPackageState() );
+        assertNull( json.getAffectedRelease() );
     }
 
-    @Test(expected = FileNotFoundException.class)
+    @Test(expected = HttpResponseException.class)
     public void invalidLookUpTest() throws Exception
     {
         String cve_id = "CVE-nonexistent"; // non-existing cve id
 
         SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
 
-        executeMethod( sdp, "lookUpAPI", new Object [] { cve_id });
+        executeMethod( sdp, new Object [] { cve_id });
     }
 
     @Test
@@ -232,7 +227,7 @@ public class SecurityDataProcessorTest
      * the method are specified.  The method will be executed and the value
      * of it returned, even if the method would have private or protected access.
      */
-    private Object executeMethod( Object instance, String name, Object[] params ) throws Exception
+    private Object executeMethod( Object instance, Object[] params ) throws Exception
     {
         Class<?> c = instance.getClass();
 
@@ -242,7 +237,7 @@ public class SecurityDataProcessorTest
         for ( int i = 0; i < params.length; i++ )
             types[i] = params[i].getClass();
 
-        Method m = c.getDeclaredMethod( name, types );
+        Method m = c.getDeclaredMethod( "lookUpAPI", types );
         m.setAccessible( true );
 
         try

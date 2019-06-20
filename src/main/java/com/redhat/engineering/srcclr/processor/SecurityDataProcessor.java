@@ -21,18 +21,15 @@ import com.redhat.engineering.srcclr.json.securitydata.AffectedRelease;
 import com.redhat.engineering.srcclr.json.securitydata.PackageState;
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
 import com.redhat.engineering.srcclr.utils.InternalException;
+import kong.unirest.HttpResponse;
+import kong.unirest.JacksonObjectMapper;
+import kong.unirest.Unirest;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.HttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
 import java.util.stream.Stream;
 
 public class SecurityDataProcessor
@@ -41,11 +38,12 @@ public class SecurityDataProcessor
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private String cpe;
+    private final String cpe;
 
-    private String base_url = REDHAT_SECURITY_DATA_CVE;
+    private final String base_url;
 
     private String packageName;
+
 
     private String getCpeOfMajorVersion()
     {
@@ -71,24 +69,18 @@ public class SecurityDataProcessor
 
     public SecurityDataProcessor( String startCPE )
     {
-        cpe = startCPE;
+        this ( startCPE, REDHAT_SECURITY_DATA_CVE);
     }
 
     public SecurityDataProcessor( String startCPE, String startBaseUrl )
     {
         cpe = startCPE;
         base_url = startBaseUrl;
-    }
 
-    private static String readAll( Reader rd ) throws IOException
-    {
-        StringBuilder sb = new StringBuilder();
-        int cp;
-        while ( ( cp = rd.read() ) != -1 )
-        {
-            sb.append( (char) cp );
-        }
-        return sb.toString();
+        JacksonObjectMapper mapper = new JacksonObjectMapper(
+                        new ObjectMapper().configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false )
+                                          .configure( DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true ) );
+        Unirest.config().setObjectMapper( mapper ).addShutdownHook( true ).verifySsl( false );
     }
 
     private SecurityDataJSON lookUpAPI( String cve_id ) throws IOException
@@ -97,30 +89,23 @@ public class SecurityDataProcessor
 
         logger.debug( "Looking up {}", url );
 
-        HttpsURLConnection conn = (HttpsURLConnection) new URL( url ).openConnection();
+        HttpResponse<SecurityDataJSON> request = Unirest.get( url ).
+                        header("accept", "application/json").
+                        asObject( SecurityDataJSON.class );
 
-        // Dealing with 406 error returns
-        conn.setRequestProperty( "Accept", "*/*" );
-
-        SecurityDataJSON json;
-
-        try (InputStream is = conn.getInputStream())
+        if ( request.isSuccess() )
         {
-            BufferedReader rd = new BufferedReader( new InputStreamReader( is ) );
-            String jsonText = readAll( rd );
-
-            ObjectMapper mapper =
-                            new ObjectMapper().configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false )
-                                              .configure( DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true );
-            json = mapper.readValue( jsonText, SecurityDataJSON.class );
-
-            return json;
+            return request.getBody();
         }
-    }
+        else
+        {
+            throw new HttpResponseException( request.getStatus(), request.getStatusText() );
+        }
+     }
 
     private PackageState searchPackageState(SecurityDataJSON json)
     {
-        PackageState ps_found = null;
+        PackageState ps_found;
 
         if (json.getPackageState() == null) 
         {
@@ -172,7 +157,7 @@ public class SecurityDataProcessor
 
     private AffectedRelease searchAffectedRelease(SecurityDataJSON json)
     {
-        AffectedRelease ar_found = null;
+        AffectedRelease ar_found;
 
         if (json.getAffectedRelease() == null) 
         {
@@ -274,7 +259,7 @@ public class SecurityDataProcessor
                 }
             }
         }
-        catch ( FileNotFoundException e )
+        catch ( HttpResponseException e )
         {
             logger.info( "No CVE data in security data API. URL {}", e.getMessage() );
             sdpr.setMessage( "No CVE data in security data API" );
@@ -300,4 +285,4 @@ public class SecurityDataProcessor
         return sdpr;
 
     }
-}  
+}
