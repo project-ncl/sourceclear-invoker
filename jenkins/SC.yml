@@ -31,10 +31,10 @@
     # Example for pulling master:
     # curl -s -k -L http://github.com/project-ncl/sourceclear-invoker/tarball/master > invoker.tgz
     # Example for pulling tagged release (requires tar command to be 'tar xzf') :
-    # curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/tarball/srcclr-1.1 > invoker.tgz
+    # curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/tarball/srcclr-1.2 > invoker.tgz
     - shell: |
         cd $WORKSPACE
-        curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/tarball/srcclr-1.1 > invoker.tgz
+        curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/tarball/srcclr-1.2 > invoker.tgz
         tar xzf invoker.tgz --strip-components=1
     - maven-target:
         pom: pom.xml
