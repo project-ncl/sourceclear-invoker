@@ -22,6 +22,7 @@ import com.redhat.engineering.srcclr.utils.ScanException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +69,17 @@ public class SCM implements Callable<Void>
         Map<String,String> env = new HashMap<>(  );
         parent.excludedEnvironment.forEach( s -> env.put( s, null ) );
 
-        if ( isNotEmpty( url ) )
+        if ( ! url.startsWith( "http" ) )
+        {
+            if ( url.equals( "." ))
+            {
+                url = Paths.get("" ).toAbsolutePath().toString();
+            }
+            String target = url.replaceFirst( "file://", "" );
+            logger.info ("Scanning local file system with {}", target);
+            args.add( target );
+        }
+        else
         {
             args.add( "--url" );
             args.add( url );

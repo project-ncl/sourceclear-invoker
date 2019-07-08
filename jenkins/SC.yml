@@ -84,8 +84,8 @@
           Default is 1 which means fail on all found vulnerabilities.
     - bool:
         default: false
-        description: Enable recursive scanning of this project. This should NOT normally
-          be required unless the project is rooted within a subdirectory. Only used if scanning a SCM repository.
+        description: Enable recursive scanning of this project. This should NOT normally be required unless the project
+        is rooted within a subdirectory. May cause issues with multiple build types in a project. Only used if scanning a SCM repository.
         name: RECURSIVE
     - bool:
         default: false

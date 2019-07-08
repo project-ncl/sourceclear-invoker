@@ -23,6 +23,7 @@ import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.rules.TemporaryFolder;
 
 import java.nio.file.NoSuchFileException;
 import java.util.UUID;
@@ -50,6 +51,9 @@ public class SourceClearInvokerTest
 
     @Rule
     public final ProvideSystemProperty overideHome = new ProvideSystemProperty( "user.home", UUID.randomUUID().toString() );
+
+    @Rule
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test( expected = NoSuchFileException.class )
     public void runBinarySC1() throws Exception
@@ -104,6 +108,32 @@ public class SourceClearInvokerTest
 
         assertTrue( systemOutRule.getLog().contains( "score 7.5" ) );
         assertTrue( systemOutRule.getLog().contains( "GIT_URL=null" ) );
+    }
+
+    @Test
+    public void verifyLocalSCMScan() throws Exception
+    {
+        System.setProperty( SC,
+                            "--debug --processor=cvss -p=product -v=0 -t 8 scm --url=file://" +
+                            getClass().getProtectionDomain().getCodeSource().getLocation().getFile() + "../.. --no-upload" );
+        wrapper.runSourceClear();
+    }
+
+    @Test
+    public void verifyLocal2SCMScan() throws Exception
+    {
+        System.setProperty( SC,
+                            "--debug --processor=cvss -p=product -v=0 -t 8 scm --url=" +
+                                            getClass().getProtectionDomain().getCodeSource().getLocation().getFile() + "../.. --no-upload" );
+        wrapper.runSourceClear();
+    }
+
+    @Test
+    public void verifyLocalSCMCurrentDirectoryScan() throws Exception
+    {
+        System.setProperty( SC,
+                            "--debug --processor=cvss -p=product -v=0 -t 8 scm --url=. --no-upload" );
+        wrapper.runSourceClear();
     }
 
     @Test( expected = ScanException.class )
