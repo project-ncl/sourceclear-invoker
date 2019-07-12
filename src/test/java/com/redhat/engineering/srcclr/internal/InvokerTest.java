@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +57,7 @@ public class InvokerTest
     @Test
     public void execSCTest() throws IOException, InternalException
     {
-        srccr.execSourceClear( SrcClrInvoker.ScanType.OTHER, Collections.emptyMap(), Collections.singletonList( "--version" ) );
+        srccr.execSourceClear( SrcClrInvoker.ScanType.OTHER, new HashMap<>(  ), Collections.singletonList( "--version" ) );
     }
 
     @Test

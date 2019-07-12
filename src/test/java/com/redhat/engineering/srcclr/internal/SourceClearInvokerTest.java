@@ -156,4 +156,14 @@ public class SourceClearInvokerTest
 
         assertTrue( systemOutRule.getLog().contains( "com.sourceclear.agent.services.ScanServiceImpl" ) );
     }
+
+    @Test
+    public void runScmGoScan() throws Exception
+    {
+        System.setProperty( SC,
+                            "--trace --processor=cvss -p=product -v=0 -t 8 scm --url=https://github.com/srcclr/example-go-glide --ref=96b1262 --no-upload" );
+        wrapper.runSourceClear();
+        assertTrue( systemOutRule.getLog().contains( "2016-9121" ) );
+        assertTrue( systemOutRule.getLog().contains( "GOPATH" ) );
+    }
 }

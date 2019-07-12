@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
 import com.redhat.engineering.srcclr.utils.InternalException;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeroturnaround.exec.InvalidExitValueException;
@@ -114,6 +115,10 @@ public class SrcClrInvoker
         command.addAll( args );
 
         Path temporaryLocation = Files.createTempDirectory( "sourceclear-invoker-" );
+        Path goPathTemporaryLocation = Files.createTempDirectory( "sourceclear-gopath-" );
+        env.put( "GOPATH", goPathTemporaryLocation.toFile().getAbsolutePath() );
+        env.put( "SRCCLR_FORCE_GO_INSTALL", "true");
+
 
         SourceClearJSON json;
         try
@@ -159,6 +164,11 @@ public class SrcClrInvoker
         {
             logger.error( "Failed to execute SourceClear: ", e );
             throw new InternalException( "Error executing SourceClear ", e );
+        }
+        finally
+        {
+            FileUtils.deleteDirectory( temporaryLocation.toFile() );
+            FileUtils.deleteDirectory( goPathTemporaryLocation.toFile() );
         }
         return json;
     }
