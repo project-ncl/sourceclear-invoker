@@ -18,7 +18,7 @@ package com.redhat.engineering.srcclr;
 import com.redhat.engineering.srcclr.json.sourceclear.Record;
 import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
-import com.redhat.engineering.srcclr.utils.ScanException;
+import com.redhat.engineering.srcclr.utils.SourceClearResult;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -46,7 +46,7 @@ import static picocli.CommandLine.ParentCommand;
 import static picocli.CommandLine.Unmatched;
 
 @Command(name = "binary", description = "Scan a remote binary" + SrcClrWrapper.UNMATCHED, mixinStandardHelpOptions = true )
-public class Binary implements Callable<Void>
+public class Binary implements Callable<SourceClearResult>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -71,8 +71,10 @@ public class Binary implements Callable<Void>
      * @throws Exception if unable to compute a result
      */
     @Override
-    public Void call() throws Exception
+    public SourceClearResult call() throws Exception
     {
+        SourceClearResult result = new SourceClearResult();
+
         if ( debug || parent.isDebug() )
         {
             parent.enableDebug();
@@ -164,14 +166,15 @@ public class Binary implements Callable<Void>
                 parent.notifyListeners( this.toString(),
                                         matched.stream().filter( ProcessorResult::getNotify ).collect( Collectors.toSet()) );
 
-                throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
+
+                result.setMessage( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
             }
             else if ( json.getRecords().size() > 0 )
             {
                 logger.info( "Report is {}", json.getRecords().get( 0 ).getMetadata().getReport() );
             }
-            return null;
+            return result;
         }
         finally
         {

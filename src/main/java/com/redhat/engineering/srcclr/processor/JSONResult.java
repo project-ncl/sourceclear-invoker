@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public interface ScanResult
+public interface JSONResult
 {
     Pattern pattern = Pattern.compile( "(/records/0/libraries/)([0-9]+)(.*)");
 

@@ -21,17 +21,19 @@ import com.redhat.engineering.srcclr.converters.ThresholdConverter;
 import com.redhat.engineering.srcclr.notification.EmailNotifier;
 import com.redhat.engineering.srcclr.notification.LogFileNotifier;
 import com.redhat.engineering.srcclr.notification.Notifier;
+import com.redhat.engineering.srcclr.processor.JSONResult;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
-import com.redhat.engineering.srcclr.processor.ScanResult;
 import com.redhat.engineering.srcclr.utils.ConfigurationFileProvider;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import com.redhat.engineering.srcclr.utils.ManifestVersionProvider;
+import com.redhat.engineering.srcclr.utils.SourceClearResult;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParseResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,7 +77,7 @@ public class SrcClrWrapper implements Callable<Void>
 
     @Option( names = { "--processor" }, defaultValue = "cve", converter = ProcessorConvertor.class,
                     description = "Processor (cve|cvss) to use to analyse SourceClear results. Default is cve")
-    private ScanResult processor;
+    private JSONResult processor;
 
     @Option( names = { "-p", "--product" }, required = true, description = "Product Name (in same format as CPE Product Name)")
     private String product;
@@ -103,17 +105,37 @@ public class SrcClrWrapper implements Callable<Void>
      */
     protected final List<String>excludedEnvironment = Arrays.asList( "GIT_URL", "GIT_BRANCH" );
 
+
     public static void main( String[] args ) throws Exception
     {
+        System.exit( invokeWrapper( args ).isResult() ? 0 : 1 );
+    }
+
+    static SourceClearResult invokeWrapper( String[] args ) throws Exception
+    {
         final ExceptionHandler<List<Object>> handler = new ExceptionHandler<>();
+        SourceClearResult result;
+
         try
         {
             cl = new CommandLine( new SrcClrWrapper() );
+
             cl.parseWithHandlers( new CommandLine.RunAll(), handler, args );
 
             if ( handler.isParseException() )
             {
                 throw new InternalException( "Command line parse exception" );
+            }
+
+            ParseResult parseResult = cl.getParseResult();
+            if ( parseResult.subcommand() != null )
+            {
+                CommandLine sub = parseResult.subcommand().commandSpec().commandLine();
+                result = sub.getExecutionResult();
+            }
+            else
+            {
+                throw new InternalException( "Subcommand does not exist ; unable to extract result" );
             }
         }
         catch ( CommandLine.ExecutionException e )
@@ -124,6 +146,7 @@ public class SrcClrWrapper implements Callable<Void>
             }
             throw e;
         }
+        return result;
     }
 
     @Override

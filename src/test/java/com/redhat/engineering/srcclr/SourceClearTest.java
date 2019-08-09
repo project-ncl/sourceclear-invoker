@@ -16,6 +16,8 @@
 package com.redhat.engineering.srcclr;
 
 import com.redhat.engineering.srcclr.utils.PropertyHandler;
+import com.redhat.engineering.srcclr.utils.SourceClearResult;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,16 +40,15 @@ public class SourceClearTest
     public void runSourceClear() throws Exception
     {
         String[] arguments = PropertyHandler.convertProperty ( System.getProperty( "sourceclear" ) );
+
         logger.info( "Retrieved argument {}", Arrays.toString( arguments ) );
 
-        try
+        SourceClearResult result = SrcClrWrapper.invokeWrapper( arguments );
+
+        if ( ! result.isResult())
         {
-            SrcClrWrapper.main( arguments );
-        }
-        catch( Exception e )
-        {
-            logger.debug( "Caught exception executing the wrapper", e );
-            throw e;
+            logger.error( "Found issues when scanning {}", result.getMessage() );
+            Assert.fail(result.getMessage());
         }
     }
 }
