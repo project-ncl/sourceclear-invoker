@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.engineering.srcclr.notification;
+package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SrcClrWrapper;
 import com.redhat.engineering.srcclr.json.sourceclear.Library;
 import com.redhat.engineering.srcclr.json.sourceclear.Version;
 import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
+import com.redhat.engineering.srcclr.notification.EmailNotifier;
+import com.redhat.engineering.srcclr.notification.Notifier;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import org.apache.commons.lang.reflect.FieldUtils;
