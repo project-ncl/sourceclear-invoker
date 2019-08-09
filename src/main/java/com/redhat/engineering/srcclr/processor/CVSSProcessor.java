@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CVSSProcessor implements ScanResult
+public class CVSSProcessor implements JSONResult
 {
     private final Logger logger = LoggerFactory.getLogger( CVSSProcessor.class );
 

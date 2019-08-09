@@ -16,7 +16,7 @@
 package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SourceClearTest;
-import com.redhat.engineering.srcclr.utils.ScanException;
+import com.redhat.engineering.srcclr.utils.InternalException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
@@ -55,6 +55,16 @@ public class SourceClearInvokerTest
     @Rule
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+    @Test( expected = InternalException.class )
+    public void runParseFailure() throws Exception
+    {
+        System.setProperty( SC,
+                            "-d binary --FOOBAR " );
+        wrapper.runSourceClear();
+    }
+
+
+
     @Test( expected = NoSuchFileException.class )
     public void runBinarySC1() throws Exception
     {
@@ -63,7 +73,7 @@ public class SourceClearInvokerTest
         wrapper.runSourceClear();
     }
 
-    @Test( expected = ScanException.class )
+    @Test( expected = AssertionError.class )
     public void runBinarySC2() throws Exception
     {
         System.setProperty( SC,
@@ -99,7 +109,7 @@ public class SourceClearInvokerTest
         wrapper.runSourceClear();
     }
 
-    @Test( expected = ScanException.class )
+    @Test( expected = AssertionError.class )
     public void runScanFailureSC() throws Exception
     {
         System.setProperty( SC,
@@ -136,7 +146,7 @@ public class SourceClearInvokerTest
         wrapper.runSourceClear();
     }
 
-    @Test( expected = ScanException.class )
+    @Test( expected = AssertionError.class )
     public void runScanFailureSC_CVE() throws Exception
     {
         System.setProperty( SC,

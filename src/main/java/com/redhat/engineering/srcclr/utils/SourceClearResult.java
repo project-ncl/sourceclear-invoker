@@ -15,15 +15,20 @@
  */
 package com.redhat.engineering.srcclr.utils;
 
-public class ScanException extends Exception
-{
-    public ScanException( String message )
-    {
-        super( message );
-    }
+import lombok.Getter;
+import lombok.ToString;
 
-    public ScanException( String message, Exception e )
+@Getter
+@ToString
+public class SourceClearResult
+{
+    private boolean result = true;
+
+    private String message;
+
+    public void setMessage ( String message )
     {
-        super( message, e);
+        this.message = message;
+        this.result = false;
     }
 }

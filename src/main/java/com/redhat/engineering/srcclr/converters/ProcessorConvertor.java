@@ -17,11 +17,11 @@ package com.redhat.engineering.srcclr.converters;
 
 import com.redhat.engineering.srcclr.processor.CVEProcessor;
 import com.redhat.engineering.srcclr.processor.CVSSProcessor;
-import com.redhat.engineering.srcclr.processor.ScanResult;
+import com.redhat.engineering.srcclr.processor.JSONResult;
 import picocli.CommandLine;
 
 public class ProcessorConvertor
-                implements CommandLine.ITypeConverter<ScanResult>
+                implements CommandLine.ITypeConverter<JSONResult>
 {
     /**
      * Converts the specified command line argument value to some domain object.
@@ -29,7 +29,7 @@ public class ProcessorConvertor
      * @return the resulting domain object
      */
     @Override
-    public ScanResult convert( String value )
+    public JSONResult convert( String value )
     {
         switch ( value.trim().toLowerCase() )
         {

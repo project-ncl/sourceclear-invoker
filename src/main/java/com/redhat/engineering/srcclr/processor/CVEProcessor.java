@@ -31,7 +31,7 @@ import java.util.Set;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 public class CVEProcessor
-                implements ScanResult
+                implements JSONResult
 {
     private final Logger logger = LoggerFactory.getLogger( CVEProcessor.class );
 

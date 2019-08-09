@@ -18,7 +18,7 @@ package com.redhat.engineering.srcclr;
 import com.redhat.engineering.srcclr.json.sourceclear.Record;
 import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
-import com.redhat.engineering.srcclr.utils.ScanException;
+import com.redhat.engineering.srcclr.utils.SourceClearResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ import static picocli.CommandLine.ParentCommand;
 import static picocli.CommandLine.Unmatched;
 
 @Command(name = "scm", description = "Scan a SCM URL"+ SrcClrWrapper.UNMATCHED, mixinStandardHelpOptions = true )
-public class SCM implements Callable<Void>
+public class SCM implements Callable<SourceClearResult>
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -58,8 +58,10 @@ public class SCM implements Callable<Void>
     private SrcClrWrapper parent; // picocli injects reference to parent command
 
     @Override
-    public Void call() throws Exception
+    public SourceClearResult call() throws Exception
     {
+        SourceClearResult result = new SourceClearResult();
+
         if ( debug || parent.isDebug() )
         {
             parent.enableDebug();
@@ -108,7 +110,7 @@ public class SCM implements Callable<Void>
 
             parent.notifyListeners( this.toString(), matched.stream().filter( ProcessorResult::getNotify ).collect( Collectors.toSet()) );
 
-            throw new ScanException( "Found " + matched.size() + " vulnerabilities : " +
+            result.setMessage( "Found " + matched.size() + " vulnerabilities : " +
                              ( record.getMetadata().getReport() == null ? "no-report-available" : record.getMetadata().getReport() ) );
         }
         else if ( json.getRecords().size() > 0 )
@@ -116,7 +118,7 @@ public class SCM implements Callable<Void>
             logger.info( "Report is {}", json.getRecords().get( 0 ).getMetadata().getReport() );
 
         }
-        return null;
+        return result;
     }
 
     @Override
