@@ -15,14 +15,9 @@
  */
 package com.redhat.engineering.srcclr;
 
-import com.redhat.engineering.srcclr.utils.PropertyHandler;
 import com.redhat.engineering.srcclr.utils.SourceClearResult;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
 
 /**
  * This is the interface that Jenkins runs should use. Parameters to the jenkins runs
@@ -32,20 +27,14 @@ import java.util.Arrays;
  *
  *
  */
-public class SourceClearTest
+public class SourceClearTest extends SCBase
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
     @Test
     public void runSourceClear() throws Exception
     {
-        String[] arguments = PropertyHandler.convertProperty ( System.getProperty( "sourceclear" ) );
+        SourceClearResult result = exeSC();
 
-        logger.info( "Retrieved argument {}", Arrays.toString( arguments ) );
-
-        SourceClearResult result = SrcClrWrapper.invokeWrapper( arguments );
-
-        if ( ! result.isResult())
+        if ( ! result.isPass())
         {
             logger.error( "Found issues when scanning {}", result.getMessage() );
             Assert.fail(result.getMessage());

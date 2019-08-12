@@ -15,8 +15,9 @@
  */
 package com.redhat.engineering.srcclr.internal;
 
-import com.redhat.engineering.srcclr.SourceClearTest;
+import com.redhat.engineering.srcclr.SCBase;
 import com.redhat.engineering.srcclr.utils.InternalException;
+import com.redhat.engineering.srcclr.utils.SourceClearResult;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
@@ -34,12 +35,10 @@ import static org.junit.Assert.assertFalse;
 /**
  * Test for Jenkins interface.
  */
-public class SourceClearInvokerTest
+public class SourceClearInvokerTest extends SCBase
 {
     private static final String SC = "sourceclear";
-
-    private final SourceClearTest wrapper = new SourceClearTest();
-
+    
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
@@ -60,7 +59,7 @@ public class SourceClearInvokerTest
     {
         System.setProperty( SC,
                             "-d binary --FOOBAR " );
-        wrapper.runSourceClear();
+        exeSC();
     }
 
 
@@ -70,15 +69,17 @@ public class SourceClearInvokerTest
     {
         System.setProperty( SC,
                             "-p=product -d -v=8.0.18 binary --url=file:///home/user/foobar.jar --name=H2 Database --no-upload" );
-        wrapper.runSourceClear();
+        exeSC();
     }
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void runBinarySC2() throws Exception
     {
         System.setProperty( SC,
                             "--processor=cvss -p=product -d -v=2.1 binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --no-upload" );
-        wrapper.runSourceClear();
+        SourceClearResult r = exeSC();
+
+        assertFalse( r.isPass() );
     }
 
     @Test
@@ -86,8 +87,9 @@ public class SourceClearInvokerTest
     {
         System.setProperty( SC,
                             "--processor=cvss -p=product -d -v=1.0 binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar --no-upload" );
-        wrapper.runSourceClear();
+        SourceClearResult r = exeSC();
 
+        assertTrue( r.isPass() );
         assertTrue( systemOutRule.getLog().contains( "SRCCLR_SCM_NAME=product-1.0-commons-io-2.6.jar" ) );
     }
 
@@ -96,8 +98,9 @@ public class SourceClearInvokerTest
     {
         System.setProperty( SC,
                             "-t 10 -v=2.1 --product=PRODUCT --package=SUBPACKAGE -d binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --no-upload" );
-        wrapper.runSourceClear();
+        SourceClearResult r = exeSC();
 
+        assertTrue( r.isPass() );
         assertTrue( systemOutRule.getLog().contains( "SRCCLR_SCM_NAME=PRODUCT-2.1-SUBPACKAGE-commons-io-2.1.jar" ) );
     }
 
@@ -106,17 +109,19 @@ public class SourceClearInvokerTest
     {
         System.setProperty( SC,
                             "--processor=cvss -p=product -v=0 -t 8 scm --url=https://github.com/srcclr/example-java-maven.git --ref=a4c94e9 --no-upload" );
-        wrapper.runSourceClear();
+        SourceClearResult r = exeSC();
+        assertTrue( r.isPass() );
     }
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void runScanFailureSC() throws Exception
     {
         System.setProperty( SC,
                             "-p=product --product-version=0 scm --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
-        wrapper.runSourceClear();
 
-        assertTrue( systemOutRule.getLog().contains( "score 7.5" ) );
+        SourceClearResult r = exeSC();
+        assertFalse( r.isPass() );
+        assertTrue( systemOutRule.getLog().contains( "CVE ID 2018-15531" ) );
         assertTrue( systemOutRule.getLog().contains( "GIT_URL=null" ) );
     }
 
@@ -126,7 +131,8 @@ public class SourceClearInvokerTest
         System.setProperty( SC,
                             "--debug --processor=cvss -p=product -v=0 -t 8 scm --url=file://" +
                             getClass().getProtectionDomain().getCodeSource().getLocation().getFile() + "../.. --no-upload" );
-        wrapper.runSourceClear();
+        SourceClearResult r = exeSC();
+        assertTrue( r.isPass() );
     }
 
     @Test
@@ -135,7 +141,8 @@ public class SourceClearInvokerTest
         System.setProperty( SC,
                             "--debug --processor=cvss -p=product -v=0 -t 8 scm --url=" +
                                             getClass().getProtectionDomain().getCodeSource().getLocation().getFile() + "../.. --no-upload" );
-        wrapper.runSourceClear();
+        SourceClearResult r = exeSC();
+        assertTrue( r.isPass() );
     }
 
     @Test
@@ -143,18 +150,20 @@ public class SourceClearInvokerTest
     {
         System.setProperty( SC,
                             "--debug --processor=cvss -p=product -v=0 -t 8 scm --url=. --no-upload" );
-        wrapper.runSourceClear();
+        SourceClearResult r = exeSC();
+        assertTrue( r.isPass() );
     }
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void runScanFailureSC_CVE() throws Exception
     {
         System.setProperty( SC,
                             "-v 0 -p cve scm --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
-        wrapper.runSourceClear();
+        SourceClearResult r = exeSC();
 
-        assertFalse( systemOutRule.getLog().contains( "score 7.5" ) );
+        assertTrue( systemOutRule.getLog().contains( "CVE ID 2018-15531" ) );
         assertTrue( systemOutRule.getLog().contains( "2017-2646" ) );
+        assertFalse( r.isPass() );
     }
 
     @Test
@@ -162,8 +171,9 @@ public class SourceClearInvokerTest
     {
         System.setProperty( SC,
                             "--trace --processor=cvss -p=product -v=0 -t 8 scm --url=https://github.com/srcclr/example-java-maven.git --ref=a4c94e9 --no-upload" );
-        wrapper.runSourceClear();
+        SourceClearResult r = exeSC();
 
+        assertTrue( r.isPass() );
         assertTrue( systemOutRule.getLog().contains( "com.sourceclear.agent.services.ScanServiceImpl" ) );
     }
 
@@ -171,9 +181,33 @@ public class SourceClearInvokerTest
     public void runScmGoScan() throws Exception
     {
         System.setProperty( SC,
-                            "--trace --processor=cvss -p=product -v=0 -t 8 scm --url=https://github.com/srcclr/example-go-glide --ref=96b1262 --no-upload" );
-        wrapper.runSourceClear();
-        assertTrue( systemOutRule.getLog().contains( "2016-9121" ) );
+                            "--trace --processor=cvss -p=product -v=0 -t 6 scm --url=https://github.com/srcclr/example-go-glide --ref=96b1262 --no-upload" );
+        SourceClearResult r = exeSC();
+
+        assertFalse( r.isPass() );
+        assertTrue( systemOutRule.getLog().contains( "Invalid Curve Attack" ) );
         assertTrue( systemOutRule.getLog().contains( "GOPATH" ) );
+    }
+
+    @Test
+    public void runScanFailureExtraMVNParamsSC() throws Exception
+    {
+        System.setProperty( SC,
+                            "--trace -d -p=product --product-version=0 scm --maven-param=-Pnot-exist --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
+
+        SourceClearResult r = exeSC();
+        assertFalse( r.isPass() );
+        assertTrue( systemOutRule.getLog().contains( "[WARNING] The requested profile \"not-exist\" could not be activated because it does not exist." ) );
+    }
+
+    @Test
+    public void runScanFailureExtraMVN2ParamsSC() throws Exception
+    {
+        System.setProperty( SC,
+                            "--trace -d -p=product --product-version=0 scm --maven-param=\"-Pnot-exist -Palso-not-exist\" --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
+
+        SourceClearResult r = exeSC();
+        assertFalse( r.isPass() );
+        assertTrue( systemOutRule.getLog().contains( "[WARNING] The requested profile \"not-exist\" could not be activated because it does not exist." ) );
     }
 }

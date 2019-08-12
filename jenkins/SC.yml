@@ -38,7 +38,7 @@
         tar xzf invoker.tgz --strip-components=1
     - maven-target:
         pom: pom.xml
-        goals: '-Pjenkins test -Dmaven.buildNumber.skip=true -DargLine=''-Dsourceclear="${DEBUG} ${TRACE} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=${NAME} --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
+        goals: '-Pjenkins test -Dmaven.buildNumber.skip=true -DargLine=''-Dsourceclear="${DEBUG} ${TRACE} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=\"${NAME}\" --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${MVNPARAMS} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
         maven-version: maven-3-5-0
         private-repository: false
 
@@ -70,6 +70,10 @@
         default: master
         description: Only used for SCM scanning. A SCM reference (e.g. branch/tag/commit).
         name: SCMVERSION
+    - string:
+        default: ''
+        description: Only used for Maven scanning. Extra, optional, Maven Parameters.
+        name: MVNPARAMS
     - choice:
         choices:
         - cve
@@ -139,7 +143,10 @@
           } else {
           map.put("TRACE","")
           }
-
+          if ( MVNPARAMS.length() > 0)
+          {
+          map.put("MVNPARAMS","--maven-params=\"${MVNPARAMS}\"")
+          }
           if ( SCAN_TYPE == "scm" ) {
           map.put("SCMVERSIONPARAM"," --ref=${SCMVERSION}")
           } else {

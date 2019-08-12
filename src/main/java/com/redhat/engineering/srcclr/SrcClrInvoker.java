@@ -139,9 +139,9 @@ public class SrcClrInvoker
             {
                 throw new InternalException( "Error executing SourceClear - found no library dependencies");
             }
-            else if ( type != ScanType.OTHER && !trace )
+            else if ( type != ScanType.OTHER )
             {
-                output = stripInvalidOutput( output );
+                output = stripInvalidOutput( trace, output );
 
                 ObjectMapper mapper = new ObjectMapper().configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
                 json = mapper.readValue( output, SourceClearJSON.class );
@@ -179,8 +179,13 @@ public class SrcClrInvoker
     }
 
 
-    public String stripInvalidOutput( String output ) throws InternalException
+    public String stripInvalidOutput( boolean trace, String output ) throws InternalException
     {
+        if ( trace )
+        {
+            // The regex will strip the trace output for json processing.
+            output = output.replaceFirst( "(?m)[\\s\\S]+^ {2}(\"metadata\")", "{ $1");
+        }
         Matcher m = REGEXP.matcher( output );
 
         if ( m.matches() && m.groupCount() == 2 )
