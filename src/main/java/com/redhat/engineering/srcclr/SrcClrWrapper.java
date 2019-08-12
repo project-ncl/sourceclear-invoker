@@ -108,7 +108,7 @@ public class SrcClrWrapper implements Callable<Void>
 
     public static void main( String[] args ) throws Exception
     {
-        System.exit( invokeWrapper( args ).isResult() ? 0 : 1 );
+        System.exit( invokeWrapper( args ).isPass() ? 0 : 1 );
     }
 
     static SourceClearResult invokeWrapper( String[] args ) throws Exception

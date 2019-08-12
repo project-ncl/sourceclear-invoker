@@ -51,6 +51,9 @@ public class SCM implements Callable<SourceClearResult>
     @Option(names = { "--ref" }, /*arity = "0..1",*/ paramLabel = "REF", description = "the SCM reference (e.g. git sha, tag)")
     private String tag;
 
+    @Option(names = { "--maven-param" }, paramLabel = "MAVEN-PARAM", description = "extra maven parameters")
+    private String mavenParam;
+
     @Unmatched
     private List<String> unmatched;
 
@@ -90,6 +93,21 @@ public class SCM implements Callable<SourceClearResult>
         {
             args.add( "--ref" );
             args.add( tag );
+        }
+        if ( isNotEmpty( mavenParam ) )
+        {
+            // In case the parameter multiple and inside quotes, strip them off to add the default params.
+            mavenParam = mavenParam.trim();
+            if ( mavenParam.startsWith( "\"" ) )
+            {
+                mavenParam = mavenParam.substring( 1 );
+            }
+            if ( mavenParam.endsWith( "\"" ) )
+            {
+                mavenParam = mavenParam.substring( 0, mavenParam.length() - 1 );
+            }
+            String defaultCmds = " -Dcheckstyle.skip=true -e -DskipTests -DskipITs --fail-fast --nsu -Denforcer.skip=true ";
+            env.put( "SRCCLR_CUSTOM_MAVEN_COMMAND", mavenParam + defaultCmds );
         }
 
         if ( unmatched != null )

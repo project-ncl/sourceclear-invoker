@@ -22,13 +22,13 @@ import lombok.ToString;
 @ToString
 public class SourceClearResult
 {
-    private boolean result = true;
+    private boolean pass = true;
 
     private String message;
 
     public void setMessage ( String message )
     {
         this.message = message;
-        this.result = false;
+        this.pass = false;
     }
 }

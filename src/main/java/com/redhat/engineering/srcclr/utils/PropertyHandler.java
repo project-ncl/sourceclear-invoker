@@ -15,7 +15,9 @@
  */
 package com.redhat.engineering.srcclr.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,8 +25,6 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public class PropertyHandler
 {
-    //private static final Logger logger = LoggerFactory.getLogger( PropertyHandler.class );
-
     private static final String REGEX = "(.*(?:scm|binary))(.*)";
 
     private static final Pattern PATTERN = Pattern.compile( REGEX );
@@ -52,15 +52,40 @@ public class PropertyHandler
         {
             throw new InternalException( "Unable to correct match property string: " + property );
         }
-        String []first = m.group( 1 ).trim().split( "\\s+|=" );
-        String []last = m.group( 2 ).trim().split( "\\s+(?=-)");
+        ArrayList<String> result = new ArrayList<>( Arrays.asList( m.group( 1 ).trim().split( "\\s+|=" ) ) );
 
-        //logger.info( "Retrieved first {} ", Arrays.toString( first ) );
-        //logger.info( "Retrieved last {} ", Arrays.toString( last ) );
+        result.addAll( splitQuoted( m.group( 2 ).trim() ) );
 
-        String []result = Arrays.copyOf( first, first.length + last.length );
-        System.arraycopy(last, 0, result, first.length, last.length);
+        return result.toArray( new String[0] );
+    }
 
+    private static List<String> splitQuoted (String match)
+    {
+        List<String> result = new ArrayList<>(  );
+        boolean inQuote = false;
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i<match.length(); i++)
+        {
+            if ( match.charAt( i ) == '"' )
+            {
+                inQuote = !inQuote;
+            }
+            if ( match.charAt( i ) != ' ' ||
+                            // Allow space separation in quotes
+                            (match.charAt( i ) == ' ' && inQuote) )
+            {
+                sb.append( match.charAt( i ) );
+            }
+            // Space separated block (if we don't have multiple spaces)
+            else if ( match.charAt( i ) == ' ' && match.charAt( i-1 ) != ' ' && !inQuote)
+            {
+                result.add( sb.toString() );
+                sb.delete( 0, sb.length() );
+                inQuote = false;
+            }
+        }
+        result.add( sb.toString() );
         return result;
     }
 }
