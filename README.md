@@ -51,7 +51,7 @@ Scan a SCM URL
   -t, --threshold=<threshold>
                     Threshold on which exception is thrown.
   -V    Print version information and exit.
-
+  --maven-param     Extra Maven parameters
 
 Usage: SrcClrWrapper binary [-dehV] --name=NAME --url=URL
                             [-t=<threshold>]
