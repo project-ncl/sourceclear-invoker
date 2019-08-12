@@ -87,7 +87,7 @@ public class InvokerTest
 
         SrcClrInvoker si = new SrcClrInvoker( false );
 
-        String result = si.stripInvalidOutput( output );
+        String result = si.stripInvalidOutput( false, output );
 
         assertTrue ( systemRule.getLog().contains( "ERROR" ) );
         assertFalse( result.contains( "ERROR" ) );

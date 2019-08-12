@@ -181,11 +181,11 @@ public class SourceClearInvokerTest extends SCBase
     public void runScmGoScan() throws Exception
     {
         System.setProperty( SC,
-                            "--trace --processor=cvss -p=product -v=0 -t 8 scm --url=https://github.com/srcclr/example-go-glide --ref=96b1262 --no-upload" );
+                            "--trace --processor=cvss -p=product -v=0 -t 6 scm --url=https://github.com/srcclr/example-go-glide --ref=96b1262 --no-upload" );
         SourceClearResult r = exeSC();
 
-        assertTrue( r.isPass() );
-        assertTrue( systemOutRule.getLog().contains( "2016-9121" ) );
+        assertFalse( r.isPass() );
+        assertTrue( systemOutRule.getLog().contains( "Invalid Curve Attack" ) );
         assertTrue( systemOutRule.getLog().contains( "GOPATH" ) );
     }
 
@@ -193,7 +193,7 @@ public class SourceClearInvokerTest extends SCBase
     public void runScanFailureExtraMVNParamsSC() throws Exception
     {
         System.setProperty( SC,
-                            "--trace -p=product --product-version=0 scm --maven-param=-Pnot-exist --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
+                            "--trace -d -p=product --product-version=0 scm --maven-param=-Pnot-exist --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
 
         SourceClearResult r = exeSC();
         assertFalse( r.isPass() );
@@ -204,7 +204,7 @@ public class SourceClearInvokerTest extends SCBase
     public void runScanFailureExtraMVN2ParamsSC() throws Exception
     {
         System.setProperty( SC,
-                            "--trace -p=product --product-version=0 scm --maven-param=\"-Pnot-exist -Palso-not-exist\" --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
+                            "--trace -d -p=product --product-version=0 scm --maven-param=\"-Pnot-exist -Palso-not-exist\" --url=https://github.com/srcclr/example-java-maven.git --ref= --no-upload" );
 
         SourceClearResult r = exeSC();
         assertFalse( r.isPass() );
