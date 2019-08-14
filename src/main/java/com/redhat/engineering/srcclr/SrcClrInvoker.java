@@ -112,13 +112,16 @@ public class SrcClrInvoker
             command.add( "--scan-collectors");
             command.add( "jar");
         }
+        // TODO: PRODTASKS-678 : Workaround for SOFile Collector causing scan to fail.
+        command.add( "--skip-collectors=\"SOFile\"" );
+
         command.addAll( args );
 
         Path temporaryLocation = Files.createTempDirectory( "sourceclear-invoker-" );
         Path goPathTemporaryLocation = Files.createTempDirectory( "sourceclear-gopath-" );
         env.put( "GOPATH", goPathTemporaryLocation.toFile().getAbsolutePath() );
-        env.put( "SRCCLR_FORCE_GO_INSTALL", "true");
-
+        // Don't need to set this as the default value is true.
+        // env.put( "SRCCLR_FORCE_GO_INSTALL", "true");
 
         SourceClearJSON json;
         try
