@@ -128,17 +128,17 @@
         groovy-content: |
           def map = [:]
 
-          if ( RECURSIVE == "true" ) {
+          if ( "${RECURSIVE}" == "true" ) {
           map.put("RECURSE"," --recursive ")
           } else {
           map.put("RECURSE","")
           }
-          if ( DEBUGGING == "true" ) {
+          if ( "${DEBUGGING}" == "true" ) {
           map.put("DEBUG"," -d ")
           } else {
           map.put("DEBUG","")
           }
-          if ( TRACING == "true" ) {
+          if ( "${TRACING}" == "true" ) {
           map.put("TRACE"," --trace ")
           } else {
           map.put("TRACE","")
@@ -149,7 +149,7 @@
           } else {
           map.put("MVNPARAMETER", "")
           }
-          if ( SCAN_TYPE == "scm" ) {
+          if ( "${SCAN_TYPE}" == "scm" ) {
           map.put("SCMVERSIONPARAM"," --ref=${SCMVERSION}")
           } else {
           map.put("SCMVERSIONPARAM","")
