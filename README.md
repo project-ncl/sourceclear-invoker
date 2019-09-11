@@ -67,8 +67,8 @@ Scan a remote binary
 
 Its main use is to be ran inside Jenkins as a JUnit test suite e.g.
 
-    mvn -Pjenkins clean test -DargLine='-Dsourceclear="--url=https://github.com/release-engineering/koji-build-finder.git --ref=koji-build-finder-1.0.0"'
-
+    mvn -Dmaven.buildNumber.skip=true -Pjenkins clean test  '-DargLine=-Dsourceclear="--product-version=1.0.0 -p=koji-build-finder scm --url=https://github.com/release-engineering/koji-build-finder.git --ref=koji-build-finder-1.0.0"'
+    
 ## Features
 
 * It supports reading a configuration from the command or from `$HOME/.srcclr/invoker.properties`.
