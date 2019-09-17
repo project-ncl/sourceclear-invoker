@@ -26,9 +26,11 @@ public class SourceClearResult
 
     private String message;
 
-    public void setMessage ( String message )
+    public SourceClearResult setMessage ( String message )
     {
         this.message = message;
         this.pass = false;
+
+        return this;
     }
 }

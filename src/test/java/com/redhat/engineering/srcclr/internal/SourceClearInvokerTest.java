@@ -16,7 +16,6 @@
 package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SCBase;
-import com.redhat.engineering.srcclr.utils.InternalException;
 import com.redhat.engineering.srcclr.utils.SourceClearResult;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,7 +37,7 @@ import static org.junit.Assert.assertFalse;
 public class SourceClearInvokerTest extends SCBase
 {
     private static final String SC = "sourceclear";
-    
+
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
@@ -54,12 +53,14 @@ public class SourceClearInvokerTest extends SCBase
     @Rule
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Test( expected = InternalException.class )
+    @Test
     public void runParseFailure() throws Exception
     {
         System.setProperty( SC,
                             "-d binary --FOOBAR " );
-        exeSC();
+        SourceClearResult r = exeSC();
+        assertFalse( r.isPass() );
+        assertTrue( systemErrRule.getLog().contains( "Missing required options" ) );
     }
 
 
@@ -209,5 +210,25 @@ public class SourceClearInvokerTest extends SCBase
         SourceClearResult r = exeSC();
         assertFalse( r.isPass() );
         assertTrue( systemOutRule.getLog().contains( "[WARNING] The requested profile \"not-exist\" could not be activated because it does not exist." ) );
+    }
+
+    @Test
+    public void verifyHelp() throws Exception
+    {
+        System.setProperty( SC, "--help" );
+        SourceClearResult r = exeSC();
+
+        assertTrue( r.isPass() );
+        assertFalse( systemOutRule.getLog().contains( "Exception in thread" ) );
+    }
+
+    @Test
+    public void verifyNoParams() throws Exception
+    {
+        System.setProperty( SC, "" );
+        SourceClearResult r = exeSC();
+
+        assertFalse( r.isPass() );
+        assertFalse( systemOutRule.getLog().contains( "Exception in thread" ) );
     }
 }

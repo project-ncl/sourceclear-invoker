@@ -15,38 +15,55 @@
  */
 package com.redhat.engineering.srcclr.internal;
 
-import com.redhat.engineering.srcclr.SrcClrWrapper;
-import com.redhat.engineering.srcclr.utils.InternalException;
+import com.redhat.engineering.srcclr.SCBase;
+import com.redhat.engineering.srcclr.utils.SourceClearResult;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemErrRule;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import java.util.UUID;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class ThresholdTest
+public class ThresholdTest extends SCBase
 {
+    private static final String SC = "sourceclear";
+
+    @Rule
+    public final RestoreSystemProperties systemProperties = new RestoreSystemProperties();
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
     @Rule
 	public final SystemErrRule systemRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public final ProvideSystemProperty overideHome = new ProvideSystemProperty( "user.home", UUID.randomUUID().toString() );
 
-    @Test(expected = InternalException.class )
+    @Test
     public void invalidThreshold1Test() throws Exception
     {
-        SrcClrWrapper.main( new String [] { "-t", "-1", "scm" } );
+        System.setProperty( SC, "-t -1  scm" );
 
+        SourceClearResult r = exeSC();
+
+        assertFalse( r.isPass() );
         assertTrue( systemRule.getLog().contains( "Invalid CVSS Score parameter" ) );
     }
 
-    @Test(expected = InternalException.class)
+    @Test
     public void invalidThreshold2Test() throws Exception
     {
-        SrcClrWrapper.main( new String [] { "-t", "11", "scm" } );
+        System.setProperty( SC, "-t -11  scm" );
 
+        SourceClearResult r = exeSC();
+
+        assertFalse( r.isPass() );
         assertTrue( systemRule.getLog().contains( "Invalid CVSS Score parameter" ) );
     }
 }

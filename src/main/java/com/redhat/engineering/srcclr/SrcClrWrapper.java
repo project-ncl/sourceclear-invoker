@@ -124,18 +124,21 @@ public class SrcClrWrapper implements Callable<Void>
 
             if ( handler.isParseException() )
             {
-                throw new InternalException( "Command line parse exception" );
-            }
-
-            ParseResult parseResult = cl.getParseResult();
-            if ( parseResult.subcommand() != null )
-            {
-                CommandLine sub = parseResult.subcommand().commandSpec().commandLine();
-                result = sub.getExecutionResult();
+                result = new SourceClearResult().setMessage( "Command line parse exception" );
             }
             else
             {
-                throw new InternalException( "Subcommand does not exist ; unable to extract result" );
+                ParseResult parseResult = cl.getParseResult();
+                if ( parseResult.subcommand() != null && !parseResult.subcommand().isVersionHelpRequested()
+                                && !parseResult.subcommand().isUsageHelpRequested() )
+                {
+                    CommandLine sub = parseResult.subcommand().commandSpec().commandLine();
+                    result = sub.getExecutionResult();
+                }
+                else
+                {
+                    result = new SourceClearResult();
+                }
             }
         }
         catch ( CommandLine.ExecutionException e )

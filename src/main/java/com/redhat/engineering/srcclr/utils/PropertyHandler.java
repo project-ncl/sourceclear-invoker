@@ -42,15 +42,15 @@ public class PropertyHandler
      */
     public static String[] convertProperty (String property) throws InternalException
     {
-        if ( isEmpty( property ) )
+        if ( isEmpty( property ) || property.equals( "--help" ))
         {
-            throw new InternalException( "Invalid property string to match: " + property );
+            return new String [] { property };
         }
         Matcher m = PATTERN.matcher( property );
 
         if ( !m.matches() || m.groupCount() != 2)
         {
-            throw new InternalException( "Unable to correct match property string: " + property );
+            throw new InternalException( "Unable to correctly match property string: " + property + " (groupCount:" + m.groupCount() +')' );
         }
         ArrayList<String> result = new ArrayList<>( Arrays.asList( m.group( 1 ).trim().split( "\\s+|=" ) ) );
 
