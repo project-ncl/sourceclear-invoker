@@ -74,14 +74,16 @@ public class SCM implements Callable<SourceClearResult>
         Map<String,String> env = new HashMap<>(  );
         parent.excludedEnvironment.forEach( s -> env.put( s, null ) );
 
-        if ( ! url.startsWith( "http" ) )
+        if ( url.equals( "." ))
         {
-            if ( url.equals( "." ))
-            {
-                url = Paths.get("" ).toAbsolutePath().toString();
-            }
+            url = Paths.get("" ).toAbsolutePath().toString();
+            logger.info( "Scanning local file system with {}", url );
+            args.add( url );
+        }
+        else if ( url.startsWith( "file://" ))
+        {
             String target = url.replaceFirst( "file://", "" );
-            logger.info ("Scanning local file system with {}", target);
+            logger.info( "Scanning local file system with {}", target );
             args.add( target );
         }
         else

@@ -132,7 +132,7 @@ public class SrcClrInvoker
                             destroyOnExit().
                             directory( temporaryLocation.toFile() ).
                             exitValue( 0 ).
-                            redirectError( Slf4jStream.of( logger ).asDebug() ).
+                            redirectError( Slf4jStream.of( logger ).asError() ).
                             redirectOutput( Slf4jStream.of(logger).asDebug() ).
                             readOutput( true ).
                             execute().
@@ -160,7 +160,8 @@ public class SrcClrInvoker
         catch ( InvalidExitValueException e )
         {
             logger.error( e.getResult().outputUTF8() );
-            logger.error( "Invalid exit ", e );
+            logger.error( "Invalid exit: " + e.getMessage() );
+            logger.debug( "SourceClear process finished with an error ", e );
             throw new InternalException( "Error executing SourceClear ", e );
         }
         catch ( InterruptedException | TimeoutException e )

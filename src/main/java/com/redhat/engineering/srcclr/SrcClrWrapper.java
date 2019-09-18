@@ -60,7 +60,7 @@ public class SrcClrWrapper implements Callable<Void>
 
     private static CommandLine cl;
 
-    private final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
+    private static final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
 
     @Option( names = { "--trace" }, description = "Enable trace. Will DISABLE JSON OUTPUT" )
     private boolean trace;
@@ -145,9 +145,21 @@ public class SrcClrWrapper implements Callable<Void>
         {
             if ( e.getCause() != null && e.getCause() instanceof Exception )
             {
-                throw (Exception)e.getCause();
+                if ( e.getCause() instanceof InternalException && e.getCause().getCause() instanceof Exception)
+                {
+                    logger.debug( "Caught an internal exception", e );
+
+                    result = new SourceClearResult().setMessage( e.getCause().getCause().getMessage() );
+                }
+                else
+                {
+                    throw (Exception) e.getCause();
+                }
             }
-            throw e;
+            else
+            {
+                throw e;
+            }
         }
         return result;
     }

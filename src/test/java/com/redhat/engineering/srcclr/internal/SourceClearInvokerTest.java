@@ -63,8 +63,6 @@ public class SourceClearInvokerTest extends SCBase
         assertTrue( systemErrRule.getLog().contains( "Missing required options" ) );
     }
 
-
-
     @Test( expected = NoSuchFileException.class )
     public void runBinarySC1() throws Exception
     {
