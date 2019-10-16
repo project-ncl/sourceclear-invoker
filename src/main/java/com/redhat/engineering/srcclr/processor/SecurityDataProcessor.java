@@ -261,7 +261,11 @@ public class SecurityDataProcessor
         }
         catch ( HttpResponseException e )
         {
-            logger.info( "No CVE data in security data API. URL {}", e.getMessage() );
+            // Only report if we found an unexpected one.
+            if ( e.getStatusCode() != 404 )
+            {
+                logger.error( "No CVE data in security data API. URL {}", e.getMessage() );
+            }
             sdpr.setMessage( "No CVE data in security data API" );
             is_fail = true;
         }
