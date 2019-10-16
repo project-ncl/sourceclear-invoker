@@ -15,6 +15,7 @@
  */
 package com.redhat.engineering.srcclr.internal;
 
+import ch.qos.logback.classic.Level;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.redhat.engineering.srcclr.SrcClrWrapper;
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
@@ -46,6 +47,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SecurityDataProcessorTest
 {
@@ -82,13 +84,18 @@ public class SecurityDataProcessorTest
 
         // Install the all-trusting host verifier
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+
+        ch.qos.logback.classic.Logger rootLogger =
+                        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME );
+
+        rootLogger.setLevel( Level.DEBUG );
     }
 
     @Test
     // test where packageState and affectRelease don't exist
     public void fieldNullTest() throws Exception
     {
-        givenThat(get(urlEqualTo("/null"))
+        givenThat(get(urlEqualTo("/null.json"))
                 .willReturn(aResponse()
                     .withHeader("Content-Type", "application/json")
                     .withBodyFile("security_data_processor_test/fields_null.json")));
@@ -102,10 +109,28 @@ public class SecurityDataProcessorTest
         assertNull( json.getAffectedRelease() );
     }
 
-    @Test(expected = HttpResponseException.class)
+    @Test
     public void invalidLookUpTest() throws Exception
     {
-        String cve_id = "CVE-nonexistent"; // non-existing cve id
+        String cve_id = "nonexistent"; // non-existing cve id
+
+        SecurityDataProcessor sdp = new SecurityDataProcessor( "anycpe" );
+
+        try
+        {
+            executeMethod( sdp, new Object[] { cve_id } );
+            fail( "No exception thrown" );
+        }
+        catch ( HttpResponseException e )
+        {
+            assertTrue( e.getMessage().contains( "404" ) );
+        }
+    }
+
+    @Test
+    public void validLookUpTest() throws Exception
+    {
+        String cve_id = "2019-2975"; // valid cve id
 
         SecurityDataProcessor sdp = new SecurityDataProcessor("anycpe");
 
@@ -116,7 +141,7 @@ public class SecurityDataProcessorTest
     public void packageTest() throws Exception
     {
         // test with cve-2017-7536-multi-rhoar.json
-        givenThat(get(urlEqualTo("/CVE-mock"))
+        givenThat(get(urlEqualTo("/CVE-mock.json"))
         .willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));
@@ -154,7 +179,7 @@ public class SecurityDataProcessorTest
     public void packageEmptyTest() throws Exception
     {
         // test with cve-2017-7536-multi-rhoar.json
-        givenThat(get(urlEqualTo("/CVE-mock"))
+        givenThat(get(urlEqualTo("/CVE-mock.json"))
         .willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));
@@ -202,7 +227,7 @@ public class SecurityDataProcessorTest
     public void getMajorVersionTest() throws Exception
     {
         // test with cve-2017-7536-multi-rhoar.json
-        givenThat(get(urlEqualTo("/CVE-mock"))
+        givenThat(get(urlEqualTo("/CVE-mock.json"))
         .willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));

@@ -117,7 +117,7 @@ public class SecurityDataProcessorParameterizedTest
 
     private ProcessorResult paramTestHelper() throws Exception
     {
-        givenThat(get(urlEqualTo("/CVE-mock"))
+        givenThat(get(urlEqualTo("/CVE-mock.json"))
         .willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBodyFile("security_data_processor_test/cve-2017-7536-multi-rhoar.json")));

@@ -85,7 +85,7 @@ public class SecurityDataProcessor
 
     private SecurityDataJSON lookUpAPI( String cve_id ) throws IOException
     {
-        String url = base_url + cve_id;
+        String url = base_url + cve_id +".json";
 
         logger.debug( "Looking up {}", url );
 
