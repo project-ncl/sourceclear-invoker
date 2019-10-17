@@ -19,12 +19,14 @@ import com.redhat.engineering.srcclr.SrcClrWrapper;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class DefaultStringNotifier implements Notifier
 {
     String toString( SrcClrWrapper parent, String scanInfo, Set<ProcessorResult> processorResults )
     {
         // We know we have at least one result ; use it to extra the link to the full scan results.
+        @SuppressWarnings( "OptionalGetWithoutIsPresent" )
         ProcessorResult first = processorResults.stream().findFirst().get();
 
         StringBuffer sb = new StringBuffer( "Located " )
@@ -53,7 +55,10 @@ public abstract class DefaultStringNotifier implements Notifier
                                             .append ( "Vulnerability is " )
                                             .append( pRes.getVulnerability().getTitle() )
                                             .append( System.lineSeparator() )
+                                            .append( "Original SourceClear warning: " )
                                             .append( pRes.getVulnerability().getOverview() )
+                                            .append( System.lineSeparator() )
+                                            .append( pRes.getMessage() )
                                             .append( System.lineSeparator() )
                                             .append( "Original SourceClear version range " )
                                             // Every instance of Libraries/Details appears to be a valid size 1 list.
@@ -67,6 +72,14 @@ public abstract class DefaultStringNotifier implements Notifier
         );
         sb.append( System.lineSeparator() );
 
+        sb.append( processorResults.stream().map ( r -> r.getVulnerability().toString() ).collect( Collectors.joining( System.lineSeparator())));
+
         return sb.toString();
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.getClass().getName();
     }
 }

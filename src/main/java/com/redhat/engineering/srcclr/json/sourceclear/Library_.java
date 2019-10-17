@@ -18,10 +18,13 @@ package com.redhat.engineering.srcclr.json.sourceclear;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringExclude;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.redhat.engineering.srcclr.utils.Style.STYLE;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -33,6 +36,8 @@ public class Library_ {
     @JsonProperty("details")
     private List<Detail> details = new ArrayList<Detail>();
     @JsonProperty("_links")
+    // Not appending the links as that simply contains a cross-reference for the JSON stream.
+    @ToStringExclude
     private Links__ links;
 
     @JsonProperty("details")
@@ -57,7 +62,6 @@ public class Library_ {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("details", details).append("links", links).toString();
+        return new ToStringBuilder(this, STYLE).append("details", details).append("links", links).toString();
     }
-
 }

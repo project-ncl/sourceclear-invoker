@@ -42,8 +42,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Main entry point.
@@ -91,6 +91,12 @@ public class SrcClrWrapper implements Callable<Void>
 
     @Option ( names = "--email-server", description = "SMTP Server to use to send notification email" )
     private String emailServer;
+
+    @Option( names = "--json", defaultValue="target", description = "Directory path to output processed JSON as a file. Set to empty to disable." )
+    private String json;
+
+    @Option( names = "--log", defaultValue="target", description = "Directory path to output log file containing results. Set to empty to disable." )
+    private String log;
 
     @Option ( names = "--email-address",
               description = "Comma separated list of email address to notify. Domain portion will be used as FROM address",
@@ -177,7 +183,10 @@ public class SrcClrWrapper implements Callable<Void>
         {
             notifier.add( new EmailNotifier() );
         }
-        notifier.add( new LogFileNotifier() );
+        if ( isNotBlank( log ) )
+        {
+            notifier.add( new LogFileNotifier(log) );
+        }
 
         return null;
     }

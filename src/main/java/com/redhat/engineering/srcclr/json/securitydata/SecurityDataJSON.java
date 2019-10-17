@@ -18,9 +18,11 @@ package com.redhat.engineering.srcclr.json.securitydata;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
+
+import static com.redhat.engineering.srcclr.utils.Style.STYLE;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -173,7 +175,7 @@ public class SecurityDataJSON {
 
     @Override
     public String toString() {
-    return new ToStringBuilder(this).append("acknowledgement", acknowledgement).append("affectedRelease", affectedRelease).append("bugzilla", bugzilla).append("cvss", cvss).append("cvss3", cvss3).append("details", details).append("name", name).append("packageState", packageState).append("publicDate", publicDate).append("statement", statement).append("threatSeverity", threatSeverity).toString();
+    return new ToStringBuilder(this, STYLE).append("acknowledgement", acknowledgement).append("affectedRelease", affectedRelease).append("bugzilla", bugzilla).append("cvss", cvss).append("cvss3", cvss3).append("details", details).append("name", name).append("packageState", packageState).append("publicDate", publicDate).append("statement", statement).append("threatSeverity", threatSeverity).toString();
     }
 
 }

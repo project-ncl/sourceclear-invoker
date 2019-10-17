@@ -39,7 +39,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.ParentCommand;
@@ -156,7 +156,7 @@ public class Binary implements Callable<SourceClearResult>
             // Add target folder
             args.add( temporaryLocation.toFile().getAbsolutePath() );
 
-            SourceClearJSON json = new SrcClrInvoker(parent.isTrace()).execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
+            SourceClearJSON json = new SrcClrInvoker(parent.isTrace(), parent.getJson()).execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
             Set<ProcessorResult> matched = parent.getProcessor().process( parent, json );
 
             if ( parent.isException() && matched.size() > 0 )

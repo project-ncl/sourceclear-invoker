@@ -21,54 +21,46 @@ import com.redhat.engineering.srcclr.json.sourceclear.Vulnerability;
 import lombok.Getter;
 import lombok.Setter;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Getter
 @Setter
 public class ProcessorResult
 {
     private Boolean notify = false;
+
     private Boolean fail = false;
+
     private String message = "";
+
     private Vulnerability vulnerability;
+
     private Library library;
+
     private String scanReport;
 
-    
-    private String enhanceMessageForNotification(String cve_id)
+    public void setVulnerability( Vulnerability vulnerability )
     {
-        /*
-        * make the message look better in the notification email. The final result will look like:
-        *    Reason flagged: 
-        *    no CPE exists
-        *    https://access.redhat.com/security/cve/cve-2017-7536
-        */
-        return "Reason flagged: "
-            + System.lineSeparator()
-            + message
-            + System.lineSeparator()
-            + "https://access.redhat.com/security/cve/cve-"
-            + cve_id;
-    }
-
-    public void setVulnerability ( Vulnerability vulnerability )
-    {
-        this.vulnerability = vulnerability;
-
-        if ( isNotEmpty( message ))
+        if ( isNotEmpty( message ) )
         {
-            String sb = "Original SourceClear warning:"
+            // make the message look better in the notification email. The final result will look like:
+            //   Reason flagged:
+            //    no CPE exists
+            //    https://access.redhat.com/security/cve/cve-2017-7536
+            message = "Reason flagged: "
                             + System.lineSeparator()
-                            + vulnerability.getOverview()
+                            + message
                             + System.lineSeparator()
-                            + enhanceMessageForNotification(vulnerability.getCve());
-                            
-            vulnerability.setOverview( sb );
+                            + "https://access.redhat.com/security/cve/cve-"
+                            + vulnerability.getCve();
         }
+        this.vulnerability = vulnerability;
     }
 
     void setScanReport( Metadata_ metadata )
     {
-        scanReport = ( metadata != null && metadata.getReport() != null ) ? (String) metadata.getReport() : "<no-report-available>";
+        scanReport = ( metadata != null && metadata.getReport() != null ) ?
+                        (String) metadata.getReport() :
+                        "<no-report-available>";
     }
 }

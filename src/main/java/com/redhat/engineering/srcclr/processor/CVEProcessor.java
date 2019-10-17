@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public class CVEProcessor
                 implements JSONResult

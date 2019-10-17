@@ -23,7 +23,7 @@ import com.redhat.engineering.srcclr.notification.EmailNotifier;
 import com.redhat.engineering.srcclr.notification.Notifier;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.utils.InternalException;
-import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -89,7 +89,7 @@ public class EmailNotifierTest
         pr.setMessage("No CPE exist");
         pr.setVulnerability( v );
         pr.setLibrary( l );
-       
+
         processorResults.add( pr );
         n.notify( wrapper, "", processorResults );
 
