@@ -16,7 +16,9 @@
 package com.redhat.engineering.srcclr.internal;
 
 import com.redhat.engineering.srcclr.SCBase;
+import com.redhat.engineering.srcclr.utils.InternalException;
 import com.redhat.engineering.srcclr.utils.SourceClearResult;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ProvideSystemProperty;
@@ -101,6 +103,44 @@ public class SourceClearInvokerTest extends SCBase
 
         assertTrue( r.isPass() );
         assertTrue( systemOutRule.getLog().contains( "SRCCLR_SCM_NAME=PRODUCT-2.1-SUBPACKAGE-commons-io-2.1.jar" ) );
+    }
+
+    @Test(expected = InternalException.class )
+    public void runBinarySC5() throws Exception
+    {
+        System.setProperty( SC,
+                            "--processor=cvss -p=product -d -v=2.1 binary "
+                                            + "--url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar "
+                                            + "--no-upload "
+                                            + "--scan-collectors=cocoapods" );
+        // Will get "found no library dependencies" forcing the scan-collector
+        exeSC();
+    }
+
+    @Test
+    public void runBinarySC6() throws Exception
+    {
+        System.setProperty( SC,
+                            "--processor=cvss -p=product -d -v=2.1 binary "
+                                            + "--url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar "
+                                            + "--no-upload "
+                                            + "--scan-collectors=jar" );
+        SourceClearResult r = exeSC();
+
+        assertFalse( r.isPass() );
+    }
+
+    @Test
+    @Ignore
+    public void runBinarySC7() throws Exception
+    {
+        System.setProperty( SC,
+                            "--processor=cvss -p=product -d -v=2.1 binary "
+                                            + "--url=https://bintray.com/vszakats/generic/download_file?file_path=curl-7.64.0-win64-mingw.zip "
+                                            + "--no-upload " );
+        SourceClearResult r = exeSC();
+
+        assertFalse( r.isPass() );
     }
 
     @Test
