@@ -42,7 +42,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * Main entry point.
@@ -171,7 +172,8 @@ public class SrcClrWrapper implements Callable<Void>
         // then we could have used https://github.com/stevespringett/CPE-Parser
         cpe = "cpe:/a:redhat:" + product + ':' + version;
 
-        if ( emailAddresses.size() > 0 && isNotEmpty ( emailServer ) )
+        if ( emailAddresses.size() > 0 && isNotBlank ( emailServer )
+                        && ! ( emailAddresses.size() == 1 && isBlank(emailAddresses.get( 0 ))) )
         {
             notifier.add( new EmailNotifier() );
         }
