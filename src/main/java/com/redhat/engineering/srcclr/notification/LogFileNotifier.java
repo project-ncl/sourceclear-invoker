@@ -33,17 +33,11 @@ public class LogFileNotifier extends DefaultStringNotifier
 
     private final File target;
 
-    public LogFileNotifier ()
+    public LogFileNotifier( String directory )
     {
-        String logFile = "vulnerabilityLogFile.txt";
+        String logFileName = "vulnerabilityLogFile.txt";
 
-        // If we are running using Maven then install to the target directory
-        if ( System.getProperty( "surefire.real.class.path" ) != null )
-        {
-            logFile = "target" + File.separatorChar + logFile;
-        }
-
-        target = new File( logFile );
+        target = new File( directory, logFileName );
     }
 
     @Override

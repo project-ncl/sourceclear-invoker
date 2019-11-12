@@ -18,6 +18,7 @@ package com.redhat.engineering.srcclr.internal;
 import com.redhat.engineering.srcclr.SCBase;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import com.redhat.engineering.srcclr.utils.SourceClearResult;
+import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,6 +28,8 @@ import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.NoSuchFileException;
 import java.util.UUID;
 
@@ -268,5 +271,26 @@ public class SourceClearInvokerTest extends SCBase
 
         assertFalse( r.isPass() );
         assertFalse( systemOutRule.getLog().contains( "Exception in thread" ) );
+    }
+
+
+    @Test
+    public void runBinarySCWithJson() throws Exception
+    {
+        File output = temporaryFolder.newFolder();
+        System.setProperty( SC,
+                            "--processor=cvss -p=product -d -v=2.1 "
+                                            + " --json=" + output.getAbsolutePath()
+                                            + " binary"
+                                            + " --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar "
+                                            + " --no-upload");
+        SourceClearResult r = exeSC();
+
+        File result = new File ( output, "sourceclear.json");
+        assertTrue( output.exists() );
+        assertTrue( result.exists() );
+        assertFalse( r.isPass() );
+        assertTrue( FileUtils.readFileToString( result, Charset.defaultCharset()).contains(
+                        "html\" : \"https://www.sourceclear.com/vulnerability-database/vulnerabilities/5295\"" ));
     }
 }

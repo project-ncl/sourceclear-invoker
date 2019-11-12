@@ -48,7 +48,7 @@ public class NotFoundInvokerTest
     )
     public void verifynosrcclTest() throws IOException
     {
-        SrcClrInvoker srccr = new SrcClrInvoker(false);
+        SrcClrInvoker srccr = new SrcClrInvoker( false, "" );
         srccr.locateSourceClearJar();
     }
 }

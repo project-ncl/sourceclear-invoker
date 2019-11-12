@@ -27,7 +27,7 @@ import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class EmailNotifier extends DefaultStringNotifier
 {

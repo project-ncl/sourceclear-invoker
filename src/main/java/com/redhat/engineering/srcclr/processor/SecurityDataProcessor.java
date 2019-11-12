@@ -24,7 +24,7 @@ import com.redhat.engineering.srcclr.utils.InternalException;
 import kong.unirest.HttpResponse;
 import kong.unirest.JacksonObjectMapper;
 import kong.unirest.Unirest;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public class SecurityDataProcessor
         {
             newversion = splits[0];
         }
-        
+
         String first_part = cpe.substring(0, cpe.lastIndexOf(':') + 1);
 
         return first_part + newversion;
@@ -107,20 +107,20 @@ public class SecurityDataProcessor
     {
         PackageState ps_found;
 
-        if (json.getPackageState() == null) 
+        if (json.getPackageState() == null)
         {
             return null;
         }
 
         if ( StringUtils.isEmpty( packageName ) )
         {
-            
+
             ps_found = json.getPackageState()
                 .stream()
                 .filter( ps -> cpe.equals( ps.getCpe() ) )
                 .findAny()
                 .orElse( null );
-        
+
             if ( ps_found == null )
             {
                 ps_found = json.getPackageState()
@@ -129,7 +129,7 @@ public class SecurityDataProcessor
                     .findAny()
                     .orElse( null );
             }
-        
+
         }
         else
         {
@@ -147,7 +147,7 @@ public class SecurityDataProcessor
                     .filter( ps -> getCpeOfMajorVersion().equals( ps.getCpe() ) )
                     .filter( ps -> packageName.equals( ps.getPackageName() ) )
                     .findAny()
-                    .orElse( null );     
+                    .orElse( null );
             }
         }
 
@@ -159,20 +159,20 @@ public class SecurityDataProcessor
     {
         AffectedRelease ar_found;
 
-        if (json.getAffectedRelease() == null) 
+        if (json.getAffectedRelease() == null)
         {
             return null;
         }
 
         if ( StringUtils.isEmpty( packageName ) )
         {
-            
+
             ar_found = json.getAffectedRelease()
                 .stream()
                 .filter( ar -> cpe.equals( ar.getCpe() ) )
                 .findAny()
                 .orElse( null );
-        
+
             if ( ar_found == null )
             {
                 ar_found = json.getAffectedRelease()
@@ -181,7 +181,7 @@ public class SecurityDataProcessor
                     .findAny()
                     .orElse( null );
             }
-        
+
         }
         else
         {
@@ -199,7 +199,7 @@ public class SecurityDataProcessor
                     .filter( ar -> getCpeOfMajorVersion().equals( ar.getCpe() ) )
                     .filter( ar -> packageName.equals( ar.getPackage() ) )
                     .findAny()
-                    .orElse( null );     
+                    .orElse( null );
             }
         }
 
@@ -218,8 +218,8 @@ public class SecurityDataProcessor
             SecurityDataJSON json = lookUpAPI( cve_id );
 
             PackageState ps_found = searchPackageState(json);
-            
-            
+
+
             if ( ps_found != null )
             {
                 String fixed_state = ps_found.getFixState();
@@ -245,7 +245,7 @@ public class SecurityDataProcessor
             else
             {
                 AffectedRelease ar_found = searchAffectedRelease(json);
-                
+
 
                 if ( ar_found != null )
                 {

@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.ParentCommand;
@@ -118,7 +118,7 @@ public class SCM implements Callable<SourceClearResult>
             args.addAll( unmatched );
         }
 
-        SourceClearJSON json = new SrcClrInvoker(parent.isTrace()).execSourceClear( SrcClrInvoker.ScanType.SCM, env, args );
+        SourceClearJSON json = new SrcClrInvoker( parent.isTrace(), parent.getJson() ).execSourceClear( SrcClrInvoker.ScanType.SCM, env, args );
 
         Set<ProcessorResult> matched = parent.getProcessor().process ( parent, json );
 

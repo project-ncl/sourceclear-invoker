@@ -21,7 +21,7 @@ import com.redhat.engineering.srcclr.SrcClrWrapper;
 import com.redhat.engineering.srcclr.json.securitydata.SecurityDataJSON;
 import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.processor.SecurityDataProcessor;
-import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.http.client.HttpResponseException;
 import org.junit.Before;
 import org.junit.Rule;

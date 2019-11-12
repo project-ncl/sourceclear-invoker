@@ -18,10 +18,12 @@ package com.redhat.engineering.srcclr.json.sourceclear;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.redhat.engineering.srcclr.utils.Style.STYLE;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -135,7 +137,7 @@ public class Version {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("version", version).append("releaseDate", releaseDate).append("sha1", sha1).append("sha2", sha2).append("bytecodeHash", bytecodeHash).append("platform", platform).append("licenses", licenses).append("links", links).toString();
+        return new ToStringBuilder(this, STYLE).append("version", version).append("releaseDate", releaseDate).append("sha1", sha1).append("sha2", sha2).append("bytecodeHash", bytecodeHash).append("platform", platform).append("licenses", licenses).append("links", links).toString();
     }
 
 }

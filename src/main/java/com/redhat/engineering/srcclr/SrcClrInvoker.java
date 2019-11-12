@@ -28,6 +28,7 @@ import org.zeroturnaround.exec.stream.slf4j.Slf4jStream;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,12 +40,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * Responsible for locating and invoking the SourceClear Jar.
  */
 public class SrcClrInvoker
 {
-    private final static String DEFAULT_LOCATION = "/usr/local/bin/srcclr";
+    private static final String DEFAULT_LOCATION = "/usr/local/bin/srcclr";
 
     private static final Pattern REGEXP = Pattern.compile("(?s)(^[^{]*)?\\{(.+)");
 
@@ -52,9 +55,12 @@ public class SrcClrInvoker
 
     private final boolean trace;
 
-    public SrcClrInvoker( boolean trace )
+    private final String jsonDir;
+
+    public SrcClrInvoker( boolean trace, String jsonDir )
     {
         this.trace = trace;
+        this.jsonDir = jsonDir;
     }
 
     public enum ScanType
@@ -121,7 +127,7 @@ public class SrcClrInvoker
         // Don't need to set this as the default value is true.
         // env.put( "SRCCLR_FORCE_GO_INSTALL", "true");
 
-        SourceClearJSON json;
+        SourceClearJSON processedJson;
         try
         {
             logger.info( "Invoking in environment {} command {} ....", env, command );
@@ -145,14 +151,19 @@ public class SrcClrInvoker
                 output = stripInvalidOutput( trace, output );
 
                 ObjectMapper mapper = new ObjectMapper().configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
-                json = mapper.readValue( output, SourceClearJSON.class );
+                processedJson = mapper.readValue( output, SourceClearJSON.class );
 
+                if ( isNotBlank( jsonDir ) )
+                {
+                    File jsonTarget = new File ( jsonDir, "sourceclear.json");
+                    jsonTarget.getParentFile().mkdirs();
+                    FileUtils.writeStringToFile( jsonTarget, output, Charset.defaultCharset() );
+                }
 //                logger.debug( "Read json {} ", json );
             }
             else
             {
-                json = new SourceClearJSON();
-                logger.info( output );
+                processedJson = new SourceClearJSON();
             }
         }
         catch ( InvalidExitValueException e )
@@ -172,7 +183,7 @@ public class SrcClrInvoker
             FileUtils.deleteDirectory( temporaryLocation.toFile() );
             FileUtils.deleteDirectory( goPathTemporaryLocation.toFile() );
         }
-        return json;
+        return processedJson;
     }
 
     private Path getDefaultSrcClrLocation()
