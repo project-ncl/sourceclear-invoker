@@ -116,8 +116,6 @@ public class SrcClrInvoker
             command.add( "--unmatched" );
             command.add( "--recursive" );
         }
-        // TODO: PRODTASKS-678 : Workaround for SOFile Collector causing scan to fail.
-        command.add( "--skip-collectors=\"SOFile\"" );
 
         command.addAll( args );
 
