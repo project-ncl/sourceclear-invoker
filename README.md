@@ -4,14 +4,22 @@
 
 This project is designed to project a simple wrapper around the existing SourceClear command line in order to provide the ability to parse the results and output a configurable JUnit pass/fail test. This can then be used as part of a pipeline in order to verify source repositories and final deliverables.
 
-It has a pre-requisite that SourceClear has been installed via its rpm (it should check for that). The yum repo for that is:
+## Requirements
 
+* glide: `brew install glide` on macOS, [check here](https://glide-gae.appspot.com/docs/installing) for installation instructions on other platforms
+* srcclr: 
+  * **Linux**: SourceClear should be installed via its rpm (it should check for that). The yum repo for that is:
+```
     [SourceClear]
     name=SourceClear
     baseurl=https://download.sourceclear.com/redhat/noarch/
     enabled=1
     gpgcheck=1
     gpgkey=https://download.sourceclear.com/redhat/SRCCLR-GPG-KEY
+```
+  * **macOS**: with homebrew - `brew install srcclr` 
+
+## Usage
 
 Currently this project will build a jar-with-dependencies although this is primarily aimed at local testing only. It provides a simplified interface to SourceClear e.g.
 
