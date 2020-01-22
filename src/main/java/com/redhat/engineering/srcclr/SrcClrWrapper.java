@@ -205,9 +205,12 @@ public class SrcClrWrapper implements Callable<Void>
 
     void notifyListeners( String scanInfo, Set<ProcessorResult> v ) throws InternalException
     {
-        for ( Notifier n : notifier )
+        if ( v.size() > 0 )
         {
-            n.notify( this, scanInfo, v );
+            for ( Notifier n : notifier )
+            {
+                n.notify( this, scanInfo, v );
+            }
         }
     }
 

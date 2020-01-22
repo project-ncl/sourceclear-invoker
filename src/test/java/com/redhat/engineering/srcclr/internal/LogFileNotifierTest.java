@@ -25,6 +25,7 @@ import com.redhat.engineering.srcclr.processor.ProcessorResult;
 import com.redhat.engineering.srcclr.utils.InternalException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
@@ -32,8 +33,10 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,11 +49,10 @@ public class LogFileNotifierTest
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
-    public final TemporaryFolder folder = new TemporaryFolder( );
-
+    public final TemporaryFolder folder = new TemporaryFolder();
 
     @Test
-    public void testWriteLogFile () throws IllegalAccessException, InternalException, IOException
+    public void testWriteLogFile() throws IllegalAccessException, InternalException, IOException
     {
         SrcClrWrapper wrapper = new SrcClrWrapper();
         Notifier n = new LogFileNotifier( "target" );
@@ -80,5 +82,17 @@ public class LogFileNotifierTest
 
         assertTrue( FileUtils.readFileToString( newTarget, Charset.defaultCharset() ).contains( "Located 1 possible vulnerability within product TEST PRODUCT" ) );
         assertTrue( newTarget.toString().contains( "target" ) );
+    }
+
+    @Test
+    public void testEmptyProcessResult()
+                    throws IllegalAccessException, NoSuchMethodException,
+                    InvocationTargetException
+    {
+        SrcClrWrapper wrapper = new SrcClrWrapper();
+        FieldUtils.writeField( wrapper, "log", "TESTPRODUCT.log", true );
+        wrapper.call();
+
+        MethodUtils.invokeMethod( wrapper, true, "notifyListeners", "", Collections.emptySet() );
     }
 }
