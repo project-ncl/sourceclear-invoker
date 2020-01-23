@@ -80,7 +80,7 @@ public class SourceClearInvokerTest extends SCBase
     public void runBinarySC2() throws Exception
     {
         System.setProperty( SC,
-                            "--processor=cvss -p=product -d -v=2.1 binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --no-upload" );
+                            "--processor=cvss -p=product -d -v=2.1 binary --url=https://repo1.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --no-upload" );
         SourceClearResult r = exeSC();
 
         assertFalse( r.isPass() );
@@ -90,7 +90,7 @@ public class SourceClearInvokerTest extends SCBase
     public void runBinarySC3() throws Exception
     {
         System.setProperty( SC,
-                            "--processor=cvss -p=product -d -v=1.0 binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar --no-upload" );
+                            "--processor=cvss -p=product -d -v=1.0 binary --url=https://repo1.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar --no-upload" );
         SourceClearResult r = exeSC();
 
         assertTrue( r.isPass() );
@@ -101,7 +101,7 @@ public class SourceClearInvokerTest extends SCBase
     public void runBinarySC4() throws Exception
     {
         System.setProperty( SC,
-                            "-t 10 -v=2.1 --product=PRODUCT --package=SUBPACKAGE -d binary --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --no-upload" );
+                            "-t 10 -v=2.1 --product=PRODUCT --package=SUBPACKAGE -d binary --url=https://repo1.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar --no-upload" );
         SourceClearResult r = exeSC();
 
         assertTrue( r.isPass() );
@@ -113,7 +113,7 @@ public class SourceClearInvokerTest extends SCBase
     {
         System.setProperty( SC,
                             "--processor=cvss -p=product -d -v=2.1 binary "
-                                            + "--url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar "
+                                            + "--url=https://repo1.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar "
                                             + "--no-upload "
                                             + "--scan-collectors=cocoapods" );
         // Will get "found no library dependencies" forcing the scan-collector
@@ -125,7 +125,7 @@ public class SourceClearInvokerTest extends SCBase
     {
         System.setProperty( SC,
                             "--processor=cvss -p=product -d -v=2.1 binary "
-                                            + "--url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar "
+                                            + "--url=https://repo1.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar "
                                             + "--no-upload "
                                             + "--scan-collectors=jar" );
         SourceClearResult r = exeSC();
@@ -282,7 +282,7 @@ public class SourceClearInvokerTest extends SCBase
                             "--processor=cvss -p=product -d -v=2.1 "
                                             + " --json=" + output.getAbsolutePath()
                                             + " binary"
-                                            + " --url=http://central.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar "
+                                            + " --url=https://repo1.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar "
                                             + " --no-upload");
         SourceClearResult r = exeSC();
 
