@@ -7,7 +7,7 @@ This project is designed to project a simple wrapper around the existing SourceC
 ## Requirements
 
 * glide: `brew install glide` on macOS, [check here](https://glide-gae.appspot.com/docs/installing) for installation instructions on other platforms
-* srcclr: 
+* srcclr:
   * **Linux**: SourceClear should be installed via its rpm (it should check for that). The yum repo for that is:
 ```
     [SourceClear]
@@ -17,7 +17,7 @@ This project is designed to project a simple wrapper around the existing SourceC
     gpgcheck=1
     gpgkey=https://download.sourceclear.com/redhat/SRCCLR-GPG-KEY
 ```
-  * **macOS**: with homebrew - `brew install srcclr` 
+  * **macOS**: with homebrew - `brew install srcclr`
 
 ## Usage
 
@@ -63,6 +63,11 @@ Scan a SCM URL
   -V    Print version information and exit.
   --maven-param     Extra Maven parameters
 
+```
+Note : for the SCM `--url` parameter both `.` and `file://`  URLs are supported to scan the local filesystem.
+
+```
+
 Usage: SrcClrWrapper binary [-dehV] --name=NAME --url=URL
                             [-t=<threshold>]
 Scan a remote binary
@@ -78,7 +83,7 @@ Scan a remote binary
 Its main use is to be ran inside Jenkins as a JUnit test suite e.g.
 
     mvn -Dmaven.buildNumber.skip=true -Pjenkins clean test  '-DargLine=-Dsourceclear="--product-version=1.0.0 -p=koji-build-finder scm --url=https://github.com/release-engineering/koji-build-finder.git --ref=koji-build-finder-1.0.0"'
-    
+
 ## Features
 
 * It supports reading a configuration from the command or from `$HOME/.srcclr/invoker.properties`.
