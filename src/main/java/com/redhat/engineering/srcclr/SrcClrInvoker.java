@@ -15,6 +15,7 @@
  */
 package com.redhat.engineering.srcclr;
 
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.engineering.srcclr.json.sourceclear.SourceClearJSON;
@@ -48,6 +49,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class SrcClrInvoker
 {
+    private static final Version CLI_CHANGE = new Version( 3, 6, 33, null, "", "");
+
+    private static final Pattern VERSION_PATTERN = Pattern.compile( ".*(\\d+)\\.(\\d+)\\.(\\d+).*" );
+
     private static final String DEFAULT_LOCATION = "/usr/local/bin/srcclr";
 
     private static final Pattern REGEXP = Pattern.compile("(?s)(^[^{]*)?\\{(.+)");
@@ -111,10 +116,25 @@ public class SrcClrInvoker
         {
             command.add( "scan" );
             command.add( "--json" );
-            // We shouldn't need a directory but with local file paths can cause issues.
-            File jsonFile = new File( Files.createTempDirectory( "sourceclear-json-" ).toFile(), UUID.randomUUID().toString());
-            logger.debug( "Setting json dir to {}", jsonFile );
-            command.add( jsonFile.getAbsolutePath() );
+
+            Matcher versionMatcher = VERSION_PATTERN.matcher( locateSourceClearJar().getFileName().toString() );
+            if ( versionMatcher.matches() )
+            {
+                if ( new Version( Integer.parseInt( versionMatcher.group( 1 ) ),
+                                  Integer.parseInt( versionMatcher.group( 2 ) ),
+                                  Integer.parseInt( versionMatcher.group( 3 ) ),
+                                  null,
+                                  "",
+                                  "" ).compareTo( CLI_CHANGE )
+                                >= 0 )
+                {
+                    // We shouldn't need a directory but with local file paths can cause issues.
+                    File jsonFile = new File( Files.createTempDirectory( "sourceclear-json-" ).toFile(),
+                                              UUID.randomUUID().toString() );
+                    logger.debug( "Setting json dir to {}", jsonFile );
+                    command.add( jsonFile.getAbsolutePath() );
+                }
+            }
         }
         if ( type == ScanType.BINARY )
         {
