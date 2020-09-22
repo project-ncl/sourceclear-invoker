@@ -35,6 +35,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -110,6 +111,10 @@ public class SrcClrInvoker
         {
             command.add( "scan" );
             command.add( "--json" );
+            // We shouldn't need a directory but with local file paths can cause issues.
+            File jsonFile = new File( Files.createTempDirectory( "sourceclear-json-" ).toFile(), UUID.randomUUID().toString());
+            logger.debug( "Setting json dir to {}", jsonFile );
+            command.add( jsonFile.getAbsolutePath() );
         }
         if ( type == ScanType.BINARY )
         {

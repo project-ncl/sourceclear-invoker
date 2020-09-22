@@ -31,6 +31,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -115,7 +116,7 @@ public class Binary implements Callable<SourceClearResult>
 
             if ( processedUrl.getProtocol().equals( "file" ) )
             {
-                Files.copy( new File( processedUrl.getPath() ).toPath(), target.toPath() );
+                Files.copy( new File( processedUrl.getPath() ).toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
             }
             else
             {
