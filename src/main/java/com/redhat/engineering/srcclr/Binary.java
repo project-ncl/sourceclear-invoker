@@ -157,7 +157,7 @@ public class Binary implements Callable<SourceClearResult>
             // Add target folder
             args.add( temporaryLocation.toFile().getAbsolutePath() );
 
-            SourceClearJSON json = new SrcClrInvoker(parent.isTrace(), parent.getJson()).execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
+            SourceClearJSON json = new SrcClrInvoker(parent.isTrace(), parent.getJson(), parent.getProfile()).execSourceClear( SrcClrInvoker.ScanType.BINARY, env, args );
             Set<ProcessorResult> matched = parent.getProcessor().process( parent, json );
 
             if ( parent.isException() && matched.size() > 0 )

@@ -95,6 +95,9 @@ public class SrcClrWrapper implements Callable<Void>
     @Option( names = "--json", defaultValue="target", description = "Directory path to output processed JSON as a file. Set to empty to disable." )
     private String json;
 
+    @Option( names = "--profile", defaultValue="", description = "Profile for VeraCode scanning. Defaults to empty (default profile)." )
+    private String profile;
+
     @Option( names = "--log", defaultValue="target", description = "Directory path to output log file containing results. Set to empty to disable." )
     private String log;
 
