@@ -45,6 +45,8 @@ Wrap SourceClear and invoke it.
   --processor=<processor>
                          Processor to use to analyse SourceClear results. Default is
                            'cvss'
+  --profile=<profile>   Profile for VeraCode scanning. Defaults to empty
+                            (default profile).
   -t, --threshold=<threshold>
                          Threshold on which exception is thrown. Only used with CVSS
                            Processor
