@@ -63,10 +63,13 @@ public class SrcClrInvoker
 
     private final String jsonDir;
 
-    public SrcClrInvoker( boolean trace, String jsonDir )
+    private final String profile;
+
+    public SrcClrInvoker( boolean trace, String jsonDir, String profile )
     {
         this.trace = trace;
         this.jsonDir = jsonDir;
+        this.profile = profile;
     }
 
     public enum ScanType
@@ -111,6 +114,11 @@ public class SrcClrInvoker
         if ( trace )
         {
             command.add( "--debug" );
+        }
+        if ( isNotBlank( profile ) )
+        {
+            command.add( "--profile");
+            command.add( profile );
         }
         if ( type == ScanType.SCM || type == ScanType.BINARY)
         {
