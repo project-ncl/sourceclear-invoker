@@ -35,7 +35,7 @@
     - shell: |
         sudo rm -rf /tmp/tmp-srcclr*
         cd $WORKSPACE
-        curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/tarball/srcclr-1.4 > invoker.tgz
+        curl -s -k -L https://github.com/project-ncl/sourceclear-invoker/tarball/srcclr-1.5 > invoker.tgz
         tar xzf invoker.tgz --strip-components=1
     - maven-target:
         pom: pom.xml
