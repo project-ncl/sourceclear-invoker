@@ -109,6 +109,8 @@ public class SrcClrInvoker
         command.add( locateSourceClearJRE() );
         command.add( "-jar" );
         command.add( locateSourceClearJar().toString() );
+        // From /usr/local/bin/srcclr script
+        command.add( "-Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8  -Dhttps.protocols=TLSv1.2,TLSv1.1,TLSv1");
 
         // If we add --debug before the scan type command then that enables vast
         // amount of debugging (but breaks the json output).
