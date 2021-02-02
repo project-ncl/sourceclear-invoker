@@ -36,6 +36,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
@@ -161,7 +162,7 @@ public class SrcClrInvoker
         SourceClearJSON processedJson;
         try
         {
-            logger.info( "Invoking in environment {} command {} ....", env, command );
+            logger.info( "Invoking in environment {} with command {}", env, String.join( " ", command ) );
             String output = new ProcessExecutor().command( command ).
                             environment( env ).
                             destroyOnExit().
