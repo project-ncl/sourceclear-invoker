@@ -32,12 +32,21 @@ public class SourceClearTest extends SCBase
     @Test
     public void runSourceClear() throws Exception
     {
-        SourceClearResult result = exeSC();
-
-        if ( ! result.isPass())
+        SourceClearResult result;
+        try
         {
-            logger.error( "Found issues when scanning {}", result.getMessage() );
-            Assert.fail(result.getMessage());
+            result = exeSC();
+
+            if ( !result.isPass() )
+            {
+                logger.error( "Found issues when scanning {}", result.getMessage() );
+                Assert.fail( result.getMessage() );
+            }
+        }
+        catch ( Exception e )
+        {
+            logger.error( "Exception running sourceclear", e );
+            throw e;
         }
     }
 }
