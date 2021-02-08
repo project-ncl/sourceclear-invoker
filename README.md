@@ -35,6 +35,7 @@ Wrap SourceClear and invoke it.
                          SMTP Server to use to send notification email
   -p, --product=<product>    Product Name
   -v, --product-version=<version>   Version of the product
+  --memory               Memory allocation for the forked process. If not set will default to the current VM size.
   --package=<subpackage> CPE Subpackage Name
   --trace                Enables trace logging from SourceClear. Disables JSON output.
   --log                  Directory path to output log file containing results. Defaults to 'target'. Set to empty to disable.

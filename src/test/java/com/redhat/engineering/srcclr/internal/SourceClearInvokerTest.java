@@ -220,6 +220,28 @@ public class SourceClearInvokerTest extends SCBase
     }
 
     @Test
+    public void verifyMemory() throws Exception
+    {
+        System.setProperty( SC,
+                            "--memory=1 --processor=cvss -p=product -v=0 -t 8 scm --url=https://github.com/srcclr/example-java-maven.git --no-upload" );
+        SourceClearResult r = exeSC();
+
+        assertTrue( systemOutRule.getLog().contains( "java -Xmx1G -jar" ) );
+    }
+
+    @Test
+    public void verifyDefaultMemory() throws Exception
+    {
+        long defaultValue = Runtime.getRuntime().maxMemory();
+
+        System.setProperty( SC,
+                            "--processor=cvss -p=product -v=0 -t 8 scm --url=https://github.com/srcclr/example-java-maven.git --no-upload" );
+        SourceClearResult r = exeSC();
+
+        assertTrue( systemOutRule.getLog().contains( "java -Xmx" + defaultValue ) );
+    }
+
+    @Test
     public void runScmGoScan() throws Exception
     {
         System.setProperty( SC,

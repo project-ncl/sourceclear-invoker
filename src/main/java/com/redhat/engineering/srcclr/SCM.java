@@ -118,7 +118,7 @@ public class SCM implements Callable<SourceClearResult>
             args.addAll( unmatched );
         }
 
-        SourceClearJSON json = new SrcClrInvoker( parent.isTrace(), parent.getJson(),
+        SourceClearJSON json = new SrcClrInvoker( parent.getMemory(), parent.isTrace(), parent.getJson(),
                                                   parent.getProfile() ).execSourceClear( SrcClrInvoker.ScanType.SCM, env, args );
 
         Set<ProcessorResult> matched = parent.getProcessor().process ( parent, json );

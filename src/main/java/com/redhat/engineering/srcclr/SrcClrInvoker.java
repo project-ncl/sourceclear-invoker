@@ -36,7 +36,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
@@ -66,11 +65,14 @@ public class SrcClrInvoker
 
     private final String profile;
 
-    public SrcClrInvoker( boolean trace, String jsonDir, String profile )
+    private final int memory;
+
+    public SrcClrInvoker( int memory, boolean trace, String jsonDir, String profile )
     {
         this.trace = trace;
         this.jsonDir = jsonDir;
         this.profile = profile;
+        this.memory = memory;
     }
 
     public enum ScanType
@@ -107,6 +109,14 @@ public class SrcClrInvoker
     {
         List<String> command = new ArrayList<>();
         command.add( locateSourceClearJRE() );
+        if (memory > 0) // 0 = default value
+        {
+            command.add( "-Xmx" + memory + "G" );
+        }
+        else
+        {
+            command.add( "-Xmx" + Runtime.getRuntime().maxMemory() );
+        }
         command.add( "-jar" );
         command.add( locateSourceClearJar().toString() );
         // From /usr/local/bin/srcclr script
@@ -164,7 +174,7 @@ public class SrcClrInvoker
         SourceClearJSON processedJson;
         try
         {
-            logger.info( "Invoking in environment {} with command {}", env, String.join( " ", command ) );
+            logger.info( "Invoking in environment {} with command {{}}", env, String.join( " ", command ) );
             String output = new ProcessExecutor().command( command ).
                             environment( env ).
                             destroyOnExit().
@@ -193,12 +203,13 @@ public class SrcClrInvoker
                     jsonTarget.getParentFile().mkdirs();
                     FileUtils.writeStringToFile( jsonTarget, output, Charset.defaultCharset() );
                 }
-//                logger.debug( "Read json {} ", json );
             }
             else
             {
                 processedJson = new SourceClearJSON();
             }
+            // logger.debug( "Read output {} ", output );
+            // logger.debug( "Read json {} ", processedJson );
         }
         catch ( InvalidExitValueException e )
         {

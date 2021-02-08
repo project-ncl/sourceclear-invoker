@@ -63,6 +63,9 @@ public class SrcClrWrapper implements Callable<Void>
 
     private static final Logger logger = LoggerFactory.getLogger( SrcClrWrapper.class );
 
+    @Option(names = { "--memory" }, description = "Memory in GB for forked process. If not set will default to current JVM size.")
+    private int memory;
+
     @Option( names = { "--trace" }, description = "Enable trace. Will DISABLE JSON OUTPUT" )
     private boolean trace;
 
@@ -106,9 +109,10 @@ public class SrcClrWrapper implements Callable<Void>
               split = ",")
     private List<String> emailAddresses = new ArrayList<>(  );
 
+    private final Set<Notifier> notifier = new HashSet<>();
+
     private String cpe;
 
-    private Set<Notifier> notifier = new HashSet<>();
 
     /**
      * List of environment variables to exclude from the SourceClear process to prevent interference.
