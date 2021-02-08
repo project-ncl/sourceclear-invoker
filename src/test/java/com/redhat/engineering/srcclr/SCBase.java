@@ -39,7 +39,7 @@ public class SCBase
     {
         String[] arguments = PropertyHandler.convertProperty ( System.getProperty( "sourceclear" ) );
 
-        logger.info( "Retrieved argument {}", Arrays.toString( arguments ) );
+        logger.info( "Retrieved argument {}", String.join( " ", arguments ) );
 
         return SrcClrWrapper.invokeWrapper( arguments );
     }

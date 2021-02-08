@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 
 public class InvokerTest
 {
-    private final SrcClrInvoker srccr = new SrcClrInvoker( false, "", "" );
+    private final SrcClrInvoker srccr = new SrcClrInvoker( 0, false, "", "" );
 
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -85,7 +85,7 @@ public class InvokerTest
                         + "{\r\n    \"requestDate\" : \"2019-03-14T10:41:26.309+0000\"\r\n  },\r\n  \"records\" : [ "
                         + "{\r\n    \"metadata\" : {\r\n      \"recordType\" : \"SCAN\",\r\n      \"report\" : ";
 
-        SrcClrInvoker si = new SrcClrInvoker( false, "", "" );
+        SrcClrInvoker si = new SrcClrInvoker( 0, false, "", "" );
 
         String result = si.stripInvalidOutput( false, output );
 
