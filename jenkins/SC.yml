@@ -39,7 +39,7 @@
         tar xzf invoker.tgz --strip-components=1
     - maven-target:
         pom: pom.xml
-        goals: '-Pjenkins test -Dmaven.buildNumber.skip=true -DargLine=''-Dsourceclear="${DEBUG} ${TRACE} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=\"${NAME}\" --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${MVNPARAMETER} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'' '
+        goals: '-Pjenkins test -Dmaven.buildNumber.skip=true -DargLine=''${MEMPARAMETER} -Dsourceclear="${DEBUG} ${TRACE} --processor=${PROCESSOR_TYPE} --product-version=${VERSION} --package=${PACKAGE} --product=\"${NAME}\" --threshold=${THRESHOLD} ${SCAN_TYPE} --url=${URL} ${MVNPARAMETER} ${SCMVERSIONPARAM} ${RECURSE} ${EXTRA}"'''
         maven-version: maven-3-5-0
         private-repository: false
 
@@ -75,6 +75,10 @@
         default: ''
         description: Only used for Maven scanning. Extra, optional, Maven Parameters.
         name: MVNPARAMS
+    - string:
+        default: ''
+        description: Optional amount of memory to pass through to the surefire process.
+        name: MEMORYPARAMS
     - choice:
         choices:
         - cve
@@ -154,6 +158,12 @@
           map.put("SCMVERSIONPARAM"," --ref=${SCMVERSION}")
           } else {
           map.put("SCMVERSIONPARAM","")
+          }
+          if ( "${MEMORYPARAMS}" != "" )
+          {
+          map.put("MEMPARAMETER","-Xmx${MEMORYPARAMS}")
+          } else {
+          map.put("MEMPARAMETER", "")
           }
 
           return map
