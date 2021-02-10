@@ -98,6 +98,17 @@ public class SourceClearInvokerTest extends SCBase
     }
 
     @Test
+    public void verifySCMVersion() throws Exception
+    {
+        System.setProperty( SC,
+                            "--processor=cvss -p=product -d -v=1.0 binary --url=https://repo1.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar --no-upload" );
+        SourceClearResult r = exeSC();
+
+        assertTrue( r.isPass() );
+        assertFalse( systemOutRule.getLog().contains( "unknown" ) );
+    }
+
+    @Test
     public void runBinarySC4() throws Exception
     {
         System.setProperty( SC,

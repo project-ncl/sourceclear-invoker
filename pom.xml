@@ -56,7 +56,7 @@
   </scm>
 
   <properties>
-    <argLine />
+    <argLine/>
   </properties>
 
   <dependencyManagement>
@@ -278,8 +278,8 @@
       <artifactId>subethasmtp</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.github.tomakehurst</groupId>
-        <artifactId>wiremock-standalone</artifactId>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock-standalone</artifactId>
     </dependency>
   </dependencies>
 
@@ -300,6 +300,18 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>buildnumber-maven-plugin</artifactId>
+      <executions>
+        <execution>
+          <phase>validate</phase>
+          <goals>
+            <goal>create-metadata</goal>
+          </goals>
+        </execution>
+      </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>

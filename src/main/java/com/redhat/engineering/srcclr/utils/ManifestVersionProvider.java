@@ -19,9 +19,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.jar.Manifest;
 
 public class ManifestVersionProvider
@@ -43,7 +46,23 @@ public class ManifestVersionProvider
     private String getImplVersion() {
         Package p = ManifestVersionProvider.class.getPackage();
 
-        return ((p == null || p.getImplementationVersion() == null) ? "unknown" : p.getImplementationVersion());
+        return ((p == null || p.getImplementationVersion() == null) ? getPropertyVersionAndRevision().getProperty( "version" ) : p.getImplementationVersion());
+    }
+
+    private Properties getPropertyVersionAndRevision()
+    {
+        Properties properties = new Properties();
+        File f = new File ( new File( ManifestVersionProvider.class.getClassLoader().getResource( "" ).getFile()).getParentFile(),
+                            "generated" + File.separatorChar + "build-metadata" + File.separatorChar + "build.properties");
+        try
+        {
+            properties.load( new FileInputStream( f.toString()));
+        }
+        catch ( IOException e )
+        {
+            logger.error( "Unable to load the properties file", e );
+        }
+        return properties;
     }
 
     /**
@@ -80,6 +99,10 @@ public class ManifestVersionProvider
         catch ( IOException e )
         {
             logger.warn( "Error getting SCM revision: {}", e.getMessage() );
+        }
+        if (scmRevision.equals( "unknown" ))
+        {
+            scmRevision = getPropertyVersionAndRevision().getProperty( "revision" );
         }
         return scmRevision;
     }
